@@ -1,6 +1,6 @@
 ---
 name: inboxmate-demo
-description: Set up a personalized InboxMate demo chatbot for a prospect company. Use when asked to create a demo, set up an InboxMate playground, or prepare a chatbot demo for a sales prospect. Guides the full pipeline: research company → scrape content → call MCP → deliver playground URL.
+description: "Set up a personalized InboxMate demo chatbot for a sales prospect. Use when asked to create a demo, set up an InboxMate playground, or prepare a chatbot demo. Guides the full pipeline: research company, scrape content, call MCP, deliver playground URL."
 ---
 
 # InboxMate Demo Setup Pipeline
