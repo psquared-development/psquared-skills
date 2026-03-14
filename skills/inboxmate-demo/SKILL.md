@@ -262,6 +262,26 @@ For **each item planned in 2b**, call `add_to_bucket` separately:
 >
 > Wait for each call to complete before the next — do NOT batch these.
 
+### Step 3.3b — (If multi-lang) Add Language Support item
+
+If language is `multi`: add one extra knowledge item to the bucket:
+
+- **Title:** `"Sprachunterstützung / Language Support"`
+- **Content:**
+  ```
+  This AI assistant supports both German and English. It responds in whatever language the visitor uses.
+
+  Key features relevant for [Company]:
+  - Available 24/7, responds instantly in German or English
+  - Trained on [Company]'s complete product and service information
+  - Handles common customer questions so your team doesn't have to
+  - Guides visitors toward [primary CTA]
+  - Escalates to your team for complex inquiries
+
+  Use cases for [Company]:
+  [Write 2-3 specific use cases based on what you know about the company]
+  ```
+
 **Content quality rules:**
 - Each item: 200–800 words. Long enough to be useful, short enough for precise retrieval.
 - Write in complete sentences, not bullet-point dumps
@@ -302,6 +322,12 @@ For **each item planned in 2b**, call `add_to_bucket` separately:
 > For EN-only: use `questionsEn` only, leave `questionsDe` as `[]`.
 > For DE-only: use `questionsDe` only, leave `questionsEn` as `[]`.
 
+### Step 3.5b — Restrict widget to demo page only
+
+After the demo page is created (Phase 4), the MCP automatically calls `update_widget_style`
+to set `showOnPages: ['/?id=<demoId>']`. This is handled by the `create_demo_page` tool.
+You do NOT need to call `update_widget_style` manually for this.
+
 ### Step 3.6 — Publish Agent
 
 ```json
@@ -334,11 +360,20 @@ For **each item planned in 2b**, call `add_to_bucket` separately:
       "logoUrl": "[logo URL if found — otherwise omit]",
       "offerText": "[from 2g]",
       "offerExpiresAt": "[ISO date 7 days from today]",
-      "customMessage": "[from 2g]"
+      "customMessage": "[from 2g]",
+      "language": "[en or de — must match the language you chose in Phase 2]",
+      "useCases": [
+        "[Use case 1 — specific to this company, 1 sentence]",
+        "[Use case 2 — specific to this company, 1 sentence]",
+        "[Use case 3 — specific to this company, 1 sentence]",
+        "[Use case 4 — optional, if relevant]"
+      ]
     }
   }
 }
 ```
+
+> The MCP will automatically restrict the widget to only show on `/?id=<demoId>` — no extra step needed.
 
 > Save `demoId` and `playgroundUrl`.
 
@@ -403,3 +438,6 @@ Run through this checklist mentally before Phase 5:
 - [ ] Knowledge items are focused topics, not one big dump
 - [ ] Offer text is specific and time-limited
 - [ ] Widget domain is restricted to `demo.inboxmate.psquared.dev` (auto-set by the platform)
+- [ ] `language` matches the company's website language
+- [ ] 3-4 specific `useCases` that highlight real value for this company (not generic)
+- [ ] Widget domain + page restriction set (auto-handled by `create_demo_page`)
