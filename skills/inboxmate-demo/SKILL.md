@@ -52,6 +52,22 @@ The MCP server at `https://app.psquared.dev/api/mcp` exposes tools to create and
 
 > **Announce:** `[1/5] Researching [Company Name]...`
 
+### 1a — Validate Website First
+
+Before scraping, **check if the website is reachable and current**. Use `WebFetch` on the homepage.
+
+**STOP and report to user if:**
+- Website returns HTTP error / timeout / unreachable
+- Domain is parked, expired, or "coming soon"
+- Page has no meaningful content (just a logo or placeholder)
+- Copyright year is 2+ years behind current year — site is abandoned
+- Only a social media profile exists (no real website)
+
+> If the website is unusable, announce: `SKIP: [Company] — [reason]. Website is not suitable for a demo.`
+> Do NOT proceed with the rest of the pipeline. Ask the user how to handle this prospect.
+
+### 1b — Scrape Content
+
 Given a company name and/or domain, **fetch all of these pages** (adjust paths as needed):
 
 | Page | What to extract |

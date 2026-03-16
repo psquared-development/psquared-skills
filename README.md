@@ -7,6 +7,7 @@ Claude Code skills for the psquared team. Install any skill globally with the [s
 | Skill | Description | Install |
 |-------|-------------|---------|
 | [inboxmate-demo](./skills/inboxmate-demo/SKILL.md) | Set up a personalized InboxMate chatbot demo for a sales prospect — researches the company, scrapes content, calls MCP, delivers a playground URL | `npx skills add psquared-development/psquared-skills@inboxmate-demo -g -y` |
+| [inboxmate-batch-demo](./skills/inboxmate-batch-demo/SKILL.md) | Batch-create demos for CRM prospects — queries Twenty CRM for unprocessed companies, validates websites, skips outdated/unreachable ones (marks as DISQUALIFIED), creates demos for the rest | `npx skills add psquared-development/psquared-skills@inboxmate-batch-demo -g -y` |
 
 ## Installation
 
