@@ -59,7 +59,17 @@ Use `WebFetch` on the company's domain (from CRM `domainName.primaryLinkUrl`).
 
 ### 2b — Mark skipped prospects in CRM
 
-For each skipped prospect, create a DISQUALIFIED opportunity:
+**Do NOT ask the user what to do.** Auto-skip and mark in CRM immediately.
+
+First, check if the Company object has a field like `idealCustomerProfile` (ICP) or a rating/status field you can use. Run this introspection query once at the start:
+
+```graphql
+query { __type(name: "Company") { fields { name type { name kind ofType { name } } } } }
+```
+
+**If there's a usable boolean/enum field** (e.g. `idealCustomerProfile`): set it to `false` or the "not a fit" value to mark the company directly.
+
+**Regardless**, also create a DISQUALIFIED opportunity so the company is excluded from future batch runs:
 
 ```graphql
 mutation CreateOpportunity($data: OpportunityCreateInput!) {
@@ -71,24 +81,25 @@ Variables:
 ```json
 {
   "data": {
-    "name": "[Company] — Demo skipped",
+    "name": "[Company] — Website not suitable",
     "stage": "DISQUALIFIED",
     "companyId": "[companyId]"
   }
 }
 ```
 
-Then add a note explaining why:
+Then add a note with the reason:
 ```graphql
 mutation CreateNote($data: NoteCreateInput!) {
   createNote(data: $data) { id }
 }
 ```
-With title: `[YYYY-MM-DD HH:MM] Website skipped: [reason — e.g. "unreachable", "parked domain", "outdated (copyright 2019)", "placeholder page", "no meaningful content"]`
+Title: `[YYYY-MM-DD HH:MM] Website skipped: [reason — e.g. "unreachable", "parked domain", "outdated (copyright 2019)", "placeholder page", "no meaningful content"]`
 
 Link the note to the opportunity.
 
 > **Announce for each skip:** `SKIP: [Company] — [reason]`
+> **Never pause to ask.** Just mark and move to the next prospect.
 
 ### 2c — Collect valid prospects
 

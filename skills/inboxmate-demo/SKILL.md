@@ -56,7 +56,7 @@ The MCP server at `https://app.psquared.dev/api/mcp` exposes tools to create and
 
 Before scraping, **check if the website is reachable and current**. Use `WebFetch` on the homepage.
 
-**STOP and report to user if:**
+**Auto-skip if ANY of these are true:**
 - Website returns HTTP error / timeout / unreachable
 - Domain is parked, expired, or "coming soon"
 - Page has no meaningful content (just a logo or placeholder)
@@ -64,7 +64,9 @@ Before scraping, **check if the website is reachable and current**. Use `WebFetc
 - Only a social media profile exists (no real website)
 
 > If the website is unusable, announce: `SKIP: [Company] — [reason]. Website is not suitable for a demo.`
-> Do NOT proceed with the rest of the pipeline. Ask the user how to handle this prospect.
+> **Do NOT ask the user what to do.** Just skip and move on.
+> If running as part of the batch pipeline, the batch skill handles CRM marking.
+> If running standalone, just stop and report the skip reason — the user can decide later.
 
 ### 1b — Scrape Content
 
