@@ -151,11 +151,13 @@ Write in target language. **Not generic.** Reference the product, their situatio
 
 For `multi`: write separate EN and DE greetings.
 
-### 2e — Predefined Quick Questions (Card Format)
+### 2e — Predefined Quick Questions (Card Tiles)
+
+**ALWAYS use card tiles** — never plain text pills. Cards look dramatically better and convert higher. They show an icon, a bold title, and a short description — making suggestions feel like real features instead of generic prompts.
 
 **4–5 suggestion cards** that a real prospect would click. Make them irresistible — they should surface the company's best selling points.
 
-**Use the CARD format** — each question is an object with 3 fields:
+Each question is an object with these fields:
 - **`text`**: The actual message sent to the chat when clicked. This is what the AI will answer.
 - **`title`**: Short card title displayed prominently (2-5 words). This is what the user reads first.
 - **`description`**: Brief hint about what to expect (3-5 words). Shown below the title in smaller text.
@@ -188,10 +190,11 @@ Rules:
 
 ### 2f — Brand Color
 
-Extract from the website:
-1. Check the primary button color in the HTML/CSS
-2. Look at the logo colors
-3. Use the dominant brand color as hex
+Extract the **primary color** from the website:
+1. Check the primary button color or main CTA color in the HTML/CSS
+2. Look at the logo colors and dominant accent color
+3. If the website uses multiple shades of the same hue (e.g. light blue headers, medium blue buttons, dark blue footer), **always pick the darkest shade** — it looks best as the widget accent color
+4. Use the final color as a hex value (e.g. `#1a365d` not `#63b3ed`)
 
 If you can't detect it reliably, ask before proceeding.
 
