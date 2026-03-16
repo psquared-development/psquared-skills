@@ -5,10 +5,20 @@ description: "Batch-create InboxMate demos for CRM prospects. Queries Twenty CRM
 
 # InboxMate Batch Demo Pipeline
 
+## Prerequisites — Environment Variables
+
+All required tokens are in the **`.env` file in the current working directory** (the agenthub repo root). Read it at startup to get:
+
+- `PSQUARED_CRM_TOKEN` — Bearer token for Twenty CRM GraphQL API
+- `NUXT_MCP_DEMO_TOKEN` — Bearer token for the InboxMate MCP server
+
+**Do this first:** Read `.env` from the current directory and extract these values. If either is missing, stop and ask the user.
+
 > **Announce:**
 > ```
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > InboxMate Batch Demo Pipeline
+> Reading .env for CRM and MCP tokens...
 > Querying CRM for unprocessed prospects...
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > ```
@@ -17,7 +27,7 @@ description: "Batch-create InboxMate demos for CRM prospects. Queries Twenty CRM
 
 ## Step 1 — Get Prospects from CRM
 
-Query the Twenty CRM (GraphQL at `https://crm.psquared.dev/graphql`, auth via `PSQUARED_CRM_TOKEN`) for companies that do NOT yet have an opportunity. Use this approach:
+Read `PSQUARED_CRM_TOKEN` from `.env` and use it to query the Twenty CRM (GraphQL at `https://crm.psquared.dev/graphql`) for companies that do NOT yet have an opportunity. Use this approach:
 
 1. Fetch all companies (up to 100)
 2. Fetch all opportunities (up to 200)
