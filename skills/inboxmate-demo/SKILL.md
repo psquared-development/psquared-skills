@@ -151,19 +151,40 @@ Write in target language. **Not generic.** Reference the product, their situatio
 
 For `multi`: write separate EN and DE greetings.
 
-### 2e — Predefined Quick Questions
+### 2e — Predefined Quick Questions (Card Format)
 
-**4–5 questions** that a real prospect would click. Make them irresistible — they should surface the company's best selling points.
+**4–5 suggestion cards** that a real prospect would click. Make them irresistible — they should surface the company's best selling points.
+
+**Use the CARD format** — each question is an object with 3 fields:
+- **`text`**: The actual message sent to the chat when clicked. This is what the AI will answer.
+- **`title`**: Short card title displayed prominently (2-5 words). This is what the user reads first.
+- **`description`**: Brief hint about what to expect (3-5 words). Shown below the title in smaller text.
+- **`icon`**: A Lucide icon name in **kebab-case** (e.g. `"briefcase"`, `"credit-card"`, `"shield-check"`, `"clock"`, `"users"`, `"rocket"`, `"globe"`, `"zap"`, `"heart"`, `"target"`, `"lightbulb"`, `"star"`, `"package"`, `"award"`, `"calendar"`, `"mail"`, `"phone"`, `"building"`, `"trending-up"`, `"search"`). If invalid, falls back to a checkmark.
 
 Rules:
 - Use the target language (both EN + DE arrays for `multi`)
 - Mix types: feature question, pricing question, differentiator question, use-case question
-- Keep them short (max 8 words each)
-- Avoid yes/no questions
+- Keep titles short (2-5 words), descriptions short (3-5 words)
+- The `text` field can be longer — it's the actual question the AI answers
+- Always set `style: 'cards'` in the `update_quick_questions` call
 
 **Examples for a SaaS company:**
-- EN: `["What does [Product] do?", "How much does it cost?", "Is there a free trial?", "How long does setup take?", "What makes you different?"]`
-- DE: `["Was kann [Produkt]?", "Was kostet es?", "Gibt es eine kostenlose Testversion?", "Wie lange dauert die Einrichtung?", "Was macht euch besonders?"]`
+```json
+// EN
+[
+  { "text": "What does [Product] do and who is it for?", "title": "What is [Product]?", "description": "Features & use cases", "icon": "rocket" },
+  { "text": "How much does [Product] cost? Are there different plans?", "title": "Pricing & Plans", "description": "Tiers & free trial", "icon": "credit-card" },
+  { "text": "How long does setup take and do I need technical knowledge?", "title": "Getting Started", "description": "Setup in minutes", "icon": "zap" },
+  { "text": "What makes [Product] different from competitors?", "title": "Why [Company]?", "description": "Key differentiators", "icon": "award" }
+]
+// DE
+[
+  { "text": "Was macht [Produkt] und für wen ist es gedacht?", "title": "Was ist [Produkt]?", "description": "Funktionen & Einsatz", "icon": "rocket" },
+  { "text": "Was kostet [Produkt]? Gibt es verschiedene Pakete?", "title": "Preise & Pakete", "description": "Tarife & Testphase", "icon": "credit-card" },
+  { "text": "Wie lange dauert die Einrichtung und brauche ich technisches Wissen?", "title": "Erste Schritte", "description": "Setup in Minuten", "icon": "zap" },
+  { "text": "Was unterscheidet [Produkt] von der Konkurrenz?", "title": "Warum [Company]?", "description": "Die Vorteile", "icon": "award" }
+]
+```
 
 ### 2f — Brand Color
 
@@ -176,8 +197,11 @@ If you can't detect it reliably, ask before proceeding.
 
 ### 2g — Demo Page Content
 
-- **offerText**: Something time-limited and compelling. E.g. "30 Tage kostenlos testen — kein Vertrag" or "Free setup support when you book a demo this week"
-- **offerExpiresAt**: 7 days from today (ISO 8601)
+- **offerText**: The main headline of the offer banner. This is NOT a "free consultation" — it's the value proposition with a deadline. The countdown timer shows when THIS offer expires. Examples:
+  - DE: "Jetzt starten und 50% Rabatt im ersten Jahr sichern" / "14 Tage kostenlos testen — danach upgraden mit Rabatt" / "Ihren KI-Assistenten jetzt aktivieren — Sonderkonditionen sichern"
+  - EN: "Start now and save 50% in your first year" / "14-day free trial — then upgrade with a discount" / "Activate your AI assistant now — special terms available"
+  - **Do NOT use "Kostenlose Erstberatung" (free consultation)** — the countdown is for the offer deadline, not a consultation
+- **offerExpiresAt**: 7 days from today (ISO 8601). The countdown timer counts down to this date.
 - **customMessage**: 1–2 sentences speaking directly to the prospect: "Wir haben diesen Demo-Bot speziell für [Company] konfiguriert. Probier ihn aus!"
 
 > **After planning, show a summary to the user:**
@@ -303,7 +327,7 @@ If language is `multi`: add one extra knowledge item to the bucket:
 }
 ```
 
-### Step 3.5 — Set Quick Questions
+### Step 3.5 — Set Quick Questions (Card Format)
 
 ```json
 {
@@ -312,8 +336,15 @@ If language is `multi`: add one extra knowledge item to the bucket:
     "name": "update_quick_questions",
     "arguments": {
       "agentId": "[agentId]",
-      "questionsEn": ["[q1]", "[q2]", "[q3]", "[q4]", "[q5]"],
-      "questionsDe": ["[frage1]", "[frage2]", "[frage3]", "[frage4]", "[frage5]"]
+      "style": "cards",
+      "questionsEn": [
+        { "text": "[message sent to chat]", "title": "[Card Title]", "description": "[3-5 word hint]", "icon": "[lucide-icon-name]" },
+        { "text": "[message sent to chat]", "title": "[Card Title]", "description": "[3-5 word hint]", "icon": "[lucide-icon-name]" }
+      ],
+      "questionsDe": [
+        { "text": "[Nachricht an den Chat]", "title": "[Karten-Titel]", "description": "[3-5 Wort Hinweis]", "icon": "[lucide-icon-name]" },
+        { "text": "[Nachricht an den Chat]", "title": "[Karten-Titel]", "description": "[3-5 Wort Hinweis]", "icon": "[lucide-icon-name]" }
+      ]
     }
   }
 }
@@ -321,6 +352,7 @@ If language is `multi`: add one extra knowledge item to the bucket:
 
 > For EN-only: use `questionsEn` only, leave `questionsDe` as `[]`.
 > For DE-only: use `questionsDe` only, leave `questionsEn` as `[]`.
+> Always set `style: "cards"` — this enables the rich card display in the widget.
 
 ### Step 3.5b — Restrict widget to demo page only
 
@@ -363,10 +395,10 @@ You do NOT need to call `update_widget_style` manually for this.
       "customMessage": "[from 2g]",
       "language": "[en or de — must match the language you chose in Phase 2]",
       "useCases": [
-        "[Use case 1 — specific to this company, 1 sentence]",
-        "[Use case 2 — specific to this company, 1 sentence]",
-        "[Use case 3 — specific to this company, 1 sentence]",
-        "[Use case 4 — optional, if relevant]"
+        { "text": "[Use case 1 — specific to this company, 1 sentence]", "icon": "[lucide-icon-name]" },
+        { "text": "[Use case 2 — specific to this company, 1 sentence]", "icon": "[lucide-icon-name]" },
+        { "text": "[Use case 3 — specific to this company, 1 sentence]", "icon": "[lucide-icon-name]" },
+        { "text": "[Use case 4 — optional, if relevant]", "icon": "[lucide-icon-name]" }
       ]
     }
   }
@@ -417,7 +449,7 @@ If the demo needs changes after delivery, use these individual tools:
 | What to change | Tool |
 |----------------|------|
 | System prompt | `update_prompt` |
-| Quick questions | `update_quick_questions` (use `questionsEn`/`questionsDe`) |
+| Quick questions | `update_quick_questions` (card objects with text/title/description/icon, set `style: "cards"`) |
 | Color, greeting, domain whitelist | `update_widget_style` |
 | Add more knowledge | `add_to_bucket` with the existing `bucketId` |
 | Republish after changes | `publish_agent` |
@@ -430,6 +462,7 @@ Run through this checklist mentally before Phase 5:
 
 - [ ] System prompt is specific to this company — no generic filler
 - [ ] Greeting message references the product or company name
+- [ ] Quick questions use card format (objects with text, title, description, icon) — NOT plain strings
 - [ ] Quick questions would make a real prospect click them
 - [ ] Primary color matches the company brand
 - [ ] At least 4 knowledge items covering: overview, services, pricing/FAQ, contact
@@ -439,5 +472,7 @@ Run through this checklist mentally before Phase 5:
 - [ ] Offer text is specific and time-limited
 - [ ] Widget domain is restricted to `demo.inboxmate.psquared.dev` (auto-set by the platform)
 - [ ] `language` matches the company's website language
-- [ ] 3-4 specific `useCases` that highlight real value for this company (not generic)
+- [ ] 3-4 specific `useCases` as objects with `{ text, icon }` — not plain strings
+- [ ] Use case icons are valid Lucide kebab-case names (e.g. "clock", "users", "shield-check")
+- [ ] Offer text is NOT "Kostenlose Erstberatung" — it describes the offer, countdown shows when it expires
 - [ ] Widget domain + page restriction set (auto-handled by `create_demo_page`)
