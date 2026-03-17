@@ -134,15 +134,20 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 
 For each company, generate these personalized texts:
 
-**`customHook`** — 1-2 sentences specific to this company. Reference something concrete from their website (a product, a pain point, their current setup). Shows the email isn't generic.
+**Determine tone (du vs Sie) for German emails:**
+1. Check CRM for any prior emails/notes with this contact — if they used "du", use "du"
+2. Check the company website tone — if it uses "du" throughout (casual startup vibe), mirror it
+3. **Default: Sie-Form** for cold outreach with no prior relationship
+4. When in doubt → Sie
 
-**`benefitsText`** — 1 concise sentence describing what InboxMate would do specifically for THIS company. NOT the generic "24/7 Kundenanfragen beantworten, Leads qualifizieren" — instead something like "Immobilienanfragen automatisch beantworten, Besichtigungstermine vereinbaren und Exposés teilen" for a real estate company, or "Kunden zu den richtigen IT-Services leiten, Angebote vorbereiten und Support-Tickets erstellen" for an IT company.
+**Then fill these variables (all must match the chosen tone):**
 
-**Tone rules for German (DE) emails:**
-- Always use **du-Form** (informal). "Hallo" = du, never Sie.
-- Write: "dein", "dir", "du", "euer", "eure" — NOT "Ihr", "Ihre", "Sie", "Ihnen"
-- The customHook and benefitsText must also use du-Form
-- Keep it conversational and direct, not corporate
+- **`greeting`** — e.g. "Hallo Dominik," (du) or "Guten Tag Herr Rockenschaub," (Sie)
+- **`introText`** — e.g. "wir haben einen KI-Chatbot speziell für **[Company]** konfiguriert — er kennt Ihre Produkte, Services und häufige Fragen Ihrer Kunden." (Sie) or "...eure Produkte..." (du)
+- **`customHook`** — 1-2 sentences specific to this company. Reference something concrete from their website.
+- **`ctaText`** — e.g. "Schauen Sie sich die Live-Demo an — der Bot ist sofort einsatzbereit:" (Sie) or "Schau dir die Live-Demo an..." (du)
+- **`benefitsText`** — 1 concise sentence what InboxMate does for THIS company. NOT generic. E.g. "Immobilienanfragen automatisch beantworten, Besichtigungstermine vereinbaren und Exposés teilen" for a real estate company.
+- **`closingText`** — e.g. "Bei Fragen melden Sie sich gerne direkt." (Sie) or "Bei Fragen melde dich gerne direkt." (du)
 
 ```bash
 curl -s -X POST https://notifications.psquared.dev/drafts/create \
@@ -157,8 +162,12 @@ curl -s -X POST https://notifications.psquared.dev/drafts/create \
       "contactName": "[first name]",
       "companyName": "[Company Name]",
       "demoUrl": "[demo playground URL]",
-      "customHook": "[personalized 1-2 sentences, du-Form for DE]",
-      "benefitsText": "[company-specific benefits, 1 concise sentence, du-Form for DE]",
+      "greeting": "[greeting matching tone]",
+      "introText": "[intro matching tone]",
+      "customHook": "[personalized 1-2 sentences]",
+      "ctaText": "[CTA matching tone]",
+      "benefitsText": "[company-specific benefits, 1 sentence]",
+      "closingText": "[closing matching tone]",
       "senderName": "Martin"
     },
     "crmCompanyId": "[company ID]",
