@@ -200,11 +200,35 @@ The email template is a pure layout shell — **you write ALL the text**. The te
 - Make the reader curious about the demo — don't explain everything, tease it
 - The highlight box should make them think "oh that's exactly what I need"
 
-**Determine tone (du vs Sie) for German emails:**
-1. Check CRM for any prior emails/notes with this contact — if they used "du", use "du"
-2. Check the company website tone — if it uses "du" throughout (casual startup vibe), mirror it
-3. **Default: Sie-Form** for cold outreach with no prior relationship
+**Determine tone (du vs Sie) for German emails — THIS IS CRITICAL, DO NOT SKIP:**
+
+For EACH company, before writing any text, check for prior communication:
+
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -d "{\"query\":\"{ people(filter: { companyId: { eq: \\\"[companyId]\\\" } }, first: 5) { edges { node { emails { primaryEmail } } } } }\"}"
+```
+
+Then check if we have email threads with any of those email addresses in the agenthub DB:
+
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -d "{\"query\":\"{ noteTargets(filter: { companyId: { eq: \\\"[companyId]\\\" } }, first: 20) { edges { node { note { title body } } } } }\"}"
+```
+
+Look at the note/email content for "du/dir/dein" vs "Sie/Ihnen/Ihr" patterns.
+
+**Rules:**
+1. If prior emails/notes use "du" → use "du" (Hallo [Vorname],)
+2. If the company website prominently uses "du" throughout → mirror it
+3. If no prior contact exists → **default to Sie** (Guten Tag Herr/Frau [Nachname],)
 4. When in doubt → Sie
+
+**Verify your choice:** After writing all text for a company, re-read every sentence and check that du/Sie is consistent. A single "Ihre" in an otherwise du-Form email is a dealbreaker.
 
 **Template variables:**
 
@@ -213,7 +237,8 @@ The email template is a pure layout shell — **you write ALL the text**. The te
 - **`bodyParagraph2`** — (optional) The personalized insight. Something specific about their website/business that shows you actually looked. This is what makes them keep reading.
 - **`bodyParagraph3`** — (optional) The nudge toward the demo. Keep it short.
 - **`buttonText`** — CTA button label. "Demo ansehen" / "View Demo" / or something more specific
-- **`highlightBox`** — (optional) One punchy line about what InboxMate does for THIS company specifically. Not generic features.
+- **`highlightTitle`** — (optional) Bold title for the green box. e.g. "Was der Bot für [Company] tun kann:" or "What this means for [Company]:"
+- **`highlightText`** — (optional) One punchy line about what InboxMate does for THIS company specifically. Not generic features.
 - **`closingText`** — (optional) Brief closing. "Bei Fragen einfach antworten." / "Just reply if you have questions."
 - **`signoff`** — "Beste Grüße" / "Liebe Grüße" / "Best regards" — match the tone
 - **`senderName`** — "Martin"
@@ -239,7 +264,8 @@ curl -s -X POST https://notifications.psquared.dev/drafts/create \
       "bodyParagraph2": "[personalized insight about their business]",
       "bodyParagraph3": "[nudge toward the demo]",
       "buttonText": "[CTA button text]",
-      "highlightBox": "[what InboxMate does for THIS company — one punchy line]",
+      "highlightTitle": "[bold title for green box]",
+      "highlightText": "[what InboxMate does for THIS company — one punchy line]",
       "closingText": "[brief closing]",
       "signoff": "[matching tone signoff]",
       "senderName": "Martin"
