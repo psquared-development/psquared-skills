@@ -188,7 +188,7 @@ Use mcp__plugin_supabase_supabase__execute_sql with:
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: OK_TO_SEND }) { id demoStatus } }"}'
+  -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: OK_TO_SEND, demoReviewIssues: null }) { id } }"}'
 ```
 
 ### If NEEDS_FIX:
@@ -222,11 +222,17 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 
 ---
 
-## CRM Custom Fields Reference
+## CRM Fields Updated by This Skill
 
-| Field | Type | Values |
-|-------|------|--------|
-| `demoUrl` | LINKS | `{ primaryLinkLabel: "Demo", primaryLinkUrl: "https://..." }` |
-| `demoStatus` | SELECT (enum) | `PENDING_REVIEW`, `OK_TO_SEND`, `NEEDS_FIX`, `SENT` |
+| Step | Field | Value | When |
+|------|-------|-------|------|
+| 3 (OK) | `demoStatus` | `OK_TO_SEND` | Demo passed QA |
+| 3 (OK) | `demoReviewIssues` | `null` | Clear any previous issues |
+| 3 (FIX) | `demoStatus` | `NEEDS_FIX` | Demo failed QA |
+| 3 (FIX) | `demoReviewIssues` | `"Issue 1: ... Issue 2: ..."` | What's wrong and how to fix |
+
+**Reads:** `demoStatus` (filter PENDING_REVIEW), `demoUrl` (demo page link), company domain
+
+**Does NOT touch:** `outreachSentAt`, `followupSentAt`, `agenthubAccountId`, `stage`
 
 **Important:** `demoStatus` is a GraphQL enum — use bare values (no quotes): `demoStatus: OK_TO_SEND`

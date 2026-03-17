@@ -110,16 +110,11 @@ curl -s -X POST https://notifications.psquared.dev/drafts/create \
   }'
 ```
 
-Then update CRM:
-
-```bash
-curl -s -X POST https://crm.psquared.dev/graphql \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: FOLLOW_UP_SENT }) { id } }"}'
-```
-
 > **Announce after each:** `Follow-up draft created: [Company] → [email] (sent [N] days ago)`
+
+**Note:** This skill does NOT update CRM fields. When the follow-up is actually sent from the admin UI, the notification service automatically sets:
+- `demoStatus` → `FOLLOW_UP_SENT`
+- `followupSentAt` → current timestamp
 
 ---
 
@@ -147,3 +142,11 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 > → notifications.psquared.dev/drafts
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > ```
+
+---
+
+## CRM Fields Reference
+
+**Reads:** `demoStatus` (filter SENT), `outreachSentAt` (days since sent), `demoUrl`, `stage`, contact info
+
+**Does NOT write any fields.** The notification service handles CRM updates on actual send.

@@ -158,6 +158,15 @@ curl -s -X POST https://notifications.psquared.dev/drafts/create \
 
 > **Announce after each:** `Draft created: [Company Name] → [email]`
 
+**Note:** This skill does NOT update CRM fields. The notification service updates them automatically when emails are sent from the admin UI:
+
+| On send | Field | Value |
+|---------|-------|-------|
+| Outreach email sent | `demoStatus` | `SENT` |
+| Outreach email sent | `outreachSentAt` | current timestamp |
+| Follow-up email sent | `demoStatus` | `FOLLOW_UP_SENT` |
+| Follow-up email sent | `followupSentAt` | current timestamp |
+
 ---
 
 ## STEP 5 — Report
