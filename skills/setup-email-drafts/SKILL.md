@@ -17,11 +17,7 @@ description: "Create email drafts for approved InboxMate demos. Verifies all dem
 
 ## STEP 0 — Check Environment
 
-Read `.env` in the current directory and source it:
-
-```bash
-source .env
-```
+**Read `.env` using the Read tool** (do NOT `source` it — values may contain semicolons or special characters that break shell parsing). Extract the token values by reading the file content directly.
 
 The `.env` file should contain tokens for:
 - **CRM API** — for querying opportunities and creating tasks (variable name should contain "CRM" + "TOKEN")
@@ -29,9 +25,31 @@ The `.env` file should contain tokens for:
 
 If the `.env` file is missing or doesn't contain recognizable tokens for both services, **stop immediately** and ask the user to provide them.
 
-**Note on env var placeholders:** Throughout this skill, `$<CRM_TOKEN_VAR>` and `$<DRAFT_TOKEN_VAR>` mean "use the actual variable name you found in `.env`." Substitute with the real variable names when running commands.
+**Note on env var placeholders:** Throughout this skill, `$<CRM_TOKEN_VAR>` and `$<DRAFT_TOKEN_VAR>` mean "use the actual variable name you found in `.env`." Substitute with the real variable names when running commands. Set them inline in each bash command (e.g., `CRM_TOKEN="value" && curl ...`).
 
 > **Once verified, announce:** `Environment OK. Checking demo readiness...`
+
+---
+
+## Shell Quoting for CRM GraphQL Queries
+
+**IMPORTANT:** When sending GraphQL queries to the CRM via curl, **always use double-quoted `-d` strings** with escaped inner quotes. Single-quoted strings cause intermittent parse failures with the Twenty CRM GraphQL endpoint when queries contain nested object fields like `demoUrl { primaryLinkUrl }`.
+
+**Do this:**
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $CRM_TOKEN" \
+  -d "{\"query\":\"{ opportunities(first: 5) { edges { node { id name } } } }\"}"
+```
+
+**NOT this** (breaks with nested fields):
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -d '{"query":"{ opportunities(first: 5) { edges { node { id name demoUrl { primaryLinkUrl } } } } }"}'
+```
+
+All curl examples below use the safe double-quoted form.
 
 ---
 
@@ -43,7 +61,7 @@ Query CRM for ANY opportunities at SCREENING stage with `demoStatus = PENDING_RE
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d '{"query":"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: PENDING_REVIEW } }, first: 5) { edges { node { id name } } } }"}'
+  -d "{\"query\":\"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: PENDING_REVIEW } }, first: 5) { edges { node { id name } } } }\"}"
 ```
 
 **If any PENDING_REVIEW found:** Stop and announce:
@@ -67,7 +85,7 @@ Query CRM for opportunities with `demoStatus = OK_TO_SEND`:
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d '{"query":"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: OK_TO_SEND } }, first: 50) { edges { node { id name demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } people(first: 5) { edges { node { id name { firstName lastName } emails { primaryEmail } } } } } } } } }"}'
+  -d "{\"query\":\"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: OK_TO_SEND } }, first: 50) { edges { node { id name demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } people(first: 5) { edges { node { id name { firstName lastName } emails { primaryEmail } } } } } } } } }\"}"
 ```
 
 For each opportunity, extract:
@@ -118,7 +136,7 @@ Match the template ID for the correct locale.
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d '{"query":"mutation { createTask(data: { title: \"Send initial outreach for Demo [Company Name]\", status: TODO }) { id } }"}'
+  -d "{\"query\":\"mutation { createTask(data: { title: \\\"Send initial outreach for Demo [Company Name]\\\", status: TODO }) { id } }\"}"
 ```
 
 Then link to opportunity:
@@ -127,7 +145,7 @@ Then link to opportunity:
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d '{"query":"mutation { createTaskTarget(data: { taskId: \"[taskId]\", opportunityId: \"[opportunityId]\" }) { id } }"}'
+  -d "{\"query\":\"mutation { createTaskTarget(data: { taskId: \\\"[taskId]\\\", opportunityId: \\\"[opportunityId]\\\" }) { id } }\"}"
 ```
 
 ### 4b — Create Email Draft
