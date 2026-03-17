@@ -168,7 +168,7 @@ The email template is a pure layout shell — **you write ALL the text**. The te
 
 **Template variables:**
 
-- **`greeting`** — Personal. "Hallo Dominik," or "Guten Tag Herr Rockenschaub,"
+- **`greeting`** — Personal. e.g. "Hallo [Vorname]," (du) or "Guten Tag Herr/Frau [Nachname]," (Sie)
 - **`bodyParagraph1`** — The hook. What you did and why it matters to THEM. One strong sentence.
 - **`bodyParagraph2`** — (optional) The personalized insight. Something specific about their website/business that shows you actually looked. This is what makes them keep reading.
 - **`bodyParagraph3`** — (optional) The nudge toward the demo. Keep it short.
