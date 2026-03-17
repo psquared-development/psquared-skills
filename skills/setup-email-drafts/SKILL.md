@@ -111,20 +111,19 @@ For each opportunity, extract:
 
 ## STEP 3 — Determine Template ID
 
-Look up the `demo-outreach` template ID from the notification service DB. Use the Supabase MCP to query:
+**Template UUIDs (hardcoded — do NOT query the notification service API or Supabase MCP for these):**
 
-```
-Use mcp__plugin_supabase_supabase__execute_sql with:
-  project_id: "fyqbhpwqlamjhoohkldu"
-  query: SELECT id, locale FROM email_templates WHERE module = 'inboxmate' AND topic = 'demo-outreach'
-```
+| Template | Locale | UUID |
+|----------|--------|------|
+| demo-outreach | de | `b98926be-5977-40a6-9be6-ffe38989fc5a` |
+| demo-outreach | en | `47381011-a737-4157-a177-f7646bb4aee3` |
 
 For each opportunity, determine the locale:
 - If company domain is .at, .de, .ch → locale `de`
 - If company website was in German during demo review → locale `de`
 - Otherwise → locale `en`
 
-Match the template ID for the correct locale.
+Use the matching UUID above.
 
 ---
 

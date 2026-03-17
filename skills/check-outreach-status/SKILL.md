@@ -68,17 +68,16 @@ Also check: if the opportunity stage has moved beyond SCREENING (e.g., MEETING, 
 
 ---
 
-## STEP 3 — Look Up Follow-up Template
+## STEP 3 — Determine Follow-up Template ID
 
-Query the notification service DB for the `demo-followup` template:
+**Template UUIDs (hardcoded — do NOT query any API or MCP for these):**
 
-```
-Use mcp__plugin_supabase_supabase__execute_sql with:
-  project_id: "fyqbhpwqlamjhoohkldu"
-  query: SELECT id, locale FROM email_templates WHERE module = 'inboxmate' AND topic = 'demo-followup'
-```
+| Template | Locale | UUID |
+|----------|--------|------|
+| demo-followup | de | `6f49ef62-d62d-4a88-a58b-313340322d51` |
+| demo-followup | en | `956b815b-4061-48e7-a351-e3215ae85f86` |
 
-Match template locale to company (same logic as setup-email-drafts: .at/.de/.ch → de, else en).
+Match locale to company (same logic: .at/.de/.ch → de, else en).
 
 ---
 
