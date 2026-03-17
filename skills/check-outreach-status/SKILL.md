@@ -39,7 +39,7 @@ Query CRM for opportunities with `demoStatus = SENT`:
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d '{"query":"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: SENT } }, first: 50) { edges { node { id name outreachSentAt demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } } pointOfContact { id name { firstName lastName } emails { primaryEmail } } } } } }"}'
+  -d '{"query":"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: SENT } }, first: 50) { edges { node { id name outreachSentAt demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } people(first: 5) { edges { node { id name { firstName lastName } emails { primaryEmail } } } } } } } } }"}'
 ```
 
 For each opportunity:

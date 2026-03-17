@@ -67,16 +67,16 @@ Query CRM for opportunities with `demoStatus = OK_TO_SEND`:
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d '{"query":"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: OK_TO_SEND } }, first: 50) { edges { node { id name demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } } pointOfContact { id name { firstName lastName } emails { primaryEmail } } } } } }"}'
+  -d '{"query":"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: OK_TO_SEND } }, first: 50) { edges { node { id name demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } people(first: 5) { edges { node { id name { firstName lastName } emails { primaryEmail } } } } } } } } }"}'
 ```
 
 For each opportunity, extract:
 - `opportunityId`, `opportunityName`
 - `companyId`, `companyName`, `companyDomain`
 - `demoUrl` (from `demoUrl.primaryLinkUrl`)
-- Contact: `firstName`, `lastName`, `email` (from `pointOfContact`)
+- Contact: from `company.people` — pick the first person with an email. For multi-contact companies, prefer a named person (not "Office") if available.
 
-**If no contact or no email on the contact:** Add to skip list with reason "No contact email found". Continue to next.
+**If company has no people or no email:** Add to skip list with reason "No contact email found". Continue to next.
 
 **If no OK_TO_SEND opportunities:** Announce "No demos ready to send" and stop.
 
