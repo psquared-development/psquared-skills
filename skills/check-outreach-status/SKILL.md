@@ -106,7 +106,8 @@ curl -s -X POST https://notifications.psquared.dev/drafts/create \
     },
     "crmCompanyId": "[company ID]",
     "crmOpportunityId": "[opportunity ID]",
-    "crmCompanyName": "[Company Name]"
+    "crmCompanyName": "[Company Name]",
+    "draftType": "followup"
   }'
 ```
 
