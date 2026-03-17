@@ -139,6 +139,8 @@ curl -s -X POST https://crm.psquared.dev/graphql \
   -d "{\"query\":\"mutation { createTask(data: { title: \\\"Send initial outreach for Demo [Company Name]\\\", status: TODO }) { id } }\"}"
 ```
 
+**Save the `taskId` from the response** — it will be passed to the draft creation so we can reliably delete this exact task if the draft is deleted.
+
 Then link to opportunity:
 
 ```bash
@@ -190,7 +192,8 @@ curl -s -X POST https://notifications.psquared.dev/drafts/create \
     },
     "crmCompanyId": "[company ID]",
     "crmOpportunityId": "[opportunity ID]",
-    "crmCompanyName": "[Company Name]"
+    "crmCompanyName": "[Company Name]",
+    "crmTaskId": "[taskId from step 4a]"
   }'
 ```
 
