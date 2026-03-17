@@ -33,9 +33,13 @@ The MCP server at `https://app.psquared.dev/api/mcp` exposes tools to create and
 {"jsonrpc":"2.0","id":3,"method":"tools/list","params":{}}
 ```
 
+**Environment variables** (read from `.env` in the current working directory at startup):
+- `NUXT_MCP_DEMO_TOKEN` — Bearer token for the InboxMate MCP server
+- `OPENBRAND_API_KEY` — API key for OpenBrand color/logo extraction (used in Phase 2f)
+
 **MCP connection:**
 - URL: `https://app.psquared.dev/api/mcp`
-- Auth: `Authorization: Bearer <token>` — ask Martin for the token if not in env as `NUXT_MCP_DEMO_TOKEN`
+- Auth: `Authorization: Bearer <NUXT_MCP_DEMO_TOKEN>`
 - Transport: JSON-RPC 2.0 over HTTP POST
 
 **Key concepts:**
@@ -206,15 +210,47 @@ Rules:
 ]
 ```
 
-### 2f — Brand Color
+### 2f — Brand Color (via OpenBrand API)
 
-Extract the **primary color** from the website:
-1. Check the primary button color or main CTA color in the HTML/CSS
-2. Look at the logo colors and dominant accent color
-3. If the website uses multiple shades of the same hue (e.g. light blue headers, medium blue buttons, dark blue footer), **always pick the darkest shade** — it looks best as the widget accent color
-4. Use the final color as a hex value (e.g. `#1a365d` not `#63b3ed`)
+Use the **OpenBrand API** to extract the brand color — it's more reliable than manual CSS inspection.
 
-If you can't detect it reliably, ask before proceeding.
+**API call:**
+```bash
+curl "https://openbrand.sh/api/extract?url=https://[domain]" \
+  -H "Authorization: Bearer $OPENBRAND_API_KEY"
+```
+
+The `OPENBRAND_API_KEY` is in the `.env` file (read it at startup along with the other tokens).
+
+**Response format:**
+```json
+{
+  "success": true,
+  "data": {
+    "brandName": "Company Name",
+    "logos": [{ "url": "...", "type": "favicon", "resolution": {...} }],
+    "colors": [
+      { "hex": "#3b82f6", "usage": "primary" },
+      { "hex": "#64748b", "usage": "secondary" },
+      { "hex": "#ffffff", "usage": "accent" }
+    ]
+  }
+}
+```
+
+**How to pick the color:**
+1. Use the color with `"usage": "primary"` from the response
+2. If the primary color is too light (e.g. white, very pale), use the `secondary` color instead
+3. If OpenBrand returns an error or no colors, fall back to manual extraction from CSS/HTML
+4. If the primary color looks washed out for a widget accent (very light pastel), prefer the darkest non-white color returned
+
+> **Also grab the logo URL** from `data.logos` — use the highest-resolution one as `logoUrl` in the demo page.
+
+If OpenBrand fails, fall back to manual inspection:
+1. Check the primary button/CTA color in HTML/CSS
+2. Look at logo colors and dominant accent
+3. Pick the darkest shade if multiple variants exist
+4. Use hex format (e.g. `#1a365d`)
 
 ### 2g — Demo Page Content
 
@@ -259,11 +295,30 @@ Use **individual MCP tools** — do NOT use `quick_setup_demo` for the full pipe
       "prompt": "[full system prompt from 2c]",
       "primaryColor": "[hex from 2f]",
       "greetingMessage": "[EN greeting from 2d — omit if DE-only]",
-      "greetingMessageDe": "[DE greeting from 2d — omit if EN-only]"
+      "greetingMessageDe": "[DE greeting from 2d — omit if EN-only]",
+      "buttonIcon": "[choose based on company personality — see guide below]",
+      "buttonShape": "[circle, squared, or icon-only — see guide below]",
+      "agentIconType": "[choose based on company personality — see guide below]",
+      "widgetPresence": "[shimmer or calm — see guide below]",
+      "uiLang": "[en, de, or multi — must match language from Phase 2]"
     }
   }
 }
 ```
+
+**Widget appearance guide — ALWAYS set these fields:**
+
+| Field | How to choose |
+|-------|--------------|
+| `buttonIcon` | The floating button visitors click to open chat. Match the company vibe: `messageCircle` (friendly default), `sparkles` (creative/modern), `chat` (support-focused), `help` (FAQ-heavy), `inboxmate` (InboxMate branding), `heart` (warm/personal), `zap` (tech/fast), `globe` (international). Do NOT default to `robot`. |
+| `agentIconType` | The avatar shown next to AI messages in the chat. Options: `inboxmate` (branded, good default), `avatar` (human-like, good for personal brands), `bot` (techy). Pick one that DIFFERS from `buttonIcon`. |
+| `buttonShape` | `circle` = round floating button (default, works everywhere). `squared` = rounded square (modern/minimal). `icon-only` = just the icon, no background (sleek/subtle). |
+| `widgetPresence` | `calm` = no animations, professional (corporate/B2B sites). `shimmer` = subtle glow effects (modern/creative brands). Default to `calm` for most business sites. |
+
+**Rules:**
+- `buttonIcon` and `agentIconType` MUST be different from each other
+- Never default to `robot` — choose based on the company's personality and industry
+- When in doubt: `buttonIcon: "messageCircle"`, `agentIconType: "inboxmate"`, `buttonShape: "circle"`, `widgetPresence: "calm"`
 
 > Save `agentId` from the response. **Announce:** `Agent created: [agentId]`
 
@@ -491,6 +546,9 @@ Run through this checklist mentally before Phase 5:
 - [ ] If multi-lang: knowledge item 7 (language support + use cases) added
 - [ ] Knowledge items are focused topics, not one big dump
 - [ ] Offer text is specific and time-limited
+- [ ] `buttonIcon` is set and matches company personality — NOT defaulting to `robot`
+- [ ] `agentIconType` is set and DIFFERS from `buttonIcon`
+- [ ] `buttonShape` and `widgetPresence` are set
 - [ ] Widget domain is restricted to `demo.inboxmate.psquared.dev` (auto-set by the platform)
 - [ ] `language` matches the company's website language
 - [ ] 3-4 specific `useCases` as objects with `{ text, icon }` — not plain strings

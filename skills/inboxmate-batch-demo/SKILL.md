@@ -11,8 +11,9 @@ All required tokens are in the **`.env` file in the current working directory** 
 
 - `PSQUARED_CRM_TOKEN` — Bearer token for Twenty CRM GraphQL API
 - `NUXT_MCP_DEMO_TOKEN` — Bearer token for the InboxMate MCP server
+- `OPENBRAND_API_KEY` — API key for OpenBrand brand color/logo extraction
 
-**Do this first:** Read `.env` from the current directory and extract these values. If either is missing, stop and ask the user.
+**Do this first:** Read `.env` from the current directory and extract these values. If any are missing, stop and ask the user.
 
 > **Announce:**
 > ```
