@@ -228,6 +228,7 @@ curl -s -X POST https://notifications.psquared.dev/drafts/create \
   -d '{
     "templateId": "[template UUID from step 3]",
     "locale": "[de|en]",
+    "subject": "[curiosity-driven subject line — see principle #8]",
     "recipientEmail": "[contact email]",
     "recipientName": "[contact first name]",
     "variables": {
