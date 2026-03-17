@@ -197,16 +197,7 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: NEEDS_FIX }) { id demoStatus } }"}'
-```
-
-Add a note explaining what's wrong:
-
-```
-[timestamp] Demo QA: NEEDS FIX
-- [Issue 1]: [description]
-- [Issue 2]: [description]
-Suggested fixes: [what to change]
+  -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: NEEDS_FIX, demoReviewIssues: \"[Issue 1: description. Issue 2: description. Suggested fixes: ...]\" }) { id } }"}'
 ```
 
 ---
