@@ -82,22 +82,17 @@ Austrian-legal lead sources for B2B cold outreach. GDPR applies, but B2B cold em
 - **Demo domain tracked:** `demo.inboxmate.psquared.dev` (with `detailed: true`)
 - **Tracks:** Page views, unique visitors, referrers, browsers, screen sizes, visit duration
 
-### What to monitor
+### `/check-demo-analytics`
 
-| KPI | Where | Meaning |
-|-----|-------|---------|
-| Demo page views | Ackee → filter by `/?id=xxx` | Did they open the email and click the demo link? |
-| Unique visitors per demo | Ackee | How many distinct people viewed each demo |
-| Referrer = email client | Ackee referrer data | Confirms traffic comes from outreach |
-| Demo claims | Telegram alerts + CRM | Conversion — someone signed up |
-| Trial → Paid | Stripe + CRM | Revenue |
+Run this skill periodically to get a full pipeline health report. It queries Ackee + CRM automatically and reports:
 
-### Reading the signals
-
-- **Views but no signup:** Demo interested them, but conversion barrier exists. Check CTA clarity, signup friction, offer text.
-- **No views after 5 days:** Email didn't land or wasn't compelling. Follow-up auto-created by `/check-outreach-status`.
-- **Views from multiple IPs:** They shared it internally — good sign. Consider direct outreach.
-- **Claim + no trial upgrade:** Onboarding issue. Check welcome email, setup guide, trial reminder templates.
+- **Hot leads** — have demo page views + email was sent (engage now)
+- **Warm leads** — have views but outreach not yet sent (prioritize)
+- **Cold leads** — no views after 7+ days (deprioritize or try different approach)
+- **Fresh** — sent < 5 days ago (too early to judge)
+- **Converted** — signed up from demo
+- **Pipeline counts** — how many at each stage
+- **Personalized recommendations** — what to do next based on the data
 
 ---
 
@@ -143,12 +138,11 @@ All editable at `notifications.psquared.dev/templates`.
 
 ## Daily Operations
 
-1. Check CRM for new leads at SCREENING
-2. `/create-demo-for-crm-lead` (or batch) for new leads
+1. `/check-demo-analytics` — see pipeline health, hot/cold leads, recommendations
+2. `/inboxmate-batch-demo` for new CRM leads
 3. `/review-demos` → spot-check manually
 4. `/setup-email-drafts` for approved demos
 5. `notifications.psquared.dev/drafts` → review → send
 6. `/check-outreach-status` for follow-ups (every few days)
 7. Review follow-up drafts → send
-8. Check Telegram for claim alerts 🔔
-9. Check Ackee for demo page visit trends
+8. Check Telegram for claim alerts
