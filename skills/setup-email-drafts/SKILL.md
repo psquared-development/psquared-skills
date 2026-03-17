@@ -132,7 +132,17 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 
 ### 4b — Create Email Draft
 
-Generate a 1-2 sentence `customHook` personalized to the company — something specific about their website, product, or situation that shows the email isn't generic. Base this on the company name, domain, and what you know from the demo review.
+For each company, generate these personalized texts:
+
+**`customHook`** — 1-2 sentences specific to this company. Reference something concrete from their website (a product, a pain point, their current setup). Shows the email isn't generic.
+
+**`benefitsText`** — 1 concise sentence describing what InboxMate would do specifically for THIS company. NOT the generic "24/7 Kundenanfragen beantworten, Leads qualifizieren" — instead something like "Immobilienanfragen automatisch beantworten, Besichtigungstermine vereinbaren und Exposés teilen" for a real estate company, or "Kunden zu den richtigen IT-Services leiten, Angebote vorbereiten und Support-Tickets erstellen" for an IT company.
+
+**Tone rules for German (DE) emails:**
+- Always use **du-Form** (informal). "Hallo" = du, never Sie.
+- Write: "dein", "dir", "du", "euer", "eure" — NOT "Ihr", "Ihre", "Sie", "Ihnen"
+- The customHook and benefitsText must also use du-Form
+- Keep it conversational and direct, not corporate
 
 ```bash
 curl -s -X POST https://notifications.psquared.dev/drafts/create \
@@ -147,7 +157,8 @@ curl -s -X POST https://notifications.psquared.dev/drafts/create \
       "contactName": "[first name]",
       "companyName": "[Company Name]",
       "demoUrl": "[demo playground URL]",
-      "customHook": "[personalized 1-2 sentences]",
+      "customHook": "[personalized 1-2 sentences, du-Form for DE]",
+      "benefitsText": "[company-specific benefits, 1 concise sentence, du-Form for DE]",
       "senderName": "Martin"
     },
     "crmCompanyId": "[company ID]",
