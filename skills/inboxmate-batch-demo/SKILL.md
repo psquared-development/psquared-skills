@@ -89,16 +89,6 @@ Variables:
 }
 ```
 
-Then add a note with the reason:
-```graphql
-mutation CreateNote($data: NoteCreateInput!) {
-  createNote(data: $data) { id }
-}
-```
-Title: `[YYYY-MM-DD HH:MM] Website skipped: [reason — e.g. "unreachable", "parked domain", "outdated (copyright 2019)", "placeholder page", "no meaningful content"]`
-
-Link the note to the opportunity.
-
 > **Announce for each skip:** `SKIP: [Company] — [reason]`
 > **Never pause to ask.** Just mark and move to the next prospect.
 

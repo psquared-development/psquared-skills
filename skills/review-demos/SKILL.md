@@ -191,22 +191,6 @@ curl -s -X POST https://crm.psquared.dev/graphql \
   -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: OK_TO_SEND }) { id demoStatus } }"}'
 ```
 
-Add a note with the review summary:
-
-```bash
-# Create note
-curl -s -X POST https://crm.psquared.dev/graphql \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d '{"query":"mutation { createNote(data: { title: \"[timestamp] Demo QA: APPROVED — [brief summary of checks]\" }) { id } }"}'
-
-# Link to opportunity
-curl -s -X POST https://crm.psquared.dev/graphql \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d '{"query":"mutation { createNoteTarget(data: { noteId: \"[noteId]\", opportunityId: \"[opportunityId]\" }) { id } }"}'
-```
-
 ### If NEEDS_FIX:
 
 ```bash
