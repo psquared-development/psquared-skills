@@ -341,7 +341,9 @@ Use **individual MCP tools** — do NOT use `quick_setup_demo` for the full pipe
 
 ### Step 3.3 — Add Knowledge Items
 
-For **each item planned in 2b**, call `add_to_bucket` separately:
+For **each item planned in 2b**, call `add_to_bucket` separately.
+
+**CRITICAL: Always include `sourceUrl`.** This enables source citations in the chatbot — the wow effect for prospects. The URL must point to the actual page the content was scraped from (e.g. `https://company.at/leistungen` for the services item, `https://company.at/kontakt` for the contact item). If content came from the homepage, use the homepage URL. **Never omit sourceUrl.**
 
 ```json
 {
@@ -352,13 +354,13 @@ For **each item planned in 2b**, call `add_to_bucket` separately:
       "bucketId": "[bucketId]",
       "title": "[item title]",
       "content": "[item content — focused, complete, in target language]",
-      "sourceUrl": "https://[domain]/[page]"
+      "sourceUrl": "https://[domain]/[exact page path this content came from]"
     }
   }
 }
 ```
 
-> **Announce after each:** `Knowledge item added: "[title]"`
+> **Announce after each:** `Knowledge item added: "[title]" (source: [url])`
 >
 > Wait for each call to complete before the next — do NOT batch these.
 
@@ -542,6 +544,7 @@ Run through this checklist mentally before Phase 5:
 - [ ] Quick questions would make a real prospect click them
 - [ ] Primary color matches the company brand
 - [ ] At least 4 knowledge items covering: overview, services, pricing/FAQ, contact
+- [ ] **Every knowledge item has a `sourceUrl`** — the exact page URL it was scraped from (enables source citations in chat)
 - [ ] If multi-lang: DE and EN questions both filled, greeting in both languages
 - [ ] If multi-lang: knowledge item 7 (language support + use cases) added
 - [ ] Knowledge items are focused topics, not one big dump
