@@ -87,19 +87,25 @@ For each opportunity needing follow-up:
 
 **If no contact email:** Skip with note.
 
+The follow-up uses the same template shell as outreach. Write a shorter, more casual follow-up. Don't repeat the original pitch — just check in and make it easy to click the demo link again.
+
 ```bash
 curl -s -X POST https://notifications.psquared.dev/drafts/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<DRAFT_TOKEN_VAR>" \
   -d '{
-    "templateId": "[followup template UUID]",
+    "templateId": "[followup template UUID from step 3]",
     "locale": "[de|en]",
     "recipientEmail": "[contact email]",
     "recipientName": "[contact first name]",
     "variables": {
-      "contactName": "[first name]",
       "companyName": "[Company Name]",
       "demoUrl": "[demo playground URL]",
+      "greeting": "[casual greeting — same tone as initial outreach]",
+      "bodyParagraph1": "[short check-in — did you get a chance to look at the demo?]",
+      "buttonText": "[e.g. Demo nochmal ansehen / View Demo Again]",
+      "closingText": "[brief — offer to adjust the demo or answer questions]",
+      "signoff": "[matching tone]",
       "senderName": "Martin"
     },
     "crmCompanyId": "[company ID]",

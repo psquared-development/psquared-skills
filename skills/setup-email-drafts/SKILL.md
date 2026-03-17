@@ -151,7 +151,14 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 
 ### 4b — Create Email Draft
 
-For each company, generate these personalized texts:
+The email template is a pure layout shell — **you write ALL the text**. The template only provides the InboxMate header, green CTA button, highlight box, signoff area, and p² footer. Everything else comes from your variables.
+
+**Writing style:**
+- Write like a real person, not a marketing bot. Short sentences. Direct.
+- The email should feel like Martin personally wrote it for this specific company
+- No corporate filler ("wir freuen uns...", "hiermit möchten wir..."). Get to the point.
+- Make the reader curious about the demo — don't explain everything, tease it
+- The highlight box should make them think "oh that's exactly what I need"
 
 **Determine tone (du vs Sie) for German emails:**
 1. Check CRM for any prior emails/notes with this contact — if they used "du", use "du"
@@ -159,34 +166,41 @@ For each company, generate these personalized texts:
 3. **Default: Sie-Form** for cold outreach with no prior relationship
 4. When in doubt → Sie
 
-**Then fill these variables (all must match the chosen tone):**
+**Template variables:**
 
-- **`greeting`** — e.g. "Hallo Dominik," (du) or "Guten Tag Herr Rockenschaub," (Sie)
-- **`introText`** — e.g. "wir haben einen KI-Chatbot speziell für **[Company]** konfiguriert — er kennt Ihre Produkte, Services und häufige Fragen Ihrer Kunden." (Sie) or "...eure Produkte..." (du)
-- **`customHook`** — 1-2 sentences specific to this company. Reference something concrete from their website.
-- **`ctaText`** — e.g. "Schauen Sie sich die Live-Demo an — der Bot ist sofort einsatzbereit:" (Sie) or "Schau dir die Live-Demo an..." (du)
-- **`benefitsText`** — 1 concise sentence what InboxMate does for THIS company. NOT generic. E.g. "Immobilienanfragen automatisch beantworten, Besichtigungstermine vereinbaren und Exposés teilen" for a real estate company.
-- **`closingText`** — e.g. "Bei Fragen melden Sie sich gerne direkt." (Sie) or "Bei Fragen melde dich gerne direkt." (du)
+- **`greeting`** — Personal. "Hallo Dominik," or "Guten Tag Herr Rockenschaub,"
+- **`bodyParagraph1`** — The hook. What you did and why it matters to THEM. One strong sentence.
+- **`bodyParagraph2`** — (optional) The personalized insight. Something specific about their website/business that shows you actually looked. This is what makes them keep reading.
+- **`bodyParagraph3`** — (optional) The nudge toward the demo. Keep it short.
+- **`buttonText`** — CTA button label. "Demo ansehen" / "View Demo" / or something more specific
+- **`highlightBox`** — (optional) One punchy line about what InboxMate does for THIS company specifically. Not generic features.
+- **`closingText`** — (optional) Brief closing. "Bei Fragen einfach antworten." / "Just reply if you have questions."
+- **`signoff`** — "Beste Grüße" / "Liebe Grüße" / "Best regards" — match the tone
+- **`senderName`** — "Martin"
+- **`demoUrl`** — the demo playground URL
+- **`companyName`** — used in email title
+- **`emailSubject`** — the rendered subject line (same as what you set on the draft)
 
 ```bash
 curl -s -X POST https://notifications.psquared.dev/drafts/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<DRAFT_TOKEN_VAR>" \
   -d '{
-    "templateId": "[template UUID]",
+    "templateId": "[template UUID from step 3]",
     "locale": "[de|en]",
     "recipientEmail": "[contact email]",
     "recipientName": "[contact first name]",
     "variables": {
-      "contactName": "[first name]",
       "companyName": "[Company Name]",
       "demoUrl": "[demo playground URL]",
-      "greeting": "[greeting matching tone]",
-      "introText": "[intro matching tone]",
-      "customHook": "[personalized 1-2 sentences]",
-      "ctaText": "[CTA matching tone]",
-      "benefitsText": "[company-specific benefits, 1 sentence]",
-      "closingText": "[closing matching tone]",
+      "greeting": "[personal greeting]",
+      "bodyParagraph1": "[the hook — what you did, why it matters]",
+      "bodyParagraph2": "[personalized insight about their business]",
+      "bodyParagraph3": "[nudge toward the demo]",
+      "buttonText": "[CTA button text]",
+      "highlightBox": "[what InboxMate does for THIS company — one punchy line]",
+      "closingText": "[brief closing]",
+      "signoff": "[matching tone signoff]",
       "senderName": "Martin"
     },
     "crmCompanyId": "[company ID]",
