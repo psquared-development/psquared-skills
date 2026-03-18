@@ -27,7 +27,7 @@ Stop if missing.
 
 **Ackee config:**
 - API: `$<ACKEE_DOMAIN_VAR>/api` (GraphQL)
-- Demo domain ID: `976e767e-cd96-48b4-be97-75b4978cc777`
+- Demo domain ID: `4bdddc8c-11d9-4d7e-ab94-aeb7866f0bb2`
 - Auth: `Authorization: Bearer $<ACKEE_TOKEN_VAR>`
 
 > **Once verified:** `Environment OK. Pulling analytics...`
@@ -42,7 +42,7 @@ Query Ackee for page-level statistics on the demo domain:
 curl -s -X POST "$<ACKEE_DOMAIN_VAR>/api" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<ACKEE_TOKEN_VAR>" \
-  -d '{"query":"{ domain(id: \"976e767e-cd96-48b4-be97-75b4978cc777\") { statistics { pages(sorting: TOP, range: LAST_30_DAYS) { id value count } views(interval: DAILY, type: UNIQUE, limit: 30) { id count } } } }"}'
+  -d '{"query":"{ domain(id: \"4bdddc8c-11d9-4d7e-ab94-aeb7866f0bb2\") { statistics { pages(sorting: TOP, range: LAST_30_DAYS) { id value count } views(interval: DAILY, type: UNIQUE, limit: 30) { id count } } } }"}'
 ```
 
 From the `pages` results, extract views per demo page. The `value` field contains the URL path (e.g., `/?id=abc123`). Map each `id` parameter to a demo.
