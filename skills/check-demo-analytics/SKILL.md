@@ -100,37 +100,69 @@ Categorize each opportunity:
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > Demo Analytics Report — [date]
 >
-> 📊 Overall (last 30 days):
->   Total demo page views: [N]
->   Unique visitors: [N]
+> CONVERSION FUNNEL
+> ─────────────────
+> Leads in CRM:           [N]
+> Demos built:            [N]  ([%] of leads)
+> Emails sent:            [N]  ([%] of demos)
+> Demo page viewed:       [N]  ([%] of sent — email→click rate)
+> CTA clicked:            [N]  ([%] of viewed — interest rate)
+> Signed up (PROPOSAL):   [N]  ([%] of CTA — conversion rate)
+> Paying (CUSTOMER):      [N]  ([%] of signups — close rate)
 >
-> 🔥 Hot leads (views + email sent):
+> Overall: [N] leads → [N] customers = [%] conversion
+> At current rate: need ~[X] leads to get 1 paying customer
+>
+> ACKEE EVENTS (last 30 days)
+> ───────────────────────────
+> Demo page views:        [N] unique visitors
+> Widget opened:          [N] ([%] of views — engagement)
+> Plan selected:          [N] (Starter: [N], Pro: [N], Business: [N])
+> Activate CTA clicked:   [N]
+> Discover platform:      [N]
+>
+> PIPELINE STATUS
+> ───────────────
+> Pending review:    [N]
+> Ready to send:     [N]
+> Sent:              [N]
+> Follow-up sent:    [N]
+> Converted:         [N]
+>
+> HOT LEADS (views + email sent)
 >   - [Company A] — [N] views, sent [N] days ago
 >   - [Company B] — [N] views, sent [N] days ago
 >
-> 🟡 Warm (views, not yet sent):
->   - [Company C] — [N] views, outreach pending
+> COLD LEADS (no views, 7+ days)
+>   - [Company C] — 0 views, sent [N] days ago
 >
-> 🧊 Cold (no views, sent 7+ days ago):
->   - [Company D] — 0 views, sent [N] days ago
->   - [Company E] — 0 views, follow-up sent [N] days ago
->
-> ⏳ Fresh (sent < 5 days):
->   - [Company F] — sent [N] days ago
->
-> 📋 Pipeline:
->   - Pending review: [N]
->   - Ready to send: [N]
->   - Sent: [N]
->   - Follow-up sent: [N]
->
-> ✅ Converted: [N]
->   - [Company G] — signed up [date]
->
-> 💡 Recommendations:
->   [Personalized suggestions based on data, e.g.:]
->   - "Company A has 5 views but hasn't signed up — consider a personal follow-up"
->   - "3 demos have 0 views after 10 days — these leads may be dead"
->   - "2 demos are still pending review — run /review-demos"
+> RECOMMENDATIONS
+>   [Based on funnel bottleneck:]
+>   - If email→view rate is low: "Subject lines may need work, or emails landing in spam"
+>   - If view→CTA rate is low: "Demo pages aren't converting — check offer text, countdown, widget"
+>   - If CTA→signup rate is low: "Signup friction too high — check onboarding flow"
+>   - If signup→paid rate is low: "Trial experience or pricing needs adjustment"
+>   - Plus specific company-level recommendations
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > ```
+
+---
+
+## STEP 5 — Query Ackee Events
+
+To get event counts, query each event:
+
+```bash
+curl -s -X POST "$<ACKEE_DOMAIN_VAR>/api" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $<ACKEE_TOKEN_VAR>" \
+  -d '{"query":"{ event(id: \"[eventId]\") { statistics { chart(interval: DAILY, type: TOTAL) { id count } list(sorting: TOP, type: TOTAL) { id value count } } } }"}'
+```
+
+**Event IDs:**
+- CTA Click: Claim Bot — `0f037f1c-c2c0-4205-b90d-3cb9bf66f9c2`
+- CTA Click: Discover Platform — `1911cb2c-96a9-478e-8a45-82ae8fa71bc8`
+- Widget Opened — `df5c0d51-1e96-43a9-8d73-13e0e82e99b3`
+- Plan Selected — `8693d36c-09a1-4b86-bf29-763e612f4843`
+
+The `list` query with `sorting: TOP` shows which demo pages / plans got the most actions. The `key` field contains the demoId or planId.
