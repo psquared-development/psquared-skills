@@ -117,13 +117,13 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 
 ## STEP 2 — Collect OK_TO_SEND Opportunities
 
-Query CRM for opportunities with `demoStatus = OK_TO_SEND`:
+Query CRM for opportunities with `demoStatus = OK_TO_SEND` that don't already have linked tasks (filters out opportunities already processed by a previous run):
 
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
-  -d "{\"query\":\"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: OK_TO_SEND } }, first: 50) { edges { node { id name demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } people(first: 5) { edges { node { id name { firstName lastName } emails { primaryEmail } } } } } } } } }\"}"
+  -d "{\"query\":\"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: OK_TO_SEND }, taskTargets: { is: NULL } }, first: 150) { edges { node { id name demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } people(first: 5) { edges { node { id name { firstName lastName } emails { primaryEmail } } } } } } } } }\"}"
 ```
 
 For each opportunity, extract:
