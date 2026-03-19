@@ -16,6 +16,17 @@ description: "Find new B2B leads in Germany for InboxMate outreach. Validates ea
 
 ---
 
+## Autonomy — Run Without Asking
+
+**This skill should run as autonomously as possible.** The user may not be available to answer questions. Do NOT ask for confirmation between leads — just process them one by one:
+
+- Search → validate → skip or add → next. No pauses.
+- If a check is ambiguous (e.g., unclear if email is personal), err on the side of **skipping** and add to skip-list. Don't ask.
+- Only stop if a critical error occurs (e.g., CRM token invalid, network down).
+- Report results at the end, not during.
+
+---
+
 ## Legal Context — READ THIS FIRST
 
 B2B cold email in Germany and Austria is a legal grey area. The strict reading of UWG §7 (Germany) and TKG §174 (Austria) says prior consent is required. However, the prevailing practical interpretation (used by thousands of companies daily) allows individual B2B outreach IF certain conditions are met.
@@ -74,8 +85,13 @@ The file `skip-list.json` in the current working directory tracks companies that
 
 ## STEP 0 — Check Environment
 
-**Read `.env` using the Read tool.** Required tokens:
-- **CRM API** — contains "CRM" + "TOKEN"
+**Read `.env` in the current working directory** using the Read tool. Extract these tokens:
+
+| Variable | Purpose | Used for |
+|----------|---------|----------|
+| `PSQUARED_CRM_TOKEN` | Twenty CRM GraphQL API | Checking duplicates, creating companies/persons/notes |
+
+The `.env` file is at the root of the working directory (claude-overlord-folder). If it doesn't exist, stop and tell the user.
 
 **Read `skip-list.json`** (or create it as `[]` if it doesn't exist).
 
@@ -168,7 +184,7 @@ Query the CRM to see if this company already exists:
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d "{\"query\":\"{ companies(filter: { domainName: { primaryLinkUrl: { like: \\\"%[domain]%\\\" } } }, first: 1) { totalCount } }\"}"
 ```
 
@@ -185,7 +201,7 @@ For each lead that passes ALL 7 criteria:
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d "{\"query\":\"mutation { createCompany(data: { name: \\\"[Company Name]\\\", domainName: { primaryLinkUrl: \\\"https://[domain]\\\" } }) { id name } }\"}"
 ```
 
@@ -194,31 +210,43 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d "{\"query\":\"mutation { createPerson(data: { name: { firstName: \\\"[First]\\\", lastName: \\\"[Last]\\\" }, emails: { primaryEmail: \\\"[email]\\\" }, companyId: \\\"[companyId]\\\", jobTitle: \\\"[Role/Title]\\\" }) { id } }\"}"
 ```
 
 ### 3c — Create Note with justification
 
-Create a note on the company explaining:
-- Where the email was found (exact URL)
-- Why InboxMate is relevant for this company
-- Which qualification criteria were checked
+**Two-step process:** Create the note first (with just a title), then update it with the full body. This avoids issues with long content in a single mutation.
 
+**Step 1 — Create note:**
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d "{\"query\":\"mutation { createNote(data: { title: \\\"Lead Qualification: [date]\\\", body: \\\"Email source: [URL where email was found]\\\\nContact: [Name], [Role]\\\\nRelevance: [1-2 sentence justification]\\\\nChecks: German company ✓, B2B ✓, Relevant ✓, Public email ✓, Named contact ✓, Value offer ✓, Not in CRM ✓, Active website ✓\\\" }) { id } }\"}"
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
+  -d "{\"query\":\"mutation { createNote(data: { title: \\\"Lead Qualification: [Company Name] — [date]\\\" }) { id } }\"}"
 ```
 
-Link note to company:
+**Step 2 — Update note with full content:**
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
+  -d "{\"query\":\"mutation { updateNote(id: \\\"[noteId]\\\", data: { body: \\\"Email source: [URL where email was found]\\\\nContact: [Name], [Role]\\\\nRelevance: [1-2 sentence justification]\\\\n\\\\nDemo approach: [suggest best angle for demo — e.g. 'FAQ automation for property listings' or 'lead qualification chatbot for service pages']\\\\n\\\\nChecks: German company ✓, B2B ✓, Relevant ✓, Public email ✓, Named contact ✓, Value offer ✓, Not in CRM ✓, Active website ✓\\\" }) { id } }\"}"
+```
+
+**Step 3 — Link note to company:**
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d "{\"query\":\"mutation { createNoteTarget(data: { noteId: \\\"[noteId]\\\", companyId: \\\"[companyId]\\\" }) { id } }\"}"
 ```
+
+**The "Demo approach" field** should suggest the best angle for the InboxMate demo based on what you found on their website. Examples:
+- Real estate: "FAQ bot for property listings — automate viewing requests and price inquiries"
+- IT services: "Lead qualification chatbot — help visitors find the right service package"
+- Agency: "Portfolio navigator — guide prospects to relevant case studies and services"
+- E-commerce: "Product advisor — help customers choose the right product, reduce support load"
 
 > **Announce after each:** `Added: [Company Name] — [contact email] — [1-line reason]`
 
