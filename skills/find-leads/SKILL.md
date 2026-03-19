@@ -140,7 +140,9 @@ Look for contact information on:
 4. Footer of the homepage
 
 **What we need:**
-- Full name of a decision maker (Geschäftsführer, CEO, Marketing-Leiter, Head of Sales)
+- The best contact person who will understand our offer — someone technical or product-oriented
+- Ideal roles (in order of preference): CTO, Head of IT, Head of Product, Head of Digital, Technical Lead, Marketing-Leiter with tech focus
+- Fallback roles: Geschäftsführer, CEO, Head of Sales — but only if no technical contact is available
 - Their email address — must be visible on the company's PUBLIC website
 - Their role/title
 
@@ -148,7 +150,8 @@ Look for contact information on:
 - MUST be a personal email (vorname@firma.de or v.nachname@firma.de)
 - MUST be found on the company's own website (screenshot/note the exact page)
 - Must NOT be from a purchased list, LinkedIn scrape, or any third-party source
-- Generic emails (info@, office@, kontakt@) are acceptable ONLY if no personal email is available AND you also found a specific contact name on the site
+- AVOID generic addresses (info@, office@, hello@, kontakt@) — these rarely reach the right person
+- Generic emails are acceptable ONLY as last resort if no personal email is available AND you also found a specific contact name on the site
 - **If no usable email found → add to skip-list.json with reason and move on**
 
 ### 2d — Determine relevance
