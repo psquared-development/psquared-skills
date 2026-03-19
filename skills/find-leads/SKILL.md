@@ -206,7 +206,7 @@ Create a note on the company explaining:
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d "{\"query\":\"mutation { createNote(data: { title: \\\"Lead Qualification: [date]\\\\n\\\\nEmail source: [URL where email was found]\\\\nContact: [Name], [Role]\\\\nRelevance: [1-2 sentence justification]\\\\nChecks: German company ✓, B2B ✓, Relevant ✓, Public email ✓, Named contact ✓, Value offer ✓, Not in CRM ✓, Active website ✓\\\" }) { id } }\"}"
+  -d "{\"query\":\"mutation { createNote(data: { title: \\\"Lead Qualification: [date]\\\", body: \\\"Email source: [URL where email was found]\\\\nContact: [Name], [Role]\\\\nRelevance: [1-2 sentence justification]\\\\nChecks: German company ✓, B2B ✓, Relevant ✓, Public email ✓, Named contact ✓, Value offer ✓, Not in CRM ✓, Active website ✓\\\" }) { id } }\"}"
 ```
 
 Link note to company:
