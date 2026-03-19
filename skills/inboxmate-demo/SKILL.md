@@ -9,7 +9,7 @@ description: "Set up a personalized InboxMate demo chatbot for a sales prospect.
 > ```
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > InboxMate Demo Pipeline started.
-> Working through 5 phases — I'll narrate each step.
+> Working through 6 phases — I'll narrate each step.
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > ```
 
@@ -516,9 +516,28 @@ You do NOT need to call `update_widget_style` manually for this.
 
 ---
 
-## PHASE 5 — Deliver
+## PHASE 5 — Create Opportunity in CRM
 
-> **Announce:** `[5/5] Done!`
+> **Announce:** `[5/6] Creating CRM opportunity...`
+
+Create an opportunity in the CRM so the demo enters the review pipeline:
+
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
+  -d "{\"query\":\"mutation { createOpportunity(data: { name: \\\"[Company Name] — InboxMate Demo\\\", stage: SCREENING, demoStatus: PENDING_REVIEW, demoUrl: { primaryLinkUrl: \\\"[playgroundUrl]\\\" }, companyId: \\\"[companyId]\\\" }) { id name stage demoStatus } }\"}"
+```
+
+> **Note:** The `companyId` comes from the CRM. If this company doesn't exist in the CRM yet (standalone demo, not from batch pipeline), look it up first or create it.
+
+> **Announce:** `Opportunity created at SCREENING / PENDING_REVIEW — ready for /review-demos`
+
+---
+
+## PHASE 6 — Deliver
+
+> **Announce:** `[6/6] Done!`
 
 Output this summary to the user:
 

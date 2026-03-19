@@ -118,7 +118,7 @@ For each valid prospect, invoke the `/inboxmate-demo` skill (or follow the inbox
 Process **one prospect at a time** — do not parallelize MCP calls.
 
 After each demo is created:
-1. The inboxmate-demo pipeline already creates an opportunity in CRM with the demo URL
+1. The inboxmate-demo pipeline creates an opportunity in CRM at `SCREENING` / `PENDING_REVIEW` with the demo URL — verify it was created
 2. Announce the result
 
 > **Announce after each:**
