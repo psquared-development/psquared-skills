@@ -15,10 +15,21 @@ All required tokens are in the **`.env` file in the current working directory** 
 
 **Do this first:** Read `.env` from the current directory and extract these values. If any are missing, stop and ask the user.
 
+**Before starting, ask the user for the offer deadline:**
+
+> ```
+> When should the demo offers expire?
+> This sets the countdown timer on all demo pages in this batch.
+> Examples: "in 14 days", "2026-04-01", "end of month"
+> ```
+
+Wait for the answer. Convert to an ISO 8601 date. Pass this deadline to every demo created in the batch — do NOT ask again per company.
+
 > **Announce:**
 > ```
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > InboxMate Batch Demo Pipeline
+> Offer deadline: [date]
 > Reading .env for CRM and MCP tokens...
 > Querying CRM for unprocessed prospects...
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
