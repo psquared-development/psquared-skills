@@ -167,7 +167,37 @@ Use the matching UUID above.
 
 ## STEP 4 — For Each Opportunity
 
-### 4a — Create CRM Task
+### 4a — MANDATORY: Check if draft already exists
+
+**THIS CHECK IS NOT OPTIONAL. Do NOT skip it. Do NOT proceed to 4b without running BOTH checks.**
+
+Run two checks. If EITHER returns a match, SKIP this opportunity entirely — do NOT create a task or draft.
+
+**Check 1 — Query notification service for existing drafts by opportunity ID:**
+
+```bash
+curl -s -X GET "https://notifications.psquared.dev/drafts?crmOpportunityId=[opportunityId]&pageSize=1" \
+  -H "Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER"
+```
+
+If the response contains any drafts (array length > 0, regardless of status) → **SKIP**.
+
+**Check 2 — Query CRM for existing tasks linked to this opportunity:**
+
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
+  -d "{\"query\":\"{ taskTargets(filter: { opportunityId: { eq: \\\"[opportunityId]\\\" } }, first: 1) { totalCount } }\"}"
+```
+
+If totalCount > 0 → **SKIP**.
+
+**If EITHER check finds an existing draft or task → SKIP. Announce:** `SKIP: [Company Name] — draft already exists`
+
+**Only proceed to 4b if BOTH checks return zero results.**
+
+### 4b — Create CRM Task
 
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
@@ -187,7 +217,7 @@ curl -s -X POST https://crm.psquared.dev/graphql \
   -d "{\"query\":\"mutation { createTaskTarget(data: { taskId: \\\"[taskId]\\\", opportunityId: \\\"[opportunityId]\\\" }) { id } }\"}"
 ```
 
-### 4b — Create Email Draft
+### 4c — Create Email Draft
 
 The email template is a pure layout shell — **you write ALL the text**. The template only provides the InboxMate header, green CTA button, highlight box, signoff area, and p² footer. Everything else comes from your variables.
 
@@ -271,7 +301,7 @@ curl -s -X POST https://notifications.psquared.dev/drafts/create \
     "crmCompanyId": "[company ID]",
     "crmOpportunityId": "[opportunity ID]",
     "crmCompanyName": "[Company Name]",
-    "crmTaskId": "[taskId from step 4a]"
+    "crmTaskId": "[taskId from step 4b]"
   }'
 ```
 
@@ -299,8 +329,11 @@ curl -s -X POST https://notifications.psquared.dev/drafts/create \
 >   - [Company A] → kontakt@firma.at
 >   - [Company B] → info@company.com
 >
+> Skipped (draft already exists): [N]
+>   - [Company C] — task already linked
+>
 > Skipped (no contact email): [N]
->   - [Company C] — no contact with email found
+>   - [Company D] — no contact with email found
 >
 > CRM tasks created: [N]
 >
