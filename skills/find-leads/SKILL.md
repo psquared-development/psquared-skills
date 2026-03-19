@@ -1,6 +1,6 @@
 ---
 name: find-leads
-description: "Find new B2B leads in Germany/Austria for InboxMate outreach. Validates each lead against legal requirements (UWG/TKG), checks email is publicly visible, documents justification, and adds to CRM. Pass the number of leads to find as a parameter."
+description: "Find new B2B leads in Germany for InboxMate outreach. Validates each lead against legal requirements (UWG), checks email is publicly visible, documents justification, and adds to CRM. Germany only — Austrian law (TKG) is stricter. Pass the number of leads to find as a parameter."
 ---
 
 # Find New Leads for InboxMate
@@ -22,21 +22,22 @@ B2B cold email in Germany and Austria is a legal grey area. The strict reading o
 
 **Our position:** We send individually crafted, genuinely valuable emails (with a working demo built for their company). This is not spam. But we MUST document why each lead qualifies for outreach.
 
-**Every lead MUST pass ALL of these checks:**
+**Every lead MUST pass ALL 8 of these checks:**
 
 ### The 7 Qualification Criteria
 
 | # | Criterion | What to check | Why it matters |
 |---|-----------|---------------|----------------|
-| 1 | **B2B only** | Company, not a private person | Consumer protection is stricter |
-| 2 | **Objectively relevant** | Company would genuinely benefit from a chatbot (has website traffic, customer-facing business) | UWG requires the offer to be relevant to the recipient's business |
-| 3 | **Publicly available email** | Email found on their public website (contact page, imprint, team page) — NOT scraped from LinkedIn, purchased lists, or leaked databases | Data source must be GDPR-compliant (publicly made available by the company itself) |
-| 4 | **Specific contact person** | Email goes to a named person with decision authority (founder, CEO, marketing lead, head of sales) — NOT info@, office@, or generic addresses | Shows individual outreach, not bulk |
-| 5 | **Genuine value offer** | We built something specifically for them (a demo) — not a generic pitch | Differentiates from spam |
-| 6 | **Not already in CRM** | Company doesn't already exist in our CRM | No duplicate outreach |
-| 7 | **Website is active** | Website loads, has real content, is maintained (copyright not 2+ years old) | No dead businesses |
+| 1 | **German company** | Domain is .de, Impressum shows German address (DE), company is registered in Germany | Austrian law (TKG §174) is stricter — no B2B cold email exception. Germany (UWG) has more practical tolerance for relevant individual B2B outreach. |
+| 2 | **B2B only** | Company, not a private person | Consumer protection is stricter |
+| 3 | **Objectively relevant** | Company would genuinely benefit from a chatbot (has website traffic, customer-facing business) | UWG requires the offer to be relevant to the recipient's business |
+| 4 | **Publicly available email** | Email found on their public website (contact page, imprint, team page) — NOT scraped from LinkedIn, purchased lists, or leaked databases | Data source must be GDPR-compliant (publicly made available by the company itself) |
+| 5 | **Specific contact person** | Email goes to a named person with decision authority (founder, CEO, marketing lead, head of sales) — NOT info@, office@, or generic addresses | Shows individual outreach, not bulk |
+| 6 | **Genuine value offer** | We built something specifically for them (a demo) — not a generic pitch | Differentiates from spam |
+| 7 | **Not already in CRM** | Company doesn't already exist in our CRM | No duplicate outreach |
+| 8 | **Website is active** | Website loads, has real content, is maintained (copyright not 2+ years old) | No dead businesses |
 
-**If ANY criterion fails → SKIP the lead. Do not add to CRM.**
+**If ANY of the 8 criteria fails → SKIP the lead. Add to skip-list.json. Do not add to CRM.**
 
 ---
 
@@ -86,11 +87,11 @@ The file `skip-list.json` in the current working directory tracks companies that
 
 Use WebSearch to find German and Austrian businesses that would benefit from an AI chatbot on their website.
 
-**Search strategies (rotate between these):**
-- `"[industry] Unternehmen" site:.de OR site:.at`
-- `"[industry] GmbH" Kontakt Email`
+**Search strategies (rotate between these — Germany only, .de domains):**
+- `"[industry] Unternehmen" site:.de`
+- `"[industry] GmbH" Kontakt Email site:.de`
 - `"Geschäftsführer" "[industry]" site:.de`
-- `"Immobilienmakler" OR "Versicherungsmakler" OR "Steuerberater" OR "Rechtsanwalt" site:.at`
+- `"Immobilienmakler" OR "Versicherungsmakler" OR "Steuerberater" OR "Rechtsanwalt" site:.de`
 - Industry-specific: real estate agencies, insurance brokers, IT consultancies, marketing agencies, SaaS companies, e-commerce shops, dental practices, law firms, accounting firms
 
 **Good target industries for InboxMate:**
@@ -123,11 +124,12 @@ Extract the domain from the company URL. Check if it's in `skip-list.json`. If f
 
 Visit their website. Verify:
 - Website loads and is active
+- **Impressum shows a German address** (city in Germany, not Austria/Switzerland) — this confirms criterion #1
 - Content is current (check copyright year, last blog post, news)
 - Company does customer-facing business (not just B2B wholesale with no public presence)
-- They DON'T already have a chatbot on their site (check for chat widgets in the HTML)
+- They DON'T already have a chatbot on their site (check for chat widgets like Intercom, Drift, Zendesk, HubSpot, Tidio, Crisp, LiveChat in the HTML source)
 
-**Skip if:** website is down, parked, outdated (2+ years old copyright), or already has a chatbot. **Add to skip-list.json with reason.**
+**Skip if:** website is down, parked, outdated, has a chatbot, or is NOT a German company. **Add to skip-list.json with reason.**
 
 ### 2c — Find a contact person with email
 
@@ -204,7 +206,7 @@ Create a note on the company explaining:
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
-  -d "{\"query\":\"mutation { createNote(data: { title: \\\"Lead Qualification: [date]\\\\n\\\\nEmail source: [URL where email was found]\\\\nContact: [Name], [Role]\\\\nRelevance: [1-2 sentence justification]\\\\nChecks: B2B ✓, Relevant ✓, Public email ✓, Named contact ✓, Value offer ✓, Not in CRM ✓, Active website ✓\\\" }) { id } }\"}"
+  -d "{\"query\":\"mutation { createNote(data: { title: \\\"Lead Qualification: [date]\\\\n\\\\nEmail source: [URL where email was found]\\\\nContact: [Name], [Role]\\\\nRelevance: [1-2 sentence justification]\\\\nChecks: German company ✓, B2B ✓, Relevant ✓, Public email ✓, Named contact ✓, Value offer ✓, Not in CRM ✓, Active website ✓\\\" }) { id } }\"}"
 ```
 
 Link note to company:
@@ -248,4 +250,4 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 - **Only public emails.** If you can't find an email on their website, skip the lead.
 - **Rotate industries.** Don't search for 10 real estate companies in a row — diversify.
 - **Check for chatbots.** If they already have Intercom/Drift/Zendesk/HubSpot chat, skip — they're already served.
-- **DACH focus.** Only Germany (.de) and Austria (.at) domains for now.
+- **Germany only.** Only .de domains. Austrian law (TKG) is stricter — no B2B exception. Verify Impressum shows German address.
