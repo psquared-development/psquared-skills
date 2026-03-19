@@ -179,8 +179,9 @@ Write a 1-2 sentence justification for why InboxMate would be valuable for this 
 
 ### 2e — Check CRM for duplicates
 
-Query the CRM to see if this company already exists:
+**Check by domain first** (most reliable), then fall back to company name:
 
+**Step 1 — Search by domain:**
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
@@ -188,7 +189,15 @@ curl -s -X POST https://crm.psquared.dev/graphql \
   -d "{\"query\":\"{ companies(filter: { domainName: { primaryLinkUrl: { like: \\\"%[domain]%\\\" } } }, first: 1) { totalCount } }\"}"
 ```
 
-**If totalCount > 0 → SKIP. Add to skip-list.json with reason `"already in CRM"`.**
+**Step 2 — If not found by domain, also search by name** (catches companies added without a domain):
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
+  -d "{\"query\":\"{ companies(filter: { name: { like: \\\"%[Company Name]%\\\" } }, first: 1) { totalCount } }\"}"
+```
+
+**If either query returns totalCount > 0 → SKIP. Add to skip-list.json with reason `"already in CRM"`.**
 
 ---
 
