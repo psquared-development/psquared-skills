@@ -40,12 +40,45 @@ B2B cold email in Germany and Austria is a legal grey area. The strict reading o
 
 ---
 
+## Skip List — Persistent Rejected Leads
+
+The file `skip-list.json` in the current working directory tracks companies that were already checked and rejected. **Before researching any company, check this list first.** If the domain is in the list, skip immediately — don't waste time fetching the website again.
+
+**On first run:** If `skip-list.json` doesn't exist, create it with `[]`.
+
+**Format:**
+```json
+[
+  { "domain": "example.de", "reason": "has chatbot", "date": "2026-03-19" },
+  { "domain": "other.at", "reason": "no personal email", "date": "2026-03-19" }
+]
+```
+
+**When a company fails any check:** Append to `skip-list.json` with the domain and a short reason (max 5 words).
+
+**Before checking any website:** Read `skip-list.json`, check if domain is already there. If yes, skip without fetching.
+
+**Short reason examples:**
+- `"has chatbot"` — already has a chat widget
+- `"no personal email"` — only info@/office@ found
+- `"dead website"` — site down or parked
+- `"outdated site"` — copyright 2+ years old
+- `"too small"` — sole proprietor, no real web presence
+- `"not B2B-facing"` — wholesale/internal only
+- `"already in CRM"` — duplicate
+- `"no email on site"` — no contact info found
+- `"generic only"` — only kontakt@/info@ available
+
+---
+
 ## STEP 0 — Check Environment
 
 **Read `.env` using the Read tool.** Required tokens:
 - **CRM API** — contains "CRM" + "TOKEN"
 
-> **Once verified:** `Environment OK. Starting lead search...`
+**Read `skip-list.json`** (or create it as `[]` if it doesn't exist).
+
+> **Once verified:** `Environment OK. Skip list: [N] entries. Starting lead search...`
 
 ---
 
@@ -82,7 +115,11 @@ Use WebSearch to find German and Austrian businesses that would benefit from an 
 
 For each potential lead found:
 
-### 2a — Check the website (WebFetch)
+### 2a — Check skip list first
+
+Extract the domain from the company URL. Check if it's in `skip-list.json`. If found, skip immediately and move to the next lead — no need to fetch the website.
+
+### 2b — Check the website (WebFetch)
 
 Visit their website. Verify:
 - Website loads and is active
@@ -90,9 +127,9 @@ Visit their website. Verify:
 - Company does customer-facing business (not just B2B wholesale with no public presence)
 - They DON'T already have a chatbot on their site (check for chat widgets in the HTML)
 
-**Skip if:** website is down, parked, outdated (2+ years old copyright), or already has a chatbot.
+**Skip if:** website is down, parked, outdated (2+ years old copyright), or already has a chatbot. **Add to skip-list.json with reason.**
 
-### 2b — Find a contact person with email
+### 2c — Find a contact person with email
 
 Look for contact information on:
 1. `/kontakt` or `/contact` page
@@ -110,15 +147,16 @@ Look for contact information on:
 - MUST be found on the company's own website (screenshot/note the exact page)
 - Must NOT be from a purchased list, LinkedIn scrape, or any third-party source
 - Generic emails (info@, office@, kontakt@) are acceptable ONLY if no personal email is available AND you also found a specific contact name on the site
+- **If no usable email found → add to skip-list.json with reason and move on**
 
-### 2c — Determine relevance
+### 2d — Determine relevance
 
 Write a 1-2 sentence justification for why InboxMate would be valuable for this specific company. Reference something concrete:
 - "High-traffic real estate listing site with FAQ section that could be automated"
 - "IT consultancy with complex service portfolio — chatbot could pre-qualify leads"
 - "Marketing agency with multiple service pages — visitors need guidance to the right offering"
 
-### 2d — Check CRM for duplicates
+### 2e — Check CRM for duplicates
 
 Query the CRM to see if this company already exists:
 
@@ -129,7 +167,7 @@ curl -s -X POST https://crm.psquared.dev/graphql \
   -d "{\"query\":\"{ companies(filter: { domainName: { primaryLinkUrl: { like: \\\"%[domain]%\\\" } } }, first: 1) { totalCount } }\"}"
 ```
 
-**If totalCount > 0 → SKIP. Already in CRM.**
+**If totalCount > 0 → SKIP. Add to skip-list.json with reason `"already in CRM"`.**
 
 ---
 
