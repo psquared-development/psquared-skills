@@ -117,16 +117,20 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 
 ## STEP 2 — Collect OK_TO_SEND Opportunities
 
-Query CRM for opportunities with `demoStatus = OK_TO_SEND` that don't already have linked tasks (filters out opportunities already processed by a previous run):
+Query CRM for opportunities with `demoStatus = OK_TO_SEND`, including `taskTargets` in the response so we can filter out already-processed ones client-side:
+
+**IMPORTANT:** The Twenty CRM does NOT support relation filters like `taskTargets: { is: NULL }` on `OpportunityFilterInput`. The `taskTargets` field is only available as a response field on the `Opportunity` type, not as a filter. You MUST fetch `taskTargets` in the response and filter client-side.
 
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
-  -d "{\"query\":\"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: OK_TO_SEND }, taskTargets: { is: NULL } }, first: 150) { edges { node { id name demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } people(first: 5) { edges { node { id name { firstName lastName } emails { primaryEmail } } } } } } } } }\"}"
+  -d "{\"query\":\"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: OK_TO_SEND } }, first: 150) { edges { node { id name taskTargets { edges { node { id } } } demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } people(first: 5) { edges { node { id name { firstName lastName } emails { primaryEmail } } } } } } } } }\"}"
 ```
 
-For each opportunity, extract:
+**Client-side filtering:** After receiving the response, **skip any opportunity where `taskTargets.edges` is non-empty** (length > 0). These have already been processed by a previous run. Add them to a "Skipped (already processed)" list in the report.
+
+For each remaining opportunity, extract:
 - `opportunityId`, `opportunityName`
 - `companyId`, `companyName`, `companyDomain`
 - `demoUrl` (from `demoUrl.primaryLinkUrl`)
@@ -134,7 +138,7 @@ For each opportunity, extract:
 
 **If company has no people or no email:** Add to skip list with reason "No contact email found". Continue to next.
 
-**If no OK_TO_SEND opportunities:** Announce "No demos ready to send" and stop.
+**If no OK_TO_SEND opportunities (after filtering):** Announce "No demos ready to send" and stop.
 
 > **Announce:**
 > ```
@@ -167,35 +171,22 @@ Use the matching UUID above.
 
 ## STEP 4 — For Each Opportunity
 
-### 4a — MANDATORY: Check if draft already exists
+### 4a — MANDATORY: Check if draft already exists in notification service
 
-**THIS CHECK IS NOT OPTIONAL. Do NOT skip it. Do NOT proceed to 4b without running BOTH checks.**
+**THIS CHECK IS NOT OPTIONAL. Do NOT skip it. Do NOT proceed to 4b without running this check.**
 
-Run two checks. If EITHER returns a match, SKIP this opportunity entirely — do NOT create a task or draft.
+Note: CRM task deduplication is already handled in Step 2 by fetching `taskTargets` and filtering client-side. This step only checks the notification service.
 
-**Check 1 — Query notification service for existing drafts by opportunity ID:**
+**Query notification service for existing drafts by opportunity ID:**
 
 ```bash
 curl -s -X GET "https://notifications.psquared.dev/drafts?crmOpportunityId=[opportunityId]&pageSize=1" \
   -H "Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER"
 ```
 
-If the response contains any drafts (array length > 0, regardless of status) → **SKIP**.
+If the response contains any drafts (array length > 0, regardless of status) → **SKIP**. Announce: `SKIP: [Company Name] — draft already exists`
 
-**Check 2 — Query CRM for existing tasks linked to this opportunity:**
-
-```bash
-curl -s -X POST https://crm.psquared.dev/graphql \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
-  -d "{\"query\":\"{ taskTargets(filter: { opportunityId: { eq: \\\"[opportunityId]\\\" } }, first: 1) { totalCount } }\"}"
-```
-
-If totalCount > 0 → **SKIP**.
-
-**If EITHER check finds an existing draft or task → SKIP. Announce:** `SKIP: [Company Name] — draft already exists`
-
-**Only proceed to 4b if BOTH checks return zero results.**
+**Only proceed to 4b if no drafts found.**
 
 ### 4b — Create CRM Task
 
