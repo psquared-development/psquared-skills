@@ -1,0 +1,213 @@
+---
+name: find-leads
+description: "Find new B2B leads in Germany/Austria for InboxMate outreach. Validates each lead against legal requirements (UWG/TKG), checks email is publicly visible, documents justification, and adds to CRM. Pass the number of leads to find as a parameter."
+---
+
+# Find New Leads for InboxMate
+
+> **Announce:**
+> ```
+> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+> Lead Finder started.
+> Target: [N] new leads
+> Checking environment...
+> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+> ```
+
+---
+
+## Legal Context — READ THIS FIRST
+
+B2B cold email in Germany and Austria is a legal grey area. The strict reading of UWG §7 (Germany) and TKG §174 (Austria) says prior consent is required. However, the prevailing practical interpretation (used by thousands of companies daily) allows individual B2B outreach IF certain conditions are met.
+
+**Our position:** We send individually crafted, genuinely valuable emails (with a working demo built for their company). This is not spam. But we MUST document why each lead qualifies for outreach.
+
+**Every lead MUST pass ALL of these checks:**
+
+### The 7 Qualification Criteria
+
+| # | Criterion | What to check | Why it matters |
+|---|-----------|---------------|----------------|
+| 1 | **B2B only** | Company, not a private person | Consumer protection is stricter |
+| 2 | **Objectively relevant** | Company would genuinely benefit from a chatbot (has website traffic, customer-facing business) | UWG requires the offer to be relevant to the recipient's business |
+| 3 | **Publicly available email** | Email found on their public website (contact page, imprint, team page) — NOT scraped from LinkedIn, purchased lists, or leaked databases | Data source must be GDPR-compliant (publicly made available by the company itself) |
+| 4 | **Specific contact person** | Email goes to a named person with decision authority (founder, CEO, marketing lead, head of sales) — NOT info@, office@, or generic addresses | Shows individual outreach, not bulk |
+| 5 | **Genuine value offer** | We built something specifically for them (a demo) — not a generic pitch | Differentiates from spam |
+| 6 | **Not already in CRM** | Company doesn't already exist in our CRM | No duplicate outreach |
+| 7 | **Website is active** | Website loads, has real content, is maintained (copyright not 2+ years old) | No dead businesses |
+
+**If ANY criterion fails → SKIP the lead. Do not add to CRM.**
+
+---
+
+## STEP 0 — Check Environment
+
+**Read `.env` using the Read tool.** Required tokens:
+- **CRM API** — contains "CRM" + "TOKEN"
+
+> **Once verified:** `Environment OK. Starting lead search...`
+
+---
+
+## STEP 1 — Search for Leads
+
+Use WebSearch to find German and Austrian businesses that would benefit from an AI chatbot on their website.
+
+**Search strategies (rotate between these):**
+- `"[industry] Unternehmen" site:.de OR site:.at`
+- `"[industry] GmbH" Kontakt Email`
+- `"Geschäftsführer" "[industry]" site:.de`
+- `"Immobilienmakler" OR "Versicherungsmakler" OR "Steuerberater" OR "Rechtsanwalt" site:.at`
+- Industry-specific: real estate agencies, insurance brokers, IT consultancies, marketing agencies, SaaS companies, e-commerce shops, dental practices, law firms, accounting firms
+
+**Good target industries for InboxMate:**
+- Real estate (Immobilien) — high inquiry volume, FAQ-heavy
+- Insurance/finance — customer questions, lead qualification
+- IT services / MSPs — support requests, product questions
+- Marketing/digital agencies — client communication, onboarding
+- SaaS/software companies — customer support, feature questions
+- Professional services (law, tax, consulting) — initial consultations
+- E-commerce — product questions, order support
+- Healthcare (dental, physio) — appointment scheduling, FAQ
+
+**Bad targets (skip):**
+- Very small sole proprietors with no website
+- Government / public institutions
+- Non-profits (unless large)
+- Companies that clearly don't need a chatbot (e.g., heavy industry, agriculture)
+
+---
+
+## STEP 2 — Validate Each Lead
+
+For each potential lead found:
+
+### 2a — Check the website (WebFetch)
+
+Visit their website. Verify:
+- Website loads and is active
+- Content is current (check copyright year, last blog post, news)
+- Company does customer-facing business (not just B2B wholesale with no public presence)
+- They DON'T already have a chatbot on their site (check for chat widgets in the HTML)
+
+**Skip if:** website is down, parked, outdated (2+ years old copyright), or already has a chatbot.
+
+### 2b — Find a contact person with email
+
+Look for contact information on:
+1. `/kontakt` or `/contact` page
+2. `/impressum` or `/imprint` page
+3. `/team` or `/ueber-uns` page
+4. Footer of the homepage
+
+**What we need:**
+- Full name of a decision maker (Geschäftsführer, CEO, Marketing-Leiter, Head of Sales)
+- Their email address — must be visible on the company's PUBLIC website
+- Their role/title
+
+**Email rules:**
+- MUST be a personal email (vorname@firma.de or v.nachname@firma.de)
+- MUST be found on the company's own website (screenshot/note the exact page)
+- Must NOT be from a purchased list, LinkedIn scrape, or any third-party source
+- Generic emails (info@, office@, kontakt@) are acceptable ONLY if no personal email is available AND you also found a specific contact name on the site
+
+### 2c — Determine relevance
+
+Write a 1-2 sentence justification for why InboxMate would be valuable for this specific company. Reference something concrete:
+- "High-traffic real estate listing site with FAQ section that could be automated"
+- "IT consultancy with complex service portfolio — chatbot could pre-qualify leads"
+- "Marketing agency with multiple service pages — visitors need guidance to the right offering"
+
+### 2d — Check CRM for duplicates
+
+Query the CRM to see if this company already exists:
+
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -d "{\"query\":\"{ companies(filter: { domainName: { primaryLinkUrl: { like: \\\"%[domain]%\\\" } } }, first: 1) { totalCount } }\"}"
+```
+
+**If totalCount > 0 → SKIP. Already in CRM.**
+
+---
+
+## STEP 3 — Add Qualified Lead to CRM
+
+For each lead that passes ALL 7 criteria:
+
+### 3a — Create Company
+
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -d "{\"query\":\"mutation { createCompany(data: { name: \\\"[Company Name]\\\", domainName: { primaryLinkUrl: \\\"https://[domain]\\\" } }) { id name } }\"}"
+```
+
+### 3b — Create Person (contact)
+
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -d "{\"query\":\"mutation { createPerson(data: { name: { firstName: \\\"[First]\\\", lastName: \\\"[Last]\\\" }, emails: { primaryEmail: \\\"[email]\\\" }, companyId: \\\"[companyId]\\\", jobTitle: \\\"[Role/Title]\\\" }) { id } }\"}"
+```
+
+### 3c — Create Note with justification
+
+Create a note on the company explaining:
+- Where the email was found (exact URL)
+- Why InboxMate is relevant for this company
+- Which qualification criteria were checked
+
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -d "{\"query\":\"mutation { createNote(data: { title: \\\"Lead Qualification: [date]\\\\n\\\\nEmail source: [URL where email was found]\\\\nContact: [Name], [Role]\\\\nRelevance: [1-2 sentence justification]\\\\nChecks: B2B ✓, Relevant ✓, Public email ✓, Named contact ✓, Value offer ✓, Not in CRM ✓, Active website ✓\\\" }) { id } }\"}"
+```
+
+Link note to company:
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -d "{\"query\":\"mutation { createNoteTarget(data: { noteId: \\\"[noteId]\\\", companyId: \\\"[companyId]\\\" }) { id } }\"}"
+```
+
+> **Announce after each:** `Added: [Company Name] — [contact email] — [1-line reason]`
+
+---
+
+## STEP 4 — Report
+
+> **Announce:**
+> ```
+> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+> Lead Finder complete.
+>
+> Added: [N]
+>   - [Company A] — [email] — [reason]
+>   - [Company B] — [email] — [reason]
+>
+> Skipped: [M]
+>   - [Company C] — already in CRM
+>   - [Company D] — no personal email found
+>   - [Company E] — already has chatbot
+>
+> Next step: Run /create-demo-for-crm-lead to build demos
+> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+> ```
+
+---
+
+## Important Reminders
+
+- **Quality over quantity.** 5 well-qualified leads are worth more than 50 questionable ones.
+- **Document everything.** The note on each company is your legal paper trail.
+- **Only public emails.** If you can't find an email on their website, skip the lead.
+- **Rotate industries.** Don't search for 10 real estate companies in a row — diversify.
+- **Check for chatbots.** If they already have Intercom/Drift/Zendesk/HubSpot chat, skip — they're already served.
+- **DACH focus.** Only Germany (.de) and Austria (.at) domains for now.
