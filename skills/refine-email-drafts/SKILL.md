@@ -32,7 +32,7 @@ The notification service at `notifications.psquared.dev` stores email drafts tha
 ## STEP 0 — Check Environment
 
 **Read `.env` using the Read tool** (do NOT `source` it). Extract:
-- **`EMAIL_DRAFT_ONLY_BEARER`** — bearer token for the notification service draft API
+- **`EMAIL_DRAFT_ONLY_BEARER`** — bearer token for the notification service draft API. This token can **read, create, and update** drafts but **cannot send, schedule, or delete** them. Sending is human-only via the admin UI.
 
 The notification service base URL is `https://notifications.psquared.dev`.
 

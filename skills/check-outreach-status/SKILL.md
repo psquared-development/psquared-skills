@@ -19,13 +19,11 @@ description: "Check status of sent demo outreach emails. Creates follow-up draft
 
 Read `.env` in the current directory and source it.
 
-Required tokens (variable names should be obvious from context):
-- **CRM API** — contains "CRM" + "TOKEN"
-- **Notification Service Draft API** — contains "DRAFT" and "TOKEN" or "BEARER"
+Required tokens:
+- **`PSQUARED_CRM_TOKEN`** — CRM GraphQL API
+- **`EMAIL_DRAFT_ONLY_BEARER`** — notification service draft API (can read, create, update drafts — cannot send)
 
 Stop if missing.
-
-**Note:** Throughout this skill, `$<CRM_TOKEN_VAR>` and `$<DRAFT_TOKEN_VAR>` mean "use the actual variable name from `.env`."
 
 > **Once verified:** `Environment OK. Checking sent outreach...`
 
@@ -38,7 +36,7 @@ Query CRM for opportunities with `demoStatus = SENT`:
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d '{"query":"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: SENT } }, first: 50) { edges { node { id name outreachSentAt demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } people(first: 5) { edges { node { id name { firstName lastName } emails { primaryEmail } } } } } } } } }"}'
 ```
 
@@ -92,7 +90,7 @@ The follow-up uses the same template shell as outreach. Write a shorter, more ca
 ```bash
 curl -s -X POST https://notifications.psquared.dev/drafts/create \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<DRAFT_TOKEN_VAR>" \
+  -H "Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER" \
   -d '{
     "templateId": "[followup template UUID from step 3]",
     "locale": "[de|en]",

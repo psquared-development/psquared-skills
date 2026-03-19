@@ -59,13 +59,11 @@ Don't give away the punchline. "[Company] — etwas für euch gebaut" beats "[Co
 
 **Read `.env` using the Read tool** (do NOT `source` it — values may contain semicolons or special characters that break shell parsing). Extract the token values by reading the file content directly.
 
-The `.env` file should contain tokens for:
-- **CRM API** — for querying opportunities and creating tasks (variable name should contain "CRM" + "TOKEN")
-- **Notification Service Draft API** — for creating email drafts (variable name should contain "DRAFT" and "TOKEN" or "BEARER")
+The `.env` file should contain:
+- **`PSQUARED_CRM_TOKEN`** — for querying opportunities and creating tasks
+- **`EMAIL_DRAFT_ONLY_BEARER`** — for creating email drafts via the notification service. This token can **read, create, and update** drafts but **cannot send, schedule, or delete** them.
 
-If the `.env` file is missing or doesn't contain recognizable tokens for both services, **stop immediately** and ask the user to provide them.
-
-**Note on env var placeholders:** Throughout this skill, `$<CRM_TOKEN_VAR>` and `$<DRAFT_TOKEN_VAR>` mean "use the actual variable name you found in `.env`." Substitute with the real variable names when running commands. Set them inline in each bash command (e.g., `CRM_TOKEN="value" && curl ...`).
+If the `.env` file is missing either token, **stop immediately** and ask the user to provide them.
 
 > **Once verified, announce:** `Environment OK. Checking demo readiness...`
 
@@ -100,7 +98,7 @@ Query CRM for ANY opportunities at SCREENING stage with `demoStatus = PENDING_RE
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d "{\"query\":\"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: PENDING_REVIEW } }, first: 5) { edges { node { id name } } } }\"}"
 ```
 
@@ -124,7 +122,7 @@ Query CRM for opportunities with `demoStatus = OK_TO_SEND`:
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d "{\"query\":\"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: OK_TO_SEND } }, first: 50) { edges { node { id name demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } people(first: 5) { edges { node { id name { firstName lastName } emails { primaryEmail } } } } } } } } }\"}"
 ```
 
@@ -174,7 +172,7 @@ Use the matching UUID above.
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d "{\"query\":\"mutation { createTask(data: { title: \\\"Send initial outreach for Demo [Company Name]\\\", status: TODO }) { id } }\"}"
 ```
 
@@ -185,7 +183,7 @@ Then link to opportunity:
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d "{\"query\":\"mutation { createTaskTarget(data: { taskId: \\\"[taskId]\\\", opportunityId: \\\"[opportunityId]\\\" }) { id } }\"}"
 ```
 
@@ -207,7 +205,7 @@ For EACH company, before writing any text, check for prior communication:
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d "{\"query\":\"{ people(filter: { companyId: { eq: \\\"[companyId]\\\" } }, first: 5) { edges { node { emails { primaryEmail } } } } }\"}"
 ```
 
@@ -216,7 +214,7 @@ Then check if we have email threads with any of those email addresses in the age
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d "{\"query\":\"{ noteTargets(filter: { companyId: { eq: \\\"[companyId]\\\" } }, first: 20) { edges { node { note { title body } } } } }\"}"
 ```
 
@@ -249,7 +247,7 @@ Look at the note/email content for "du/dir/dein" vs "Sie/Ihnen/Ihr" patterns.
 ```bash
 curl -s -X POST https://notifications.psquared.dev/drafts/create \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<DRAFT_TOKEN_VAR>" \
+  -H "Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER" \
   -d '{
     "templateId": "[template UUID from step 3]",
     "locale": "[de|en]",
