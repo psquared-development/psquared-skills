@@ -240,9 +240,10 @@ The `OPENBRAND_API_KEY` is in the `.env` file (read it at startup along with the
 
 **How to pick the color:**
 1. Use the color with `"usage": "primary"` from the response
-2. If the primary color is too light (e.g. white, very pale), use the `secondary` color instead
-3. If OpenBrand returns an error or no colors, fall back to manual extraction from CSS/HTML
-4. If the primary color looks washed out for a widget accent (very light pastel), prefer the darkest non-white color returned
+2. **NEVER use pure black (`#000000`) or pure white (`#ffffff`)** as the widget color — even if it's the brand's primary. These look broken in the widget. If the primary is black or white, use the `secondary` color instead.
+3. If the primary color is too light (very pale pastel) or too dark (near-black), use the next best color from the response
+4. If OpenBrand returns an error or no colors, fall back to manual extraction from CSS/HTML
+5. If the primary color looks washed out for a widget accent, prefer the darkest non-white, non-black color returned
 
 > **Also grab the logo URL** from `data.logos` — use the highest-resolution one as `logoUrl` in the demo page.
 
@@ -568,7 +569,7 @@ Run through this checklist mentally before Phase 5:
 - [ ] Greeting message references the product or company name
 - [ ] Quick questions use card format (objects with text, title, description, icon) — NOT plain strings
 - [ ] Quick questions would make a real prospect click them
-- [ ] Primary color matches the company brand
+- [ ] Primary color matches the company brand — NOT pure black (`#000000`) or pure white (`#ffffff`)
 - [ ] At least 4 knowledge items covering: overview, services, pricing/FAQ, contact
 - [ ] **Every knowledge item has a `sourceUrl`** — the exact page URL it was scraped from (enables source citations in chat)
 - [ ] If multi-lang: DE and EN questions both filled, greeting in both languages

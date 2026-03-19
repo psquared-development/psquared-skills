@@ -94,7 +94,7 @@ curl "https://openbrand.sh/api/extract?url=https://[domain]" \
   -H "Authorization: Bearer $OPENBRAND_API_KEY"
 ```
 
-Use the `primary` color from the response. If too light, use `secondary`. Then update:
+Use the `primary` color from the response. **Never use pure black (`#000000`) or pure white (`#ffffff`)** — if primary is black/white, use `secondary`. If too light or too dark, pick the next best color. Then update:
 
 ```json
 {
