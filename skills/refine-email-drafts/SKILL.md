@@ -1,6 +1,6 @@
 ---
 name: refine-email-drafts
-description: "Process change requests on InboxMate email drafts. Reads drafts with pending change requests from the notification service, applies the requested changes to the email HTML, and updates the drafts. Run after adding change requests via the admin UI."
+description: "Process change requests on InboxMate email drafts. Reads drafts with pending change requests from the notification service API, applies the requested changes to the email HTML, and updates the drafts. Run after adding change requests via the admin UI."
 ---
 
 # Refine Email Drafts
@@ -32,14 +32,9 @@ The notification service at `notifications.psquared.dev` stores email drafts tha
 ## STEP 0 — Check Environment
 
 **Read `.env` using the Read tool** (do NOT `source` it). Extract:
-- **Notification Service Admin Token** — the main BEARER_TOKEN for the notification service (variable name should contain "BEARER" but NOT "DRAFT"). This is needed to read and update drafts via the admin API.
+- **`EMAIL_DRAFT_ONLY_BEARER`** — bearer token for the notification service draft API
 
-If the main bearer token is not available, you can use the Supabase MCP to query drafts directly:
-```
-Use mcp__plugin_supabase_supabase__execute_sql with:
-  project_id: "fyqbhpwqlamjhoohkldu"
-  query: SELECT id, subject, html_body, change_request, recipient_email, crm_company_name FROM email_drafts WHERE status = 'DRAFT' AND change_request IS NOT NULL ORDER BY created_at DESC
-```
+The notification service base URL is `https://notifications.psquared.dev`.
 
 > **Once verified:** `Environment OK. Finding drafts with change requests...`
 
@@ -47,15 +42,24 @@ Use mcp__plugin_supabase_supabase__execute_sql with:
 
 ## STEP 1 — Find Drafts with Change Requests
 
-Query for all DRAFT-status emails that have a non-null `change_request`:
+Query the notification service API for DRAFT-status emails with change requests:
 
-```
-Use mcp__plugin_supabase_supabase__execute_sql with:
-  project_id: "fyqbhpwqlamjhoohkldu"
-  query: SELECT id, subject, html_body, text_body, change_request, recipient_email, crm_company_name, locale FROM email_drafts WHERE status = 'DRAFT' AND change_request IS NOT NULL AND change_request != '' ORDER BY created_at DESC
+```bash
+curl -s -X GET "https://notifications.psquared.dev/drafts?status=DRAFT&hasChangeRequest=true&pageSize=50" \
+  -H "Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER"
 ```
 
-If none found, announce "No drafts with change requests" and stop.
+This returns `{ success: true, data: { data: [...], total: N } }`. Each draft object contains:
+- `id` — draft UUID
+- `subject` — email subject
+- `html_body` — full rendered HTML
+- `text_body` — plain text version
+- `change_request` — the requested change (string)
+- `recipient_email` — recipient
+- `crm_company_name` — company name
+- `locale` — de or en
+
+If none found (empty array or total=0), announce "No drafts with change requests" and stop.
 
 > **Announce:**
 > ```
@@ -102,22 +106,24 @@ After making changes:
 
 ### 2d — Save the updated draft
 
-Update the draft via Supabase:
+Update the draft via the notification service API:
 
-```
-Use mcp__plugin_supabase_supabase__execute_sql with:
-  project_id: "fyqbhpwqlamjhoohkldu"
-  query: UPDATE email_drafts SET html_body = '[updated HTML]', change_request = NULL, updated_at = now() WHERE id = '[draftId]'
+```bash
+curl -s -X PUT "https://notifications.psquared.dev/drafts/[draftId]" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER" \
+  -d '{"html_body": "[updated HTML]", "change_request": null}'
 ```
 
-**Important:** Set `change_request = NULL` after applying — this marks it as processed.
+**Important:** Set `change_request` to `null` after applying — this marks it as processed.
 
 If the change request also affects the subject:
+```bash
+curl -s -X PUT "https://notifications.psquared.dev/drafts/[draftId]" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER" \
+  -d '{"html_body": "[updated HTML]", "subject": "[new subject]", "change_request": null}'
 ```
-  query: UPDATE email_drafts SET html_body = '[updated HTML]', subject = '[new subject]', change_request = NULL, updated_at = now() WHERE id = '[draftId]'
-```
-
-**SQL escaping:** Single quotes in the HTML must be doubled (`'` → `''`).
 
 > **Announce after each:** `Refined: [Company] — applied "[change request]"`
 
