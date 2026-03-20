@@ -40,9 +40,11 @@ See [PIPELINE.md](./PIPELINE.md) for full documentation.
 | [find-leads](./skills/find-leads/SKILL.md) | Find N new qualified DE/AT leads — legal checks, public email validation, CRM entry with justification |
 | [check-demo-analytics](./skills/check-demo-analytics/SKILL.md) | Query Ackee + CRM for demo page visits, conversions, pipeline health |
 
-### Other Skills
+### Operations
 
-_(Add non-pipeline skills here as they're created)_
+| Skill | Description |
+|-------|-------------|
+| [price-change](./skills/price-change/SKILL.md) | Change InboxMate pricing, features, or campaign coupons across all touchpoints (website, app, docs, terms, Stripe, demo page) |
 
 ## Contributing
 
