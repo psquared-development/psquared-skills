@@ -154,8 +154,8 @@ If the **Countdown set** check FAILED (missing `offerExpiresAt`, expired date, o
 
 **Determine the correct offer text:**
 - The text should describe a time-limited offer that fits the countdown premise
-- Good examples (DE): "Jetzt starten und 50% Rabatt im ersten Jahr sichern", "Ihren KI-Assistenten jetzt aktivieren — Sonderkonditionen sichern"
-- Good examples (EN): "Start now and save 50% in your first year", "Activate your AI assistant now — special terms available"
+- Good examples (DE): "Jetzt starten und bis zu 50% Rabatt im ersten Jahr sichern", "Ihren KI-Assistenten jetzt aktivieren — Sonderkonditionen sichern"
+- Good examples (EN): "Start now and save up to 50% in your first year", "Activate your AI assistant now — special terms available"
 - **Never** use "Kostenlose Erstberatung" — the countdown is for an offer deadline, not a consultation
 
 **Apply the fix** — update the `demo_pages` table directly via Supabase:

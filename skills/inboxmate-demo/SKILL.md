@@ -282,8 +282,8 @@ Wait for the user's answer. Convert their response to an ISO 8601 date for `offe
 **What the offer IS:** A time-limited discount or special deal for signing up to InboxMate (the chatbot product). The countdown shows when this deal expires.
 
 **Use one of these patterns:**
-- DE: `"Jetzt starten und 50% Rabatt sichern"` / `"Sonderkonditionen für Ihren KI-Chatbot — nur bis [date]"` / `"Ihren KI-Assistenten jetzt aktivieren — exklusive Konditionen"`
-- EN: `"Start now and save 50% in your first year"` / `"Special pricing for your AI chatbot — limited time"` / `"Activate your AI assistant — exclusive terms available"`
+- DE: `"Jetzt starten und bis zu 50% Rabatt sichern"` / `"Sonderkonditionen für Ihren KI-Chatbot — nur bis [date]"` / `"Ihren KI-Assistenten jetzt aktivieren — exklusive Konditionen"`
+- EN: `"Start now and save up to 50% in your first year"` / `"Special pricing for your AI chatbot — limited time"` / `"Activate your AI assistant — exclusive terms available"`
 
 - **customMessage**: 1–2 sentences speaking directly to the prospect: "Wir haben diesen Demo-Bot speziell für [Company] konfiguriert. Probier ihn aus!"
 

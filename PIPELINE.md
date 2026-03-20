@@ -111,14 +111,14 @@ Run this skill periodically to get a full pipeline health report. It queries Ack
 ### What happens automatically on signup
 
 1. Demo agent cloned into prospect's account
-2. 50% first-year discount applied (via `demo_source_id`)
+2. Exclusive first-year discount applied (up to 50%, varies by plan, via `demo_source_id`)
 3. CRM opportunity → `PROPOSAL` stage
 4. CRM note: "Prospect signed up — account: [name]"
 5. Telegram alert sent to team 🔔
 
 ### Trial lifecycle (automatic)
 
-- **3 days before expiry:** Branded reminder email (InboxMate template, mentions 50% discount)
+- **3 days before expiry:** Branded reminder email (InboxMate template, mentions exclusive demo discount)
 - **1 day before expiry:** "Last chance" reminder email
 - **On expiry:** Account downgraded to free tier, Telegram notification
 
