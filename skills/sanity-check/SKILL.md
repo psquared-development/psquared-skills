@@ -41,9 +41,13 @@ Ask the user what to check. Options:
 
 **C) Specific opportunity IDs** — user provides a list
 
-### Querying CRM
+**D) Specific draft IDs** — user provides draft UUIDs from the notification service
 
-For options A/B, query the CRM to collect opportunity IDs:
+**E) Campaign ID** — user provides a CRM campaign UUID
+
+### Querying CRM (for option A only)
+
+For option A, query the CRM to collect opportunity IDs:
 
 ```
 POST https://crm.psquared.dev/graphql
@@ -61,7 +65,9 @@ Collect all `id` values from the response.
 
 ## STEP 2 — Run Sanity Check via Notification Service
 
-Call the sanity check endpoint with the collected opportunity IDs:
+The endpoint accepts **three input formats** — use whichever matches the user's input. The backend resolves everything to demo page IDs internally.
+
+### Option 1: By CRM opportunity IDs
 
 ```
 POST https://notifications.psquared.dev/drafts/sanity-check
@@ -73,11 +79,40 @@ Content-Type: application/json
 }
 ```
 
-**Max 200 IDs per request.** If more than 200, batch into multiple calls.
+### Option 2: By campaign ID
+
+```
+POST https://notifications.psquared.dev/drafts/sanity-check
+Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER
+Content-Type: application/json
+
+{
+  "campaign_id": "campaign-uuid"
+}
+```
+
+The backend resolves the campaign → all linked opportunity IDs via CRM, then checks each.
+
+### Option 3: By draft IDs
+
+```
+POST https://notifications.psquared.dev/drafts/sanity-check
+Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER
+Content-Type: application/json
+
+{
+  "draft_ids": ["draft-uuid1", "draft-uuid2", ...]
+}
+```
+
+The backend resolves draft IDs → `crm_opportunity_id` from the drafts table, then checks each.
+
+**Max 200 IDs per request.** If more than 200, batch into multiple calls. Only provide ONE of the three fields per request.
 
 The endpoint:
-1. Resolves each CRM opportunity → demo page ID (via CRM `demoId` field)
-2. Calls the agenthub Supabase RPC to validate each demo agent
+1. Resolves input → CRM opportunity IDs (if not already)
+2. Resolves each CRM opportunity → demo page ID (via CRM `demoId` field)
+3. Calls the agenthub Supabase RPC to validate each demo agent
 3. Returns results mapped back to CRM opportunity IDs
 
 ### Response format
