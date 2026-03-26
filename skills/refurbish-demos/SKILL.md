@@ -1,18 +1,18 @@
 ---
 name: refurbish-demos
-description: "Upgrade demo agent knowledge for a campaign — clears old summaries, scrapes real pages via MCP+Tavily, falls back to WebFetch for failures, republishes agents. Pass campaignId as parameter."
+description: "Upgrade demo agent knowledge — clears old summaries, scrapes real pages via MCP Tavily (advanced mode), falls back to WebFetch, fixes icons, republishes. Pass campaignId or 'all-sent' as parameter."
 ---
 
 # Refurbish Demos
 
-Upgrade demo agent knowledge from old AI-written summaries to properly scraped page content with real sourceUrls.
+Upgrade demo agent knowledge from old AI-written summaries to properly scraped page content with real sourceUrls. Each knowledge item becomes a URL-type entry with the actual page URL, so the chatbot can cite specific pages in its answers.
 
-**Parameter:** campaignId (required) — the CRM campaign ID to process.
+**Parameter:** `campaignId` (CRM campaign ID) or `all-sent` (all demos where outreach was sent)
 
 > **Announce:**
 > ```
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-> Refurbish Demos — upgrading knowledge for campaign
+> Refurbish Demos — upgrading knowledge
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > ```
 
@@ -21,19 +21,48 @@ Upgrade demo agent knowledge from old AI-written summaries to properly scraped p
 ## Environment
 
 Read from `.env` in the working directory:
-- `INBOXMATE_DEMO_MCP_TOKEN` — Bearer token for InboxMate MCP
+- `INBOXMATE_DEMO_MCP_TOKEN` — Bearer token for InboxMate MCP (contains `#` character — use curl, not Python urllib)
 - `PSQUARED_CRM_TOKEN` — Bearer token for Twenty CRM
 
 **MCP endpoint:** `https://app.psquared.dev/api/mcp`
 **CRM endpoint:** `https://crm.psquared.dev/graphql`
+**Demo API:** `https://app.psquared.dev/api/demo/{demoId}`
+**Supabase project:** `fevtfywriufbqnvbgyrm` (for direct DB queries when needed)
+**Demo account ID:** `8942a6e5-91cb-4c5d-8ef5-98cfe7945620`
+
+### MCP Call Template
+
+All MCP calls use this pattern (use curl, NOT Python urllib — the token contains `#`):
+
+```bash
+curl -s --max-time 120 -X POST https://app.psquared.dev/api/mcp \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INBOXMATE_DEMO_MCP_TOKEN" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"TOOL_NAME","arguments":{...}}}'
+```
+
+### Available MCP Tools
+
+| Tool | Purpose |
+|---|---|
+| `cleanup_agent` | Wipe all knowledge from agent's buckets + delete orphaned buckets in demo account |
+| `clear_bucket` | Remove all items from a specific bucket |
+| `scrape_and_build_knowledge` | Scrape URLs via Tavily (advanced mode), create URL-type knowledge items. Max 10 URLs per call. Returns `{ created: [], failed: [] }` |
+| `add_to_bucket` | Manually add knowledge item. If `sourceUrl` is provided, creates URL-type entry |
+| `get_agent` | Get agent config (check knowledgeBucketIds, buttonIcon) |
+| `list_bucket_items` | List items in a bucket (verify results) |
+| `update_widget_style` | Fix buttonIcon or other widget config |
+| `publish_agent` | Republish agent (required after knowledge changes) |
 
 ---
 
-## PHASE 1 — Fetch Campaign Opportunities
+## PHASE 1 — Build Work List
 
-> **Announce:** `[1/5] Fetching opportunities for campaign...`
+> **Announce:** `[1/4] Building work list...`
 
-Query CRM for all opportunities linked to the campaign:
+### Option A: By campaign ID
+
+Query CRM for opportunities in the campaign:
 
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
@@ -42,163 +71,198 @@ curl -s -X POST https://crm.psquared.dev/graphql \
   -d "{\"query\":\"{ opportunities(filter: { campaignId: { eq: \\\"CAMPAIGN_ID\\\" } }, first: 150) { edges { node { id name demoStatus demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } } } } } }\"}"
 ```
 
-From each opportunity extract:
-- `demoUrl.primaryLinkUrl` → parse out the `?id=` param to get `demoId`
-- `company.domainName.primaryLinkUrl` → the company domain
-- `company.name` → for logging
-- `demoStatus` → skip anything that's `SKIP_*` or `DISQUALIFIED`
+### Option B: All sent demos
 
-**Filter:** Only process opportunities where `demoStatus` is one of: `OK_TO_SEND`, `SENT`, `FOLLOW_UP_SENT`, `PENDING_REVIEW`, `NEEDS_FIX`. Skip all `SKIP_*` and `DISQUALIFIED`.
+Get sent email drafts from notification service, extract demo IDs, then look up agents:
 
----
+```bash
+curl -s "https://notifications.psquared.dev/drafts?status=SENT&draftType=outreach&pageSize=200" \
+  -H "Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER"
+```
 
-## PHASE 2 — Get Agent & Bucket Info
+Extract `demoUrl` from each draft's variables, parse the `?id=` param to get demoId.
 
-> **Announce:** `[2/5] Looking up agents and knowledge buckets...`
-
-For each opportunity's demoId, fetch the demo data:
+### For each demo ID, fetch agent info:
 
 ```bash
 curl -s https://app.psquared.dev/api/demo/DEMO_ID
+# Returns: { agentId, companyName, companyDomain, ... }
 ```
 
-This returns `{ agentId, companyName, companyDomain, ... }`.
-
-Then get the agent's knowledge bucket via MCP:
-
+Then get bucket ID:
 ```json
 {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_agent","arguments":{"agentId":"AGENT_ID"}}}
 ```
+Extract `knowledgeBucketIds[0]`.
 
-Extract `knowledgeBucketIds[0]` — this is the bucket to clear and rebuild.
+**Filter out:** `demoStatus` = `SKIP_*`, `DISQUALIFIED`. Skip demos without `companyDomain`.
 
-**Build a work list:** `[ { companyName, companyDomain, agentId, bucketId, demoId } ]`
+**Build:** `[ { companyName, companyDomain, agentId, bucketId, demoId } ]`
 
 Announce: `Found N demos to refurbish.`
 
 ---
 
-## PHASE 3 — Determine Pages to Scrape
+## PHASE 2 — Discover Pages Per Company
 
-> **Announce:** `[3/5] Planning scrape targets for each company...`
+> **Announce:** `[2/4] Discovering pages to scrape...`
 
-For each company, determine 4-6 URLs to scrape. Use the company domain to build the list:
+For each company, determine the best URLs to scrape.
 
-1. **Homepage:** `https://DOMAIN/`
-2. **Common subpages** — try these patterns based on what German business sites typically have:
-   - `/kontakt/` or `/contact/`
-   - `/leistungen/` or `/services/` or `/angebot/`
-   - `/ueber-uns/` or `/about/` or `/unternehmen/`
-   - `/faq/` or `/haeufige-fragen/`
-   - `/team/`
-   - `/preise/` or `/pricing/`
-   - `/produkte/` or `/products/`
-   - `/standorte/` or `/filialen/`
+### Quick approach (batch mode, ~5 URLs per company):
 
-**Do NOT scrape blindly.** First, WebFetch the homepage and look at the navigation links to find the actual subpage URLs. Extract 3-5 real links from the nav/footer. This is more reliable than guessing paths.
+Use the domain + common German business site patterns:
 
-**Budget:** ~4-6 pages per company. Stay under 10 URLs per `scrape_and_build_knowledge` call.
+```
+https://www.{domain}/
+https://www.{domain}/kontakt/
+https://www.{domain}/ueber-uns/
+https://www.{domain}/leistungen/
+https://www.{domain}/impressum/
+```
+
+**Important:** Split into 2 batches of 2-3 URLs per MCP call. Tavily advanced mode takes ~5-30s per URL. A single call with 5 URLs can hit server timeouts (120s).
+
+### Thorough approach (per-company, ~6-8 URLs):
+
+WebFetch the homepage, extract real nav/footer links, then scrape those. More reliable but slower.
+
+Some "Seite nicht gefunden" / 404 pages will be scraped — that's OK, they're low-content and won't hurt the RAG. The homepage + whatever real pages exist is what matters.
 
 ---
 
-## PHASE 4 — Clear & Rebuild Knowledge
+## PHASE 3 — Clear & Rebuild Knowledge
 
-> **Announce:** `[4/5] Rebuilding knowledge for N demos...`
+> **Announce:** `[3/4] Rebuilding knowledge for N demos...`
 
-For each company in the work list, process **one at a time**:
+Process **one company at a time**:
 
-### Step 4a: Wipe existing knowledge
-
-Clears all bucket items and standalone knowledge entries for this agent. Buckets stay linked, just emptied.
+### Step 3a: Wipe existing knowledge
 
 ```json
 {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"cleanup_agent","arguments":{"agentId":"AGENT_ID"}}}
 ```
 
-Log: `Cleanup: cleared {clearedBuckets} buckets, {deletedItems} items removed.`
+This clears the agent's buckets AND deletes all orphaned buckets in the demo account (from old demo creation flow). First call handles the global orphan cleanup.
 
-### Step 4b: Scrape and build via MCP
-
-```json
-{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"scrape_and_build_knowledge","arguments":{"bucketId":"BUCKET_ID","urls":["https://domain.de/","https://domain.de/kontakt/","https://domain.de/leistungen/","https://domain.de/ueber-uns/"]}}}
-```
-
-### Step 4c: Handle failures with WebFetch fallback
-
-For each URL in the `failed` array from scrape_and_build_knowledge:
-
-1. WebFetch the URL yourself
-2. If you get content, call `add_to_bucket` via MCP:
+### Step 3b: Scrape via MCP (batch 1)
 
 ```json
-{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"add_to_bucket","arguments":{"bucketId":"BUCKET_ID","title":"Page Title","content":"[scraped content]","sourceUrl":"https://domain.de/kontakt/"}}}
+{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"scrape_and_build_knowledge","arguments":{"bucketId":"BUCKET_ID","urls":["https://www.domain.de/","https://www.domain.de/kontakt/"]}}}
 ```
 
-**Content rules for manual add_to_bucket:**
-- Content should be the full page text, not a summary
+### Step 3c: Scrape via MCP (batch 2)
+
+```json
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"scrape_and_build_knowledge","arguments":{"bucketId":"BUCKET_ID","urls":["https://www.domain.de/ueber-uns/","https://www.domain.de/leistungen/","https://www.domain.de/impressum/"]}}}
+```
+
+### Step 3d: Handle failures with WebFetch fallback
+
+For each URL in the `failed` arrays:
+
+1. WebFetch the URL
+2. If content returned, call `add_to_bucket` with `sourceUrl` set:
+
+```json
+{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"add_to_bucket","arguments":{"bucketId":"BUCKET_ID","title":"Page Title","content":"[full page text]","sourceUrl":"https://domain.de/kontakt/"}}}
+```
+
+**Content rules:**
+- Full page text, not a summary
 - Keep headings, lists, structure
-- Remove navigation, footer, cookie banners
-- Max 20,000 characters (will be truncated if longer)
-- `sourceUrl` MUST be the actual page URL, not the domain root
+- Remove nav, footer, cookie banners
+- Max 20,000 characters
+- `sourceUrl` MUST be the actual page URL (creates URL-type knowledge entry)
 
-### Step 4d: Verify minimum knowledge
-
-After scraping, call `list_bucket_items` to verify:
-- At least 3 items created
-- Items have different `sourceUrl` values (not all the same)
-- At least one item has `embeddingStatus: "completed"` or `"pending"` (not all failed)
-
-If less than 3 items, log a warning but continue — the agent will still work, just with less knowledge.
-
-### Step 4e: Fix button icon if broken
-
-Check the agent's config for `buttonIcon`. If it's NOT one of these valid values, update it to `messageCircle`:
+### Step 3e: Fix button icon if broken
 
 Valid icons: `messageCircle`, `messageSquare`, `sparkles`, `support`, `help`, `inboxmate`, `heart`, `zap`, `globe`, `wave`, `brain`, `lightbulb`, `compass`, `star`, `shield`, `robot`, `mascot`
 
-If invalid, fix via MCP:
-```json
-{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"update_widget_style","arguments":{"agentId":"AGENT_ID","buttonIcon":"messageCircle"}}}
-```
-
-### Step 4f: Republish agent
+Any other value (e.g. `shoppingBag`, `truck`, `home`, `car`, `music`) renders as a broken circle in the widget. Fix to `messageCircle`:
 
 ```json
-{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"publish_agent","arguments":{"agentId":"AGENT_ID"}}}
+{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"update_widget_style","arguments":{"agentId":"AGENT_ID","buttonIcon":"messageCircle"}}}
 ```
 
-> **Announce per company:** `✓ {companyName}: {N} items created, {M} failed → republished`
+### Step 3f: Republish agent
+
+```json
+{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"publish_agent","arguments":{"agentId":"AGENT_ID"}}}
+```
+
+> **Log per company:** `✓ {companyName}: {N} items created, {M} failed → republished`
 
 ---
 
-## PHASE 5 — Report
+## PHASE 4 — Report
 
-> **Announce:** `[5/5] Refurbish complete.`
+> **Announce:** `[4/4] Refurbish complete.`
 
-Print a summary table:
+Print summary table:
 
 ```
-| Company | Items | Failed URLs | Icon Fixed | Status |
-|---------|-------|-------------|------------|--------|
-| Schuh Marke GmbH | 4 | 1 | yes | ✓ |
-| Mainfilm | 5 | 0 | no | ✓ |
-| ... | ... | ... | ... | ... |
+| Company | Domain | Items | Failed | Icon Fixed | Status |
+|---------|--------|-------|--------|------------|--------|
+| Schuh Marke GmbH | schuh-marke.de | 5 | 0 | yes | ✓ |
+| Mainfilm | mainfilm.tv | 5 | 0 | no | ✓ |
 ```
 
 Totals:
 - Companies processed: N
 - Knowledge items created: N
-- Failed scrapes (fell back to WebFetch): N
-- Completely failed URLs: N
+- Failed URLs: N (fell back to WebFetch: N, completely failed: N)
 - Icons fixed: N
-- Tavily credits used: ~N (only count scrape_and_build_knowledge URLs, not WebFetch fallbacks)
+- Tavily credits used: ~N (2 credits per 5 URLs at advanced mode)
 
 ---
 
-## Important Notes
+## Batch Script
 
-- **Process one company at a time.** Don't parallelize MCP calls — they share a rate limit.
-- **Don't re-scrape if already refurbished.** Check `list_bucket_items` first — if items already have diverse `sourceUrl` values (not all pointing to the domain root), skip that company.
-- **Tavily budget:** ~4 URLs per company. A campaign of 100 demos ≈ 400 Tavily credits. Stay aware of the total.
-- **WebFetch fallback is slower but free.** Use it generously for failed URLs.
-- **Always republish** after changing knowledge or fixing icons. The widget script is static — it must be regenerated.
+For large batches (100+ demos), use the Python batch script instead of processing one-by-one from Claude:
+
+```bash
+python3 -u scripts/refurbish-all.py < /tmp/worklist.json > /tmp/refurbish.log 2>&1
+```
+
+The script at `claude-overlord-folder/scripts/refurbish-all.py`:
+- Uses curl (not urllib) for MCP calls — handles `#` in auth token
+- Splits URLs into 2 batches of 2-3 to avoid server timeouts
+- Processes sequentially with 1s pause every 5 agents
+- Logs progress to stdout (use `-u` flag for unbuffered output)
+- Input: JSON array of `[{company_name, company_domain, agent_id, bucket_id}]`
+
+---
+
+## Known Issues & Workarounds
+
+### Tavily advanced mode timeouts
+Tavily `extract_depth: 'advanced'` takes up to 30s per URL. Batch 5 URLs in one MCP call = 150s, which exceeds server timeout. **Always split into batches of 2-3 URLs.**
+
+### Fallback API key
+If primary Tavily key runs out, set `NUXT_TAVILY_FALLBACK_API_KEY` in agenthub `.env`. Auto-switches on 429/402 errors.
+
+### "Seite nicht gefunden" pages
+Some scraped pages will be 404s (the generic URL patterns don't exist on every site). These are low-content and won't affect RAG quality. The homepage + real pages provide the value.
+
+### Bucket name mismatches
+Old demo creation flow sometimes linked wrong-named buckets to agents (e.g. "Autohaus Freier Wissensbasis" on a Hinzmann Elektrotechnik agent). The content is correct after refurbish — the bucket name is cosmetic. Can be fixed via SQL if needed.
+
+### Orphaned buckets
+Old demo creation left ~160 orphaned "Wissensdatenbank" buckets not linked to any agent. `cleanup_agent` deletes these. For large batches, clean up via SQL first (faster):
+
+```sql
+DELETE FROM knowledge_bucket_chunks WHERE bucket_item_id IN (
+  SELECT kbi.id FROM knowledge_bucket_items kbi
+  JOIN knowledge_buckets kb ON kb.id = kbi.bucket_id
+  WHERE kb.account_id = '8942a6e5-91cb-4c5d-8ef5-98cfe7945620'
+  AND kb.id NOT IN (SELECT unnest(knowledge_bucket_ids) FROM agents WHERE account_id = '8942a6e5-91cb-4c5d-8ef5-98cfe7945620')
+);
+-- Then delete items, then buckets (same pattern)
+```
+
+### Content length limit
+Knowledge entries allow up to 20,000 characters (was 10,000, fixed 2026-03-26). Tavily advanced mode returns more content — large pages may get truncated at 20K.
+
+### Cross-contamination
+Audit showed only 1 true case out of 152 sent demos (Dachdeckermeister Hoffmann had DBM Metallbau content). Refurbish fixes this by clearing and re-scraping based on the correct domain from the demo page.
