@@ -17,19 +17,16 @@ description: "Review InboxMate demos waiting for QA. Finds CRM opportunities at 
 
 ## STEP 0 — Check Environment
 
-Before doing anything, check if a `.env` file exists in the current working directory. Read it and source it:
+Before doing anything, check if a `.env` file exists in the current working directory. Read it using the Read tool:
 
-```bash
-source .env
-```
+> **Do NOT use `source .env`** — values may contain semicolons that break shell parsing. Read the file directly and extract the values manually.
 
-The `.env` file should contain tokens for:
-- **CRM API** — for querying and updating opportunities (variable name should be obvious, e.g. contains "CRM" and "TOKEN")
-- **InboxMate MCP API** — for auto-fixing widget styles (variable name should reference "MCP" or "DEMO" and "TOKEN")
+The `.env` file must contain all three of the following tokens:
+- **`PSQUARED_CRM_TOKEN`** — for querying and updating CRM opportunities
+- **`NUXT_MCP_DEMO_TOKEN`** — for calling the InboxMate MCP API (auto-fixing widget styles)
+- **`OPENBRAND_API_KEY`** — for extracting brand colors via the OpenBrand API (used in Step 2b2)
 
-If the `.env` file is **missing** or doesn't contain recognizable tokens for both services, **stop immediately** and ask the user to provide them.
-
-**Note on env var placeholders:** Throughout this skill, `$<CRM_TOKEN_VAR>` and `$<MCP_TOKEN_VAR>` mean "use the actual variable name you found in `.env` for the CRM token and InboxMate MCP token respectively." Substitute with the real variable names when running commands.
+If the `.env` file is **missing** or doesn't contain all three tokens, **stop immediately** and ask the user to provide them.
 
 > **Once verified, announce:** `Environment OK. Finding demos pending review...`
 
@@ -42,7 +39,7 @@ Query CRM for opportunities at SCREENING stage with demoStatus = PENDING_REVIEW:
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d '{"query":"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: PENDING_REVIEW } }, first: 50) { edges { node { id name stage demoStatus demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } } } } } }"}'
 ```
 
@@ -114,7 +111,7 @@ Score each item as PASS or FAIL:
 | **Greeting quality** | Greeting is specific to the company, not generic ("Hi! How can I help?") |
 | **Quick questions** | Questions are relevant to this company's products/services |
 | **Color match** | Widget primary color matches OpenBrand `expectedPrimaryColor`. Compare hex values — minor shade differences (e.g. `#1a365d` vs `#1e3a5f`) are OK, but completely different hues are a FAIL. |
-| **Countdown set** | `offerExpiresAt` is present AND is a future date (not null, not expired). The `offerText` should describe a time-limited offer that matches the deadline premise — NOT "Kostenlose Erstberatung" or generic text. If the CRM opportunity has a deadline mentioned in the notes, the countdown should match that deadline. |
+| **Countdown set** | `offerExpiresAt` is present AND is a future date (not null, not expired) — this is set by the campaign, not during review. The `offerText` should describe a time-limited offer — NOT "Kostenlose Erstberatung" or generic text. |
 | **Content accuracy** | Any visible knowledge snippets reference real products/services from the website |
 | **No hallucinations** | Demo doesn't mention products, pricing, or features not on the company website |
 
@@ -127,7 +124,7 @@ If the **Color match** check FAILED (widget color doesn't match OpenBrand primar
 ```bash
 curl -s -X POST https://app.psquared.dev/api/mcp \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<MCP_TOKEN_VAR>" \
+  -H "Authorization: Bearer $NUXT_MCP_DEMO_TOKEN" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"update_widget_style","arguments":{"agentId":"[agentId]","primaryColor":"[expectedPrimaryColor]"}}}'
 ```
 
@@ -136,7 +133,7 @@ curl -s -X POST https://app.psquared.dev/api/mcp \
 ```bash
 curl -s -X POST https://app.psquared.dev/api/mcp \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<MCP_TOKEN_VAR>" \
+  -H "Authorization: Bearer $NUXT_MCP_DEMO_TOKEN" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"publish_agent","arguments":{"agentId":"[agentId]"}}}'
 ```
 
@@ -148,9 +145,9 @@ curl -s -X POST https://app.psquared.dev/api/mcp \
 
 If the **Countdown set** check FAILED (missing `offerExpiresAt`, expired date, or wrong `offerText`):
 
-**Determine the correct deadline:**
-- If the CRM opportunity notes mention a specific deadline → use that date
-- Otherwise → set to 7 days from today (ISO 8601)
+> **Important:** Do NOT invent or default a deadline (e.g. "7 days from today"). Deadlines are set by campaigns — not during review. If no deadline is present in the CRM opportunity notes, flag the check as FAIL in the review note and set `NEEDS_FIX` rather than guessing a date.
+
+**Only proceed with auto-fix if** the CRM opportunity notes explicitly mention a specific deadline to use.
 
 **Determine the correct offer text:**
 - The text should describe a time-limited offer that fits the countdown premise
@@ -158,13 +155,15 @@ If the **Countdown set** check FAILED (missing `offerExpiresAt`, expired date, o
 - Good examples (EN): "Start now and save up to 50% in your first year", "Activate your AI assistant now — special terms available"
 - **Never** use "Kostenlose Erstberatung" — the countdown is for an offer deadline, not a consultation
 
-**Apply the fix** — update the `demo_pages` table directly via Supabase:
+**Apply the fix** — update the `demo_pages` table directly via Supabase SQL:
 
 ```
 Use mcp__plugin_supabase_supabase__execute_sql with:
   project_id: "fevtfywriufbqnvbgyrm"
   query: UPDATE demo_pages SET offer_text = '[corrected offerText]', offer_expires_at = '[corrected ISO date]' WHERE id = '[demoId]'
 ```
+
+> **Why raw SQL?** The InboxMate MCP does not expose an `update_demo_page` tool for campaign-managed fields like `offer_expires_at`. Direct Supabase SQL is the only way to update these fields programmatically.
 
 > **Announce:** `Auto-fixed: Updated [Company] countdown — expires [date], text: "[offerText]"`
 >
@@ -187,7 +186,7 @@ Use mcp__plugin_supabase_supabase__execute_sql with:
 # Update demoStatus
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: OK_TO_SEND, demoReviewIssues: null }) { id } }"}'
 ```
 
@@ -196,7 +195,7 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: NEEDS_FIX, demoReviewIssues: \"[Issue 1: description. Issue 2: description. Suggested fixes: ...]\" }) { id } }"}'
 ```
 

@@ -73,7 +73,7 @@ The `demoReviewIssues` field contains a text description of what failed QA. Comm
 | **knowledge** / **content** / **hallucination** | Re-scrape the company website, update/add knowledge items via MCP `add_to_bucket` |
 | **wrong company** | Critical — demo was built for wrong company. Skip and flag for manual rebuild |
 | **prompt** / **system prompt** | Rewrite system prompt based on company website, update via MCP `update_prompt` |
-| **offer** / **countdown** | Update demo page offer text/expiry via MCP `update_demo_page` |
+| **offer** / **countdown** | Campaigns manage deadlines — do not set `offerExpiresAt` or `offerText`. Skip this issue and note it in the report. |
 
 ### 2b — Fetch Company Website
 
@@ -96,13 +96,15 @@ curl "https://openbrand.sh/api/extract?url=https://[domain]" \
 
 Use the `primary` color from the response. **Never use pure black (`#000000`) or pure white (`#ffffff`)** — if primary is black/white, use `secondary`. If too light or too dark, pick the next best color. Then update:
 
+> **Note on `agentId`:** The CRM stores `demoId` (= `demo_pages.id`). To get the `agentId`, call `GET https://app.psquared.dev/api/demo/<demoId>` and read `agentId` from the response. Use that value for all MCP tool calls.
+
 ```json
 {
   "method": "tools/call",
   "params": {
     "name": "update_widget_style",
     "arguments": {
-      "agentId": "[demoId from CRM]",
+      "agentId": "[agentId — see note above]",
       "primaryColor": "[corrected hex]"
     }
   }
@@ -184,19 +186,7 @@ Rewrite the system prompt to be specific to this company. Follow the template fr
 
 **For offer/countdown issues:**
 
-```json
-{
-  "method": "tools/call",
-  "params": {
-    "name": "update_demo_page",
-    "arguments": {
-      "demoId": "[demoId]",
-      "offerText": "[corrected offer text]",
-      "offerExpiresAt": "[7 days from today, ISO 8601]"
-    }
-  }
-}
-```
+> **Skip entirely.** Campaigns manage deadlines — do not set `offerExpiresAt` or `offerText`. Note in the final report that this issue was skipped.
 
 ### 2d — Republish Agent
 
@@ -230,7 +220,7 @@ Set `demoStatus` back to `PENDING_REVIEW` and clear `demoReviewIssues`:
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
-  -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: PENDING_REVIEW, demoReviewIssues: \"\" }) { id demoStatus } }"}'
+  -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: PENDING_REVIEW, demoReviewIssues: null }) { id demoStatus } }"}'
 ```
 
 > **Announce after each:** `Fixed: [Company Name] — [what was fixed]. Resubmitted for review.`

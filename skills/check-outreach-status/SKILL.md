@@ -1,9 +1,9 @@
 ---
 name: check-outreach-status
-description: "Check status of sent demo outreach emails. Creates follow-up drafts for prospects who haven't responded after 5+ days. Run periodically after /setup-email-drafts has been used."
+description: "Check status of sent demo outreach emails and monitor follow-up draft status. Follow-up drafts are created by /setup-email-drafts — this skill only monitors. Run periodically after /setup-email-drafts has been used."
 ---
 
-# Check Outreach Status & Create Follow-ups
+# Check Outreach Status
 
 > **Announce:**
 > ```
@@ -17,7 +17,7 @@ description: "Check status of sent demo outreach emails. Creates follow-up draft
 
 ## STEP 0 — Check Environment
 
-Read `.env` in the current directory and source it.
+Read the `.env` file using the Read tool. Do NOT use `source` — values contain semicolons that break shell parsing.
 
 Required tokens:
 - **`PSQUARED_CRM_TOKEN`** — CRM GraphQL API
@@ -52,94 +52,57 @@ For each opportunity:
 
 ---
 
-## STEP 2 — Determine Follow-up Actions
+## STEP 2 — Classify Opportunities
 
-For each opportunity, decide:
+For each opportunity, classify by days since sent:
 
-| Days since sent | Action |
-|-----------------|--------|
-| < 5 days | Skip — too early for follow-up |
-| 5-10 days | Create follow-up draft |
-| > 10 days | Create follow-up draft + flag as "cold" |
+| Days since sent | Classification |
+|-----------------|----------------|
+| < 5 days | Too early — no follow-up needed yet |
+| 5-10 days | Awaiting follow-up |
+| > 10 days | Cold — no response after 10+ days |
 
-Also check: if the opportunity stage has moved beyond SCREENING (e.g., MEETING, PROPOSAL), skip — they've already responded.
-
----
-
-## STEP 3 — Determine Follow-up Template ID
-
-**Template UUIDs (hardcoded — do NOT query any API or MCP for these):**
-
-| Template | Locale | UUID |
-|----------|--------|------|
-| demo-followup | de | `6f49ef62-d62d-4a88-a58b-313340322d51` |
-| demo-followup | en | `956b815b-4061-48e7-a351-e3215ae85f86` |
-
-Match locale to company (same logic: .at/.de/.ch → de, else en).
+Also check: if the opportunity stage has moved beyond SCREENING (e.g., MEETING, PROPOSAL), mark as "already progressed".
 
 ---
 
-## STEP 4 — Create Follow-up Drafts
+## STEP 3 — Check Follow-up Draft Status
 
-For each opportunity needing follow-up:
-
-**If no contact email:** Skip with note.
-
-The follow-up uses the same template shell as outreach. Write a shorter, more casual follow-up. Don't repeat the original pitch — just check in and make it easy to click the demo link again.
+For each opportunity that is 5+ days old, check whether a follow-up draft already exists in the notification service:
 
 ```bash
-curl -s -X POST https://notifications.psquared.dev/drafts/create \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER" \
-  -d '{
-    "templateId": "[followup template UUID from step 3]",
-    "locale": "[de|en]",
-    "recipientEmail": "[contact email]",
-    "recipientName": "[contact first name]",
-    "variables": {
-      "companyName": "[Company Name]",
-      "demoUrl": "[demo playground URL]",
-      "greeting": "[casual greeting — same tone as initial outreach]",
-      "bodyParagraph1": "[short check-in — did you get a chance to look at the demo?]",
-      "buttonText": "[e.g. Demo nochmal ansehen / View Demo Again]",
-      "closingText": "[brief — offer to adjust the demo or answer questions]",
-      "signoff": "[matching tone]",
-      "senderName": "Martin"
-    },
-    "crmCompanyId": "[company ID]",
-    "crmOpportunityId": "[opportunity ID]",
-    "crmCompanyName": "[Company Name]",
-    "draftType": "followup"
-  }'
+curl -s -X GET "https://notifications.psquared.dev/drafts?crmOpportunityId=[opportunity ID]&draftType=followup" \
+  -H "Authorization: Bearer $EMAIL_DRAFT_ONLY_BEARER"
 ```
 
-> **Announce after each:** `Follow-up draft created: [Company] → [email] (sent [N] days ago)`
+For each result, note the draft status (e.g., `DRAFT`, `SENT`, `PENDING`).
 
-**Note:** This skill does NOT update CRM fields. When the follow-up is actually sent from the admin UI, the notification service automatically sets:
-- `demoStatus` → `FOLLOW_UP_SENT`
-- `followupSentAt` → current timestamp
+> **This skill does NOT create follow-up drafts. Follow-ups are created by /setup-email-drafts.**
 
 ---
 
-## STEP 5 — Report
+## STEP 4 — Report
 
 > **Announce:**
 > ```
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > Outreach Status Check complete.
 >
-> Follow-up drafts created: [N]
->   - [Company A] → email (sent 6 days ago)
->   - [Company B] → email (sent 8 days ago)
+> Follow-up drafts pending send: [N]
+>   - [Company A] → email (sent 6 days ago) [status: DRAFT]
+>   - [Company B] → email (sent 8 days ago) [status: DRAFT]
+>
+> Follow-ups already sent: [N]
+>   - [Company C] — follow-up sent
 >
 > Too early for follow-up: [N]
->   - [Company C] — sent 2 days ago
+>   - [Company D] — sent 2 days ago
 >
 > Already progressed: [N]
->   - [Company D] — stage moved to MEETING
+>   - [Company E] — stage moved to MEETING
 >
-> Cold leads (10+ days, no response): [N]
->   - [Company E] — sent 12 days ago ⚠️
+> Cold leads (10+ days, no follow-up draft): [N]
+>   - [Company F] — sent 12 days ago ⚠️ (run /setup-email-drafts to create follow-up)
 >
 > Next step: Review and send follow-ups at
 > → notifications.psquared.dev/drafts

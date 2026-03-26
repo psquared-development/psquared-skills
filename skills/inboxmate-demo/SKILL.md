@@ -36,6 +36,7 @@ The MCP server at `https://app.psquared.dev/api/mcp` exposes tools to create and
 **Environment variables** (read from `.env` in the current working directory at startup):
 - `NUXT_MCP_DEMO_TOKEN` — Bearer token for the InboxMate MCP server
 - `OPENBRAND_API_KEY` — API key for OpenBrand color/logo extraction (used in Phase 2f)
+- `PSQUARED_CRM_TOKEN` — Bearer token for the psquared CRM API (used in Phase 5)
 
 **MCP connection:**
 - URL: `https://app.psquared.dev/api/mcp`

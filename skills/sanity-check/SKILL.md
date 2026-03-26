@@ -29,6 +29,8 @@ If either is missing, **stop** and ask the user.
 
 ## STEP 1 — Select Targets
 
+If the skill was invoked with a parameter (e.g., `/sanity-check PENDING_REVIEW` or `/sanity-check campaign:<id>`), skip the prompt below and use the parameter directly — map it to the appropriate option (A or E).
+
 Ask the user what to check. Options:
 
 **A) By CRM stage/status** — query CRM for opportunities matching a filter:
@@ -55,7 +57,7 @@ Authorization: Bearer $PSQUARED_CRM_TOKEN
 Content-Type: application/json
 
 {
-  "query": "{ opportunities(first: 500, filter: { stage: { eq: SCREENING }, demoStatus: { eq: <STATUS> } }) { edges { node { id demoId companyId company { name } } } totalCount } }"
+  "query": "{ opportunities(first: 200, filter: { stage: { eq: SCREENING }, demoStatus: { eq: <STATUS> } }) { edges { node { id company { name } } } totalCount } }"
 }
 ```
 

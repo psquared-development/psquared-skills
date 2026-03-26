@@ -21,8 +21,9 @@ Upgrade demo agent knowledge from old AI-written summaries to properly scraped p
 ## Environment
 
 Read from `.env` in the working directory:
-- `INBOXMATE_DEMO_MCP_TOKEN` — Bearer token for InboxMate MCP (contains `#` character — use curl, not Python urllib)
+- `NUXT_MCP_DEMO_TOKEN` — Bearer token for InboxMate MCP (contains `#` character — use curl, not Python urllib)
 - `PSQUARED_CRM_TOKEN` — Bearer token for Twenty CRM
+- `EMAIL_DRAFT_ONLY_BEARER` — Bearer token for notification service (used in Option B: all-sent)
 
 **MCP endpoint:** `https://app.psquared.dev/api/mcp`
 **CRM endpoint:** `https://crm.psquared.dev/graphql`
@@ -37,7 +38,7 @@ All MCP calls use this pattern (use curl, NOT Python urllib — the token contai
 ```bash
 curl -s --max-time 120 -X POST https://app.psquared.dev/api/mcp \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INBOXMATE_DEMO_MCP_TOKEN" \
+  -H "Authorization: Bearer $NUXT_MCP_DEMO_TOKEN" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"TOOL_NAME","arguments":{...}}}'
 ```
 
