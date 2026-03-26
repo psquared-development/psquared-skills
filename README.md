@@ -11,6 +11,9 @@ npx skills add psquared-development/psquared-skills -g -y
 ### Pipeline Overview
 
 ```
+Start here:
+  /initiate-inboxmate-knowledge  Load architecture, IDs, states, data flow — run before any work
+
 Stage 0: Lead Generation
   /find-leads [N]                Find N qualified German B2B leads, add to CRM
 
