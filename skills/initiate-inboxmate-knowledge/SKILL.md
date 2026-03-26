@@ -205,3 +205,32 @@ Returns per-item: `healthy` boolean + `issues` array. Checks: demo page exists, 
 5. **Campaigns manage deadlines, not individual demos.** Never set `offerExpiresAt` or `offerText` directly on `demo_pages` — these come from the campaign and are merged dynamically at API read time.
 
 6. **Follow-up emails: never mention "follow-up" in the subject.** Body must be unique, not a generic template. Always include `variables` in PUT body when updating drafts.
+
+## What Skill Do I Need?
+
+Based on what you're trying to do, use:
+
+| Goal | Skill |
+|------|-------|
+| Need new leads | `/find-leads [N]` |
+| Create demos for CRM leads | `/inboxmate-batch-demo` or `/inboxmate-demo <company>` |
+| QA existing demos | `/review-demos` |
+| Fix flagged demos | `/fix-demos` |
+| Check if demos are healthy | `/sanity-check` |
+| Group demos into a campaign | `/plan-campaign` |
+| Create outreach emails | `/setup-email-drafts [campaignId]` |
+| Edit email drafts | `/refine-email-drafts` |
+| Check how outreach is doing | `/check-outreach-status` |
+| Full funnel analytics | `/check-demo-analytics` |
+| Upgrade demo knowledge | `/refurbish-demos` |
+| Change pricing | `/price-change` |
+| Deep debugging / raw queries | `/analyse-inboxmate` |
+
+### Pipeline Order
+
+If starting from scratch, follow this sequence:
+```
+/find-leads → /inboxmate-batch-demo → /review-demos → /fix-demos (if needed)
+→ /sanity-check → /plan-campaign → /setup-email-drafts → /refine-email-drafts (if needed)
+→ 👤 send → /check-outreach-status → /check-demo-analytics
+```
