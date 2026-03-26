@@ -107,15 +107,15 @@ For each company, determine 4-6 URLs to scrape. Use the company domain to build 
 
 For each company in the work list, process **one at a time**:
 
-### Step 4a: Cleanup orphaned data
+### Step 4a: Cleanup orphaned data for this agent
 
-First, delete all orphaned buckets and knowledge entries left over from old demo creation. This cleans up the entire demo account (not just this agent), so it only needs to be called once per refurbish run — call it for the FIRST agent only.
+Delete orphaned buckets and knowledge entries left over from old demo creation for this specific agent. Only removes buckets matching the agent's company name that aren't linked to any agent.
 
 ```json
 {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"cleanup_agent","arguments":{"agentId":"AGENT_ID"}}}
 ```
 
-Announce the result: `Cleaned up {deletedBuckets} orphaned buckets, {deletedItems} items, {deletedKnowledge} knowledge entries.`
+Log the result: `Cleanup: {deletedBuckets} orphaned buckets, {deletedItems} items removed.`
 
 ### Step 4b: Clear active bucket
 
