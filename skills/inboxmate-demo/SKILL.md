@@ -337,7 +337,7 @@ Use **individual MCP tools** — do NOT use `quick_setup_demo` for the full pipe
 
 | Field | How to choose |
 |-------|--------------|
-| `buttonIcon` | The floating button visitors click to open chat. Match the company vibe: `messageCircle` (friendly default), `sparkles` (creative/modern), `chat` (support-focused), `help` (FAQ-heavy), `inboxmate` (InboxMate branding), `heart` (warm/personal), `zap` (tech/fast), `globe` (international). Do NOT default to `robot`. |
+| `buttonIcon` | The floating button visitors click to open chat. **ONLY these values are valid:** `messageCircle` (friendly default), `messageSquare`, `sparkles` (creative/modern), `support` (headphones, support-focused), `help` (FAQ-heavy), `inboxmate` (InboxMate branding), `heart` (warm/personal), `zap` (tech/fast), `globe` (international), `wave`, `brain`, `lightbulb`, `compass`, `star`, `shield`, `robot`, `mascot`. Any other value will render as a broken circle. Do NOT invent icon names like `shoppingBag`, `truck`, `home`, `car`, `music` etc. — they don't exist in the widget. |
 | `agentIconType` | The avatar shown next to AI messages in the chat. Options: `inboxmate` (branded, good default), `avatar` (human-like, good for personal brands), `bot` (techy). Pick one that DIFFERS from `buttonIcon`. |
 | `buttonShape` | `circle` = round floating button (default, works everywhere). `squared` = rounded square (modern/minimal). `icon-only` = just the icon, no background (sleek/subtle). |
 | `widgetPresence` | `calm` = no animations, professional (corporate/B2B sites). `shimmer` = subtle glow effects (modern/creative brands). Default to `calm` for most business sites. |
