@@ -392,6 +392,23 @@ For **each item planned in 2b**, call `add_to_bucket` separately.
 >
 > Wait for each call to complete before the next — do NOT batch these.
 
+> **Faster alternative:** Instead of adding items one by one, use the `scrape_and_build_knowledge` MCP tool which scrapes multiple URLs in one call and creates knowledge items with real sourceUrls automatically:
+> ```json
+> {
+>   "jsonrpc": "2.0",
+>   "method": "tools/call",
+>   "params": {
+>     "name": "scrape_and_build_knowledge",
+>     "arguments": {
+>       "bucketId": "[bucketId]",
+>       "urls": ["url1", "url2", "url3", ...],
+>       "agentId": "[agentId]"
+>     }
+>   }
+> }
+> ```
+> This is recommended for 5+ URLs. It handles scraping, chunking, and embedding in one operation.
+
 ### Step 3.3b — (If multi-lang) Add Language Support item
 
 If language is `multi`: add one extra knowledge item to the bucket:

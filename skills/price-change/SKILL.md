@@ -171,7 +171,10 @@ Apply changes in this order:
 ### 3e. Help center
 - `inboxmate-docs/user-guide/workspace/usage-and-billing.mdx` — pricing table
 
-### 3f. Feature constraints (if Type C)
+### 3f. Skills reference
+- `psquared-skills/skills/analyse-inboxmate/SKILL.md` — pricing tiers reference table
+
+### 3g. Feature constraints (if Type C)
 - Apply the approved changes from the constraints report (Phase 2)
 
 **Do NOT commit or push yet.**

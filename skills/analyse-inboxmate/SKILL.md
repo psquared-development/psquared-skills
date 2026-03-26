@@ -182,6 +182,8 @@ All in `/Users/martinpammesberger/Documents/psquared/claude-overlord-folder/.env
 
 ## Pricing Tiers
 
+**Note:** If prices change, this table must be updated. The `/price-change` skill handles pricing updates across all touchpoints — make sure this file is included in the update list.
+
 | Tier | Monthly | Yearly | Demo Discount (yearly) |
 |---|---|---|---|
 | Starter | €59 | €49/mo | — |

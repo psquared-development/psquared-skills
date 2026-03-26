@@ -19,16 +19,16 @@ description: "Report on InboxMate demo page visits, email engagement, and pipeli
 
 Read `.env` in the current directory and source it.
 
-Required tokens (variable names should be obvious from context):
-- **CRM API** — contains "CRM" + "TOKEN"
-- **Ackee API** — contains "ACKEE" + "TOKEN", and an "ACKEE" + "DOMAIN" URL
+Required tokens:
+- **CRM API** — `PSQUARED_CRM_TOKEN`
+- **Ackee API** — `ACKEE_TOKEN`, and `ACKEE_DOMAIN` (base URL, e.g. `https://ackee.psquared.dev`)
 
 Stop if missing.
 
 **Ackee config:**
-- API: `$<ACKEE_DOMAIN_VAR>/api` (GraphQL)
+- API: `$ACKEE_DOMAIN/api` (GraphQL)
 - Demo domain ID: `4bdddc8c-11d9-4d7e-ab94-aeb7866f0bb2`
-- Auth: `Authorization: Bearer $<ACKEE_TOKEN_VAR>`
+- Auth: `Authorization: Bearer $ACKEE_TOKEN`
 
 > **Once verified:** `Environment OK. Pulling analytics...`
 
@@ -39,9 +39,9 @@ Stop if missing.
 Query Ackee for page-level statistics on the demo domain:
 
 ```bash
-curl -s -X POST "$<ACKEE_DOMAIN_VAR>/api" \
+curl -s -X POST "$ACKEE_DOMAIN/api" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<ACKEE_TOKEN_VAR>" \
+  -H "Authorization: Bearer $ACKEE_TOKEN" \
   -d '{"query":"{ domain(id: \"4bdddc8c-11d9-4d7e-ab94-aeb7866f0bb2\") { statistics { pages(sorting: TOP, range: LAST_30_DAYS) { id value count } views(interval: DAILY, type: UNIQUE, limit: 30) { id count } } } }"}'
 ```
 
@@ -58,7 +58,7 @@ Query CRM for all active opportunities at SCREENING stage:
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d '{"query":"{ opportunities(filter: { stage: { eq: SCREENING } }, first: 100) { edges { node { id name demoStatus demoUrl { primaryLinkUrl } company { name } createdAt } } } }"}'
 ```
 
@@ -67,8 +67,17 @@ Also get recently converted (PROPOSAL stage):
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<CRM_TOKEN_VAR>" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
   -d '{"query":"{ opportunities(filter: { stage: { eq: PROPOSAL } }, first: 20) { edges { node { id name company { name } createdAt } } } }"}'
+```
+
+Also get paying customers (CUSTOMER stage):
+
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
+  -d '{"query":"{ opportunities(filter: { stage: { eq: CUSTOMER } }, first: 20) { edges { node { id name company { name } createdAt } } } }"}'
 ```
 
 ---
@@ -93,7 +102,30 @@ Categorize each opportunity:
 
 ---
 
-## STEP 4 — Report
+## STEP 4 — Query Ackee Events
+
+To get event counts, query each event:
+
+```bash
+curl -s -X POST "$ACKEE_DOMAIN/api" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACKEE_TOKEN" \
+  -d '{"query":"{ event(id: \"[eventId]\") { statistics { chart(interval: DAILY, type: TOTAL) { id count } list(sorting: TOP, type: TOTAL) { id value count } } } }"}'
+```
+
+**Event IDs:**
+- CTA Click: Claim Bot — `0f037f1c-c2c0-4205-b90d-3cb9bf66f9c2`
+- CTA Click: Discover Platform — `1911cb2c-96a9-478e-8a45-82ae8fa71bc8`
+- Widget Opened — `df5c0d51-1e96-43a9-8d73-13e0e82e99b3`
+- Plan Selected — `8693d36c-09a1-4b86-bf29-763e612f4843`
+
+The `list` query with `sorting: TOP` shows which demo pages / plans got the most actions. The `key` field contains the demoId or planId.
+
+**Email sent/failed counts:** Use `GET /stats/funnel` from the notification service instead of manually counting drafts. This endpoint returns accurate sent/failed totals per campaign.
+
+---
+
+## STEP 5 — Report
 
 > **Announce:**
 > ```
@@ -145,24 +177,3 @@ Categorize each opportunity:
 >   - Plus specific company-level recommendations
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > ```
-
----
-
-## STEP 5 — Query Ackee Events
-
-To get event counts, query each event:
-
-```bash
-curl -s -X POST "$<ACKEE_DOMAIN_VAR>/api" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $<ACKEE_TOKEN_VAR>" \
-  -d '{"query":"{ event(id: \"[eventId]\") { statistics { chart(interval: DAILY, type: TOTAL) { id count } list(sorting: TOP, type: TOTAL) { id value count } } } }"}'
-```
-
-**Event IDs:**
-- CTA Click: Claim Bot — `0f037f1c-c2c0-4205-b90d-3cb9bf66f9c2`
-- CTA Click: Discover Platform — `1911cb2c-96a9-478e-8a45-82ae8fa71bc8`
-- Widget Opened — `df5c0d51-1e96-43a9-8d73-13e0e82e99b3`
-- Plan Selected — `8693d36c-09a1-4b86-bf29-763e612f4843`
-
-The `list` query with `sorting: TOP` shows which demo pages / plans got the most actions. The `key` field contains the demoId or planId.
