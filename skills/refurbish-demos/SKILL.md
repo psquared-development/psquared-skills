@@ -107,19 +107,29 @@ For each company, determine 4-6 URLs to scrape. Use the company domain to build 
 
 For each company in the work list, process **one at a time**:
 
-### Step 4a: Clear old knowledge
+### Step 4a: Cleanup orphaned data
+
+First, delete all orphaned buckets and knowledge entries left over from old demo creation. This cleans up the entire demo account (not just this agent), so it only needs to be called once per refurbish run — call it for the FIRST agent only.
 
 ```json
-{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"clear_bucket","arguments":{"bucketId":"BUCKET_ID"}}}
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"cleanup_agent","arguments":{"agentId":"AGENT_ID"}}}
 ```
 
-### Step 4b: Scrape and build via MCP
+Announce the result: `Cleaned up {deletedBuckets} orphaned buckets, {deletedItems} items, {deletedKnowledge} knowledge entries.`
+
+### Step 4b: Clear active bucket
+
+```json
+{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"clear_bucket","arguments":{"bucketId":"BUCKET_ID"}}}
+```
+
+### Step 4c: Scrape and build via MCP
 
 ```json
 {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"scrape_and_build_knowledge","arguments":{"bucketId":"BUCKET_ID","urls":["https://domain.de/","https://domain.de/kontakt/","https://domain.de/leistungen/","https://domain.de/ueber-uns/"]}}}
 ```
 
-### Step 4c: Handle failures with WebFetch fallback
+### Step 4d: Handle failures with WebFetch fallback
 
 For each URL in the `failed` array from scrape_and_build_knowledge:
 
@@ -137,7 +147,7 @@ For each URL in the `failed` array from scrape_and_build_knowledge:
 - Max 20,000 characters (will be truncated if longer)
 - `sourceUrl` MUST be the actual page URL, not the domain root
 
-### Step 4d: Verify minimum knowledge
+### Step 4e: Verify minimum knowledge
 
 After scraping, call `list_bucket_items` to verify:
 - At least 3 items created
@@ -146,7 +156,7 @@ After scraping, call `list_bucket_items` to verify:
 
 If less than 3 items, log a warning but continue — the agent will still work, just with less knowledge.
 
-### Step 4e: Fix button icon if broken
+### Step 4f: Fix button icon if broken
 
 Check the agent's config for `buttonIcon`. If it's NOT one of these valid values, update it to `messageCircle`:
 
@@ -157,7 +167,7 @@ If invalid, fix via MCP:
 {"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"update_widget_style","arguments":{"agentId":"AGENT_ID","buttonIcon":"messageCircle"}}}
 ```
 
-### Step 4f: Republish agent
+### Step 4g: Republish agent
 
 ```json
 {"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"publish_agent","arguments":{"agentId":"AGENT_ID"}}}
