@@ -90,6 +90,13 @@ Maintenance (run anytime):
 | [check-demo-analytics](./skills/check-demo-analytics/SKILL.md) | Full funnel analytics (Ackee + CRM + emails) |
 | [refurbish-demos](./skills/refurbish-demos/SKILL.md) | Upgrade knowledge for existing demos |
 
+### SEO
+
+| Skill | Description |
+|-------|-------------|
+| [seo](./skills/seo/SKILL.md) | Audit or fix SEO issues for a single website — meta tags, structured data, i18n, content quality |
+| [seo-all](./skills/seo-all/SKILL.md) | Run SEO audit/fix across all psquared sites in parallel, combined report |
+
 ### Operations
 
 | Skill | Description |
