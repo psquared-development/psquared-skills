@@ -104,31 +104,55 @@ Announce: `Found N demos to refurbish.`
 
 ---
 
-## PHASE 2 — Discover Pages Per Company
+## PHASE 2 — Discover Real Pages Per Company
 
 > **Announce:** `[2/4] Discovering pages to scrape...`
 
-For each company, determine the best URLs to scrape.
+For each company, discover which pages actually exist before scraping. **Never guess URLs blindly** — generic patterns like `/kontakt/`, `/ueber-uns/`, `/leistungen/` fail on 60%+ of sites (e-commerce, single-page, non-standard CMS). This produces "Seite nicht gefunden" knowledge items that pollute RAG.
 
-### Quick approach (batch mode, ~5 URLs per company):
+### Step 2a: WebFetch the homepage
 
-Use the domain + common German business site patterns:
+WebFetch `https://www.{domain}/` (or `https://{domain}/` if www fails). Extract:
+- **Navigation links** (main nav, header menu)
+- **Footer links** (about, contact, FAQ, legal)
+- **Any prominent section links**
+
+### Step 2b: Select 6-8 best URLs
+
+From the discovered links, pick URLs that give the chatbot useful knowledge:
+
+**Priority order:**
+1. Homepage (always)
+2. About / Über uns / Unternehmen (who they are)
+3. Services / Leistungen / Produkte (what they offer)
+4. Contact / Kontakt / Standorte / Filialen (how to reach them)
+5. FAQ / Service / Hilfe (common questions)
+6. Team / Karriere (if relevant)
+7. Impressum (legal, low priority but useful for address/contact)
+8. Key category/product pages (for e-commerce sites)
+
+**Rules:**
+- Only include URLs on the same domain
+- Skip: blog posts, privacy policy, AGB, login pages, PDF links, anchor-only links
+- **Skip junk URLs:** `/wp-json/`, `/xmlrpc.php`, `/feed/`, `/favicon.ico`, `apple-touch-icon`, `.webp`, `.ico`, `.css`, `.js`
+- For e-commerce sites: pick category overview pages, brand pages, store locator — NOT individual product pages
+- For JS-rendered pages (store locators, maps): if Tavily returns empty, WebFetch manually
+- Max 8 URLs total (keeps scrape time reasonable)
+
+### Step 2c: Split into batches of 2-3 URLs
+
+Tavily advanced mode takes ~5-30s per URL. A single call with 5+ URLs hits server timeouts (120s). **Always split into batches of max 3 URLs per MCP call.**
+
+### Fallback: If WebFetch fails
+
+If the homepage can't be fetched (timeout, blocking), fall back to these common patterns but **expect failures** and don't count on them:
 
 ```
 https://www.{domain}/
 https://www.{domain}/kontakt/
 https://www.{domain}/ueber-uns/
-https://www.{domain}/leistungen/
 https://www.{domain}/impressum/
 ```
-
-**Important:** Split into 2 batches of 2-3 URLs per MCP call. Tavily advanced mode takes ~5-30s per URL. A single call with 5 URLs can hit server timeouts (120s).
-
-### Thorough approach (per-company, ~6-8 URLs):
-
-WebFetch the homepage, extract real nav/footer links, then scrape those. More reliable but slower.
-
-Some "Seite nicht gefunden" / 404 pages will be scraped — that's OK, they're low-content and won't hurt the RAG. The homepage + whatever real pages exist is what matters.
 
 ---
 
@@ -146,37 +170,68 @@ Process **one company at a time**:
 
 This clears the agent's buckets AND deletes all orphaned buckets in the demo account (from old demo creation flow). First call handles the global orphan cleanup.
 
-### Step 3b: Scrape via MCP (batch 1)
+### Step 3b: Scrape via MCP in batches of 3
+
+Send discovered URLs to `scrape_and_build_knowledge` in batches of max 3:
 
 ```json
-{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"scrape_and_build_knowledge","arguments":{"bucketId":"BUCKET_ID","urls":["https://www.domain.de/","https://www.domain.de/kontakt/"]}}}
+{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"scrape_and_build_knowledge","arguments":{"bucketId":"BUCKET_ID","urls":["URL1","URL2","URL3"]}}}
 ```
 
-### Step 3c: Scrape via MCP (batch 2)
+The MCP tool automatically:
+- Rejects 404/"Seite nicht gefunden" pages (returns them in `failed` array with reason `404/not-found page detected`)
+- Sets `sourceUrl` on created items (enables chat citations)
+- Supports content up to 50K characters
+
+Check the response `created` and `failed` arrays after each batch.
+
+### Step 3c: Handle failures — WebFetch fallback
+
+**For each failed URL**, check the failure reason:
+
+| Reason | Action |
+|--------|--------|
+| `404/not-found page detected` | Skip — page doesn't exist. Don't retry. |
+| `Content too short` | Skip — page has no useful content. |
+| `Timeout` or `Failed to scrape` | **Retry via WebFetch** (Tavily couldn't reach the site). |
+| `Content must not exceed` | Shouldn't happen with 50K limit. If it does, WebFetch and trim. |
+
+**WebFetch fallback for timeouts/scrape failures:**
+
+1. WebFetch the URL with a prompt to extract all content
+2. Clean the content: remove nav, footer, cookie banners, base64 images
+3. Keep: headings, lists, structure, ALL details (names, prices, hours, addresses)
+4. Call `add_to_bucket` with cleaned content + sourceUrl:
 
 ```json
-{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"scrape_and_build_knowledge","arguments":{"bucketId":"BUCKET_ID","urls":["https://www.domain.de/ueber-uns/","https://www.domain.de/leistungen/","https://www.domain.de/impressum/"]}}}
+{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"add_to_bucket","arguments":{"bucketId":"BUCKET_ID","title":"Page Title","content":"[full cleaned page text]","sourceUrl":"https://domain.de/page/"}}}
 ```
 
-### Step 3d: Handle failures with WebFetch fallback
+### Step 3d: If ALL URLs fail (site blocks Tavily entirely)
 
-For each URL in the `failed` arrays:
+Some sites block Tavily's scraper. If every URL times out or fails:
 
-1. WebFetch the URL
-2. If content returned, call `add_to_bucket` with `sourceUrl` set:
+1. **WebFetch ALL discovered URLs yourself** — WebFetch uses a different scraper that often works when Tavily doesn't
+2. For each page, extract detailed content (not summaries)
+3. Add each via `add_to_bucket` with `sourceUrl`
+4. **You MUST NOT leave the bucket empty** — an empty bucket means the chatbot can't answer anything
 
-```json
-{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"add_to_bucket","arguments":{"bucketId":"BUCKET_ID","title":"Page Title","content":"[full page text]","sourceUrl":"https://domain.de/kontakt/"}}}
-```
+**Content rules for manual WebFetch entries:**
+- Full page text, not an AI summary — keep the original wording
+- Preserve headings, lists, and structure
+- Remove nav, footer, cookie banners, boilerplate
+- Keep ALL specifics: names, services, prices, hours, addresses, team members
+- Max 50,000 characters per entry
+- `sourceUrl` MUST be the actual page URL
 
-**Content rules:**
-- Full page text, not a summary
-- Keep headings, lists, structure
-- Remove nav, footer, cookie banners
-- Max 20,000 characters
-- `sourceUrl` MUST be the actual page URL (creates URL-type knowledge entry)
+### Step 3e: Verify minimum quality
 
-### Step 3e: Fix button icon if broken
+After all scraping + fallbacks, check:
+- **At least 3 items** in the bucket (< 3 = chatbot is too thin)
+- **No items with "nicht gefunden" / "not found" / "404" in the title** (shouldn't happen with MCP detection, but verify)
+- **No junk items** (wp-json, xmlrpc, feed, favicon — delete if present)
+
+### Step 3f: Fix button icon if broken
 
 Valid icons: `messageCircle`, `messageSquare`, `sparkles`, `support`, `help`, `inboxmate`, `heart`, `zap`, `globe`, `wave`, `brain`, `lightbulb`, `compass`, `star`, `shield`, `robot`, `mascot`
 
@@ -186,7 +241,7 @@ Any other value (e.g. `shoppingBag`, `truck`, `home`, `car`, `music`) renders as
 {"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"update_widget_style","arguments":{"agentId":"AGENT_ID","buttonIcon":"messageCircle"}}}
 ```
 
-### Step 3f: Republish agent
+### Step 3g: Republish agent
 
 ```json
 {"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"publish_agent","arguments":{"agentId":"AGENT_ID"}}}
@@ -227,11 +282,15 @@ python3 -u scripts/refurbish-all.py < /tmp/worklist.json > /tmp/refurbish.log 2>
 ```
 
 The script at `claude-overlord-folder/scripts/refurbish-all.py`:
+- Discovers real URLs from homepage nav (not hardcoded patterns)
+- Filters junk URLs (wp-json, xmlrpc, feed, favicon, etc.)
+- Handles `www.` prefix correctly (no `www.www.` duplication)
+- Splits URLs into batches of 3 to avoid server timeouts
 - Uses curl (not urllib) for MCP calls — handles `#` in auth token
-- Splits URLs into 2 batches of 2-3 to avoid server timeouts
 - Processes sequentially with 1s pause every 5 agents
-- Logs progress to stdout (use `-u` flag for unbuffered output)
 - Input: JSON array of `[{company_name, company_domain, agent_id, bucket_id}]`
+
+**Limitation:** The script does NOT do WebFetch fallback — it only uses MCP `scrape_and_build_knowledge` (Tavily). If Tavily fails for a site, the agent will be left with fewer items. After a batch run, check the log for agents with 0-2 items created and fix those manually with WebFetch.
 
 ---
 
@@ -244,7 +303,7 @@ Tavily `extract_depth: 'advanced'` takes up to 30s per URL. Batch 5 URLs in one 
 If primary Tavily key runs out, set `NUXT_TAVILY_FALLBACK_API_KEY` in agenthub `.env`. Auto-switches on 429/402 errors.
 
 ### "Seite nicht gefunden" pages
-Some scraped pages will be 404s (the generic URL patterns don't exist on every site). These are low-content and won't affect RAG quality. The homepage + real pages provide the value.
+If 404 pages end up in knowledge (from fallback URL guessing or site changes), they DO hurt RAG — the chatbot may cite non-existent pages or give confused answers. Phase 2 now discovers real URLs first to prevent this. If you see 404 items after a refurbish, the homepage WebFetch likely failed and fell back to guessed URLs — investigate and re-run with manual URL discovery.
 
 ### Bucket name mismatches
 Old demo creation flow sometimes linked wrong-named buckets to agents (e.g. "Autohaus Freier Wissensbasis" on a Hinzmann Elektrotechnik agent). The content is correct after refurbish — the bucket name is cosmetic. Can be fixed via SQL if needed.
@@ -263,7 +322,10 @@ DELETE FROM knowledge_bucket_chunks WHERE bucket_item_id IN (
 ```
 
 ### Content length limit
-Knowledge entries allow up to 20,000 characters (was 10,000, fixed 2026-03-26). Tavily advanced mode returns more content — large pages may get truncated at 20K.
+Knowledge entries allow up to 50,000 characters (was 20K, bumped 2026-03-28). Tavily advanced mode returns full pages including nav/footer HTML — the extra headroom prevents truncation of actual content. Pages hitting the limit likely have nav pollution but the important content still fits.
+
+### JS-rendered content (store locators, maps, dynamic lists)
+Some pages load data via JavaScript (store locators, interactive maps, product configurators). Tavily can't extract this content. If a page returns mostly nav/boilerplate with no real data, WebFetch it manually, extract the data from the page description or other sources, and add via `add_to_bucket` with `sourceUrl`.
 
 ### Cross-contamination
 Audit showed only 1 true case out of 152 sent demos (Dachdeckermeister Hoffmann had DBM Metallbau content). Refurbish fixes this by clearing and re-scraping based on the correct domain from the demo page.

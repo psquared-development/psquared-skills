@@ -137,11 +137,39 @@ The endpoint:
       "all_items_embedded": true,
       "failed_items": 0,
       "processing_items": 0,
+      "not_found_items": 0,
+      "low_token_items": 0,
+      "no_source_url_items": 0,
+      "avg_tokens": 847,
+      "demo_api_reachable": true,
+      "draft_footer_ok": true,
+      "draft_button_ok": true,
       "issues": [],
+      "warnings": [],
       "healthy": true
     }
   ]
 }
+```
+
+### What gets checked
+
+**Health failures (unhealthy):**
+- Demo page / agent not found
+- Agent not published
+- No knowledge buckets / empty buckets
+- Text-type items (should be URL-sourced via Tavily)
+- Failed or still-processing embeddings
+- 404 / "Seite nicht gefunden" content in knowledge items
+- >50% of items have < 50 tokens (AI stubs, not real scraped content)
+- Demo API unreachable
+- Email draft link mismatches
+
+**Warnings (healthy but flagged):**
+- Demo already claimed
+- Some items missing source URL (no citations in chat)
+- Some items have < 50 tokens (but less than half)
+- Average tokens per item < 100 (thin knowledge)
 ```
 
 ---
@@ -160,6 +188,7 @@ All checks pass. Show count and list company names.
 Show each unhealthy item with:
 - Company name (from CRM query in Step 1)
 - List of issues from the `issues` array
+- List of warnings from the `warnings` array (if any)
 - Suggested action:
   - `"No demo linked in CRM"` → demo was never created, run `/inboxmate-demo`
   - `"Demo page not found"` → demo page deleted or demoId mismatch in CRM
@@ -167,9 +196,11 @@ Show each unhealthy item with:
   - `"Agent not published"` → run `publish_agent` via MCP
   - `"No knowledge buckets assigned"` → run `/fix-demos` or rebuild
   - `"Knowledge bucket is empty"` → knowledge items failed to scrape, re-scrape
-  - `"N knowledge items are not URL type"` → unexpected item types in bucket
+  - `"N knowledge items are text type"` → run `/refurbish-demos` to replace with URL-sourced content
   - `"N knowledge items have failed embeddings"` → re-index needed
   - `"N knowledge items still processing"` → wait and re-check
+  - `"N knowledge items contain 404/not-found page content"` → run `/refurbish-demos` — URLs were guessed wrong
+  - `"N/M knowledge items have < 50 tokens (likely stubs)"` → run `/refurbish-demos` — content is AI summaries, not real scraped pages
 
 ### Summary line
 

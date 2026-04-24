@@ -190,7 +190,12 @@ The notification service exposes a sanity check that validates demo agent health
 { "draft_ids": ["uuid", ...] }
 ```
 
-Returns per-item: `healthy` boolean + `issues` array. Checks: demo page exists, agent published, knowledge buckets non-empty, all items URL-type, all embeddings completed.
+Returns per-item: `healthy` boolean + `issues` array + `warnings` array. Checks:
+- **Health failures (unhealthy):** demo/agent not found, not published, empty buckets, text-type items, failed/processing embeddings, 404 content detected, >50% items under 50 tokens
+- **Warnings (non-blocking):** missing source URLs, some low-token items, thin avg tokens, claimed demos
+- **Also checks:** demo API reachability, email draft link correctness
+
+Response includes `demo_page_id` for cross-system debugging, and `avg_tokens` for knowledge quality assessment.
 
 ## Common Gotchas
 
@@ -205,6 +210,16 @@ Returns per-item: `healthy` boolean + `issues` array. Checks: demo page exists, 
 5. **Campaigns manage deadlines, not individual demos.** Never set `offerExpiresAt` or `offerText` directly on `demo_pages` — these come from the campaign and are merged dynamically at API read time.
 
 6. **Follow-up emails: never mention "follow-up" in the subject.** Body must be unique, not a generic template. Always include `variables` in PUT body when updating drafts.
+
+7. **Never guess URLs for scraping.** Always discover real pages from the homepage navigation first. Generic patterns (`/kontakt/`, `/ueber-uns/`, `/leistungen/`) fail on 60%+ of sites.
+
+8. **Tavily failures → WebFetch fallback.** `scrape_and_build_knowledge` uses Tavily. Some sites block it (all URLs timeout). When this happens, use WebFetch to scrape pages manually and add via `add_to_bucket` with `sourceUrl`. Never leave a bucket empty.
+
+9. **Skip junk URLs:** `/wp-json/`, `/xmlrpc.php`, `/feed/`, `/favicon.ico`, `.webp`, `.ico` — these produce garbage knowledge items.
+
+10. **Content limit is 50K characters** per knowledge item. Tavily advanced mode can return large pages — they won't be truncated.
+
+11. **404 pages are auto-detected** by `scrape_and_build_knowledge` — pages with "nicht gefunden"/"not found"/"404" in the title are rejected and returned in the `failed` array. No need to check manually.
 
 ## What Skill Do I Need?
 
