@@ -1,0 +1,97 @@
+{
+  "language": "de",
+  "offer": {
+    "referenceNumber": "2026-0525-SAN",
+    "title": "Sanacom Categorizer",
+    "subtitle": "KI-gestützte Sortimentskategorisierung für Apotheken — Stammdaten-Bereinigung plus laufendes Categorizer-Tool mit Web-Recherche.",
+    "eyebrow": "Angebot",
+    "date": "25. Mai 2026",
+    "validUntil": "24. Juni 2026"
+  },
+  "client": {
+    "name": "sanacom Unternehmensberatung e.U.",
+    "contactPerson": "Mag. Daniela Gruber",
+    "address": "Kirchenwagnerweg 6b, 5071 Wals bei Salzburg",
+    "email": "office@sanacom.at"
+  },
+  "provider": {
+    "name": "psquared GmbH",
+    "contactPerson": "Martin Pammesberger",
+    "address": "Dametzstraße 2-4, 4020 Linz, Österreich",
+    "email": "martin.pammesberger@psquared.dev",
+    "website": "psquared.dev",
+    "jurisdiction": "Linz"
+  },
+  "body": {
+    "intro": "Sanacom unterstützt seit über 15 Jahren österreichische Apotheken bei der Sortiments- und Regalplanung. Pro Apotheke wird ein 12-Monats-Umsatzauszug mit deiner eigenen Stammdatenbank verknüpft und die Artikel manuell in Grob- und Regalkategorien einsortiert. Dieses Angebot beschreibt eine zweistufige KI-Lösung, die diesen Prozess deutlich beschleunigt und gleichzeitig die Stammdaten dauerhaft besser macht.",
+    "problem": "Die Verknüpfung über die PZN funktioniert gut — das ist nicht der Engpass. Der eigentliche Zeitfresser ist das manuelle Ergänzen der Kategorien für Artikel, die in deinen Stammdaten als <strong>#N/A</strong> hinterlegt sind oder dort gar nicht vorkommen. In der bereitgestellten Beispiel-Apotheke betrifft das rund 46&nbsp;% der Artikel — heute recherchierst du diese einzeln per Google-Suche und shop-apotheke.at. Pro Apotheke kostet das mehrere Stunden Handarbeit. Gleichzeitig haben die Stammdaten selbst 3.797 Einträge ohne Kategorie (22&nbsp;% des Bestands).",
+    "solution": "Wir bauen ein webbasiertes Categorizer-Tool mit zwei klar getrennten Arbeitsabläufen. <strong>Stammdaten vervollständigen:</strong> einmalige KI-Anreicherung der unkategorisierten Stammdaten-Einträge. <strong>Apothekerliste ergänzen:</strong> Drag-and-drop einer KD-Datei, automatischer Join mit den Stammdaten, KI mit Live-Websuche für alle Unbekannten, Excel-Download mit farbcodierten Confidence-Werten und überprüfbaren Quellen-Links. Jede einmal kategorisierte PZN landet in einem Cache und ist beim nächsten Mal sofort verfügbar — der Aufwand sinkt mit jeder bearbeiteten Apotheke.",
+    "deliverables": [
+      "<strong>Stammdaten-Bereinigung (einmalig):</strong> KI-Anreicherung aller aktuell unkategorisierten Stammdaten-Einträge mit Confidence-Score und überprüfbarer Quellen-URL. Lieferung: bereinigte Stammdaten als Excel.",
+      "<strong>Sanacom Categorizer Web-Tool:</strong> Browser-Anwendung mit zwei Tabs (Stammdaten vervollständigen, Apothekerliste ergänzen), Datei-Upload, Live-Fortschrittsanzeige, Einzelzeilen- oder Batch-Verarbeitung.",
+      "<strong>Excel-Export mit Farbcodierung:</strong> Confidence-Werte als Ampel (Grün ≥ 80&nbsp;%, Gelb 40–80&nbsp;%, Rot &lt; 40&nbsp;%), klickbare Quellen-URLs, automatische Markierung nicht überprüfbarer Einträge.",
+      "<strong>3 Monate Nutzung inklusive:</strong> Hosting, Wartung und alle KI-Kosten in den ersten drei Monaten ohne weitere Verrechnung — genug Zeit, um mehrere Apotheken durchzuspielen und den Workflow zu validieren.",
+      "<strong>Einschulung:</strong> Online-Übergabe (ca. 1 Stunde) mit Walkthrough durch beide Workflows."
+    ],
+    "sections": [
+      {
+        "title": "Vorgehen",
+        "body": "Start ab Zusage und Eingang der Anzahlung.",
+        "bullets": [
+          "<strong>Woche 1:</strong> Setup auf psquared-Infrastruktur (Hetzner, Deutschland), DSGVO-konforme Datenablage, Übernahme der aktuellen Sanacom-Stammdaten.",
+          "<strong>Woche 2:</strong> Stammdaten-Bereinigung in Batches. Übergabe der bereinigten Stammdaten.",
+          "<strong>Woche 3:</strong> Übergabe des Categorizer-Tools mit Online-Schulung. Erste Apothekerliste wird gemeinsam durchgespielt.",
+          "<strong>Ab Woche 4:</strong> laufender Betrieb. Bei Bedarf Feinschliff auf Basis der ersten Live-Nutzung."
+        ]
+      }
+    ],
+    "screenshots": [
+      {
+        "src": "assets/stammdaten1.png",
+        "caption": "Tab «Stammdaten vervollständigen» — 3.797 offene Einträge in den Sanacom-Stammdaten, ausgewählte Zeilen per Klick einzeln oder im Batch von KI ergänzen lassen."
+      },
+      {
+        "src": "assets/stammdaten2.png",
+        "caption": "Bereinigte Stammdaten mit Confidence-Werten und klickbaren Quellen — jede KI-Kategorisierung kann nachvollzogen und stichprobenartig geprüft werden."
+      },
+      {
+        "src": "assets/apothekerliste1.png",
+        "caption": "Tab «Apothekerliste ergänzen» — KD-Datei einer Apotheke hochladen, automatischer PZN-Abgleich mit den Stammdaten, KI nur für die echten Lücken."
+      },
+      {
+        "src": "assets/excel-stammdaten.png",
+        "caption": "Export-Excel mit Farbcodierung: nicht überprüfbare Quellen rot, mittlere Confidence gelb, sichere Treffer grün. Spalten «GrobKat», «RegalKat» und «Begründung» direkt für deine weitere Sanacom-Arbeit nutzbar."
+      }
+    ]
+  },
+  "angebot": {
+    "items": [
+      {
+        "position": 1,
+        "title": "Stammdaten-Bereinigung (einmalig)",
+        "description": "KI-Anreicherung aller unkategorisierten Stammdaten-Einträge mit Confidence-Score und Quellen-URL. Lieferung als bereinigtes Excel.",
+        "qty": 1,
+        "unitPrice": 1500
+      },
+      {
+        "position": 2,
+        "title": "Categorizer-Tool — Setup & 3 Monate Nutzung",
+        "description": "Aufbau des Categorizer-Tools auf psquared-Infrastruktur inkl. Einschulung. Erste 3 Monate Hosting, Wartung und KI-Nutzung inklusive.",
+        "qty": 1,
+        "unitPrice": 1500
+      }
+    ],
+    "vatRate": 0.20,
+    "recurring": {
+      "label": "Hosting, Wartung & KI-Nutzung (ab Monat 4)",
+      "amount": 49,
+      "per": "Monat",
+      "description": "Pauschalpreis für Hosting auf psquared-Infrastruktur, laufende Wartung und alle KI-Kosten (LLM-Calls, Websuche, Caching). Kündigbar monatlich zum Monatsende."
+    },
+    "paymentSummary": "<strong>Zahlung:</strong> 50&nbsp;% bei Auftragserteilung, 50&nbsp;% nach Übergabe der bereinigten Stammdaten und Aktivierung des Tools. Zahlungsziel: 14 Tage netto. Details und weitere Bedingungen siehe AGB."
+  },
+  "terms": {
+    "paymentTerms": "Das Komplettpaket (Positionen 1 + 2) wird zu 50&nbsp;% bei Auftragserteilung und zu 50&nbsp;% nach Übergabe der bereinigten Stammdaten und Aktivierung des Tools fakturiert. Die monatliche Pauschale ab Monat 4 wird quartalsweise im Voraus verrechnet. Zahlungsziel: 14 Tage netto ab Rechnungsdatum.",
+    "extra": "<p><strong>Recht auf Eigenbetrieb (Self-Hosting):</strong> Sanacom hat jederzeit das Recht, das Tool auf eigener Infrastruktur weiterzubetreiben. psquared liefert dazu Source-Code, Setup-Dokumentation und eine einmalige Übergabe-Session gegen pauschal 800&nbsp;EUR netto. Mit der Übergabe enden alle laufenden Verpflichtungen zwischen den Parteien.</p><p><strong>Preisanpassung Monatspauschale:</strong> Die monatliche Pauschale (49&nbsp;EUR netto) ist während des ersten Jahres fix. Eine Anpassung danach ist maximal einmal pro Jahr mit 30 Tagen schriftlicher Vorankündigung möglich, und nur zulässig wenn entweder (a) die österreichische VPI-Inflationsrate über 3&nbsp;% liegt oder (b) der LLM-Anbieter seine Preise innerhalb von 12 Monaten um mehr als 25&nbsp;% angehoben hat.</p><p><strong>Datenverarbeitung:</strong> DSGVO-konforme Verarbeitung auf europäischer Infrastruktur (Hetzner). In den Apothekerlisten werden keine personenbezogenen Daten verarbeitet — ausschließlich Artikelnummern (PZN) und Sortimentsdaten.</p><p><strong>Anbieterdaten:</strong> psquared GmbH, Dametzstraße 2-4, 4020 Linz · FN 647249m · UID ATU81780404 · Geschäftsführer: Martin Pammesberger, Manuel Pils.</p>"
+  }
+}

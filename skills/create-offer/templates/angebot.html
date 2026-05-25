@@ -1,0 +1,92 @@
+<div class="body-header">
+  <div class="brand">
+    <span class="brand-mark">p²</span>
+    <span>psquared</span>
+  </div>
+  <div class="doc-label">Angebot &mdash; Leistungen &amp; Preise</div>
+</div>
+
+<div class="angebot-header">
+  <h1>Angebot</h1>
+  <div class="ref">
+    {{#if offer.referenceNumber}}Nr. {{offer.referenceNumber}} &middot; {{/if}}{{offer.date}}
+  </div>
+</div>
+
+<p style="color: var(--muted); margin-bottom: 4mm;">
+  Für <strong style="color: var(--secondary)">{{client.name}}</strong>{{#if client.contactPerson}}, z.Hd. {{client.contactPerson}}{{/if}}.
+  Alle Preise verstehen sich in Euro, exkl. USt., sofern nicht anders angegeben.
+</p>
+
+<table class="items">
+  <thead>
+    <tr>
+      <th style="width: 8mm;">Pos.</th>
+      <th>Leistung</th>
+      <th class="num" style="width: 18mm;">Menge</th>
+      <th class="num" style="width: 30mm;">Einzelpreis</th>
+      <th class="num" style="width: 30mm;">Gesamt</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each angebot.items}}
+    <tr>
+      <td>{{position}}</td>
+      <td>
+        <div class="item-title">{{title}}</div>
+        {{#if description}}<div class="item-desc">{{{description}}}</div>{{/if}}
+      </td>
+      <td class="num">{{qtyDisplay}}{{#if unit}} {{unit}}{{/if}}</td>
+      <td class="num">{{unitPriceDisplay}}</td>
+      <td class="num">{{lineTotalDisplay}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<div class="totals">
+  <div class="row">
+    <span class="label">Zwischensumme (netto)</span>
+    <span>{{angebot.subtotalDisplay}}</span>
+  </div>
+  {{#if angebot.hasDiscount}}
+  <div class="row discount">
+    <span class="label">{{#if angebot.discountLabel}}{{angebot.discountLabel}}{{else}}Bundle-Rabatt{{/if}}</span>
+    <span>&minus; {{angebot.discountDisplay}}</span>
+  </div>
+  <div class="row">
+    <span class="label">Netto nach Rabatt</span>
+    <span>{{angebot.afterDiscountDisplay}}</span>
+  </div>
+  {{/if}}
+  <div class="row">
+    <span class="label">USt. {{angebot.vatRateDisplay}}</span>
+    <span>{{angebot.vatAmountDisplay}}</span>
+  </div>
+  <div class="row total">
+    <span class="label">Gesamt (brutto)</span>
+    <span>{{angebot.totalDisplay}}</span>
+  </div>
+</div>
+
+{{#if angebot.paymentSummary}}
+<div class="payment-summary">{{{angebot.paymentSummary}}}</div>
+{{/if}}
+
+{{#if angebot.recurring}}
+<div class="recurring">
+  <div class="label">{{#if angebot.recurring.label}}{{{angebot.recurring.label}}}{{else}}Laufende Leistung{{/if}}</div>
+  <div class="amount">
+    {{angebot.recurring.amountDisplay}}
+    <span class="per">/ {{#if angebot.recurring.per}}{{angebot.recurring.per}}{{else}}Monat{{/if}}</span>
+  </div>
+  {{#if angebot.recurring.description}}<div class="desc">{{{angebot.recurring.description}}}</div>{{/if}}
+</div>
+{{/if}}
+
+{{#if angebot.notes}}
+<div class="notes">
+  <strong>Hinweise:</strong>
+  <ul>{{#each angebot.notes}}<li>{{{this}}}</li>{{/each}}</ul>
+</div>
+{{/if}}

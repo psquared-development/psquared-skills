@@ -1,0 +1,60 @@
+<div class="body-header">
+  <div class="brand">
+    <span class="brand-mark">p²</span>
+    <span>psquared</span>
+  </div>
+  <div class="doc-label">Projektbeschreibung</div>
+</div>
+
+{{#if body.intro}}
+<div class="section">
+  <h2>Worum es geht</h2>
+  <p>{{{body.intro}}}</p>
+</div>
+{{/if}}
+
+{{#if body.problem}}
+<div class="section">
+  <h2>Ausgangslage</h2>
+  <div class="callout">
+    <p>{{{body.problem}}}</p>
+  </div>
+</div>
+{{/if}}
+
+{{#if body.solution}}
+<div class="section">
+  <h2>Unsere Lösung</h2>
+  <p>{{{body.solution}}}</p>
+</div>
+{{/if}}
+
+{{#if body.deliverables}}
+<div class="section">
+  <h2>{{#if body.deliverablesHeading}}{{body.deliverablesHeading}}{{else}}Was du bekommst{{/if}}</h2>
+  <ul>
+    {{#each body.deliverables}}<li>{{{this}}}</li>{{/each}}
+  </ul>
+</div>
+{{/if}}
+
+{{#if body.sections}}
+{{#each body.sections}}
+<div class="section">
+  <h2>{{title}}</h2>
+  {{#if body}}<p>{{{body}}}</p>{{/if}}
+  {{#if bullets}}
+  <ul>{{#each bullets}}<li>{{{this}}}</li>{{/each}}</ul>
+  {{/if}}
+</div>
+{{/each}}
+{{/if}}
+
+{{#if body.screenshots}}
+{{#each body.screenshots}}
+<div class="screenshot">
+  <img src="{{src}}" alt="{{caption}}" />
+  {{#if caption}}<div class="caption">{{caption}}</div>{{/if}}
+</div>
+{{/each}}
+{{/if}}

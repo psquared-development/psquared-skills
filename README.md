@@ -102,6 +102,7 @@ Maintenance (run anytime):
 | Skill | Description |
 |-------|-------------|
 | [price-change](./skills/price-change/SKILL.md) | Change pricing across all touchpoints (website, app, docs, Stripe) |
+| [create-offer](./skills/create-offer/SKILL.md) | Generate a branded multi-page client offer PDF (title + project description + screenshots + Angebot + AGB) from a JSON config. Two-pass Playwright render with pagination + pdf-lib merge. |
 
 ## Contributing
 

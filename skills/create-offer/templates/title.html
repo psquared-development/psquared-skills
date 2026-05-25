@@ -1,0 +1,36 @@
+<div class="title-top">
+  <div class="brand">
+    <span class="brand-mark">p²</span>
+    <span>psquared</span>
+  </div>
+  <div class="meta">
+    {{#if offer.referenceNumber}}<div>Angebots-Nr. {{offer.referenceNumber}}</div>{{/if}}
+    <div>{{offer.date}}</div>
+    {{#if offer.validUntil}}<div>Gültig bis {{offer.validUntil}}</div>{{/if}}
+  </div>
+</div>
+
+<div class="title-center">
+  <div class="title-eyebrow">{{#if offer.eyebrow}}{{offer.eyebrow}}{{else}}Angebot{{/if}}</div>
+  <div class="title-client">Für {{client.name}}{{#if client.contactPerson}} &mdash; z.Hd. {{client.contactPerson}}{{/if}}</div>
+  <h1 class="title-headline">{{offer.title}}</h1>
+  {{#if offer.subtitle}}<p class="title-sub">{{offer.subtitle}}</p>{{/if}}
+</div>
+
+<div class="title-bottom">
+  <div>
+    <h4>Auftraggeber</h4>
+    <div class="contact-line"><strong>{{client.name}}</strong></div>
+    {{#if client.contactPerson}}<div class="contact-line">{{client.contactPerson}}</div>{{/if}}
+    {{#if client.address}}<div class="contact-line">{{{client.address}}}</div>{{/if}}
+    {{#if client.email}}<div class="contact-line">{{client.email}}</div>{{/if}}
+  </div>
+  <div>
+    <h4>Auftragnehmer</h4>
+    <div class="contact-line"><strong>{{provider.name}}</strong></div>
+    {{#if provider.contactPerson}}<div class="contact-line">{{provider.contactPerson}}</div>{{/if}}
+    {{#if provider.address}}<div class="contact-line">{{{provider.address}}}</div>{{/if}}
+    {{#if provider.email}}<div class="contact-line">{{provider.email}}</div>{{/if}}
+    {{#if provider.website}}<div class="contact-line"><a href="https://{{provider.website}}">{{provider.website}}</a></div>{{/if}}
+  </div>
+</div>

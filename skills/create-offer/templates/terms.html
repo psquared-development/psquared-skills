@@ -1,0 +1,98 @@
+<div class="body-header">
+  <div class="brand">
+    <span class="brand-mark">p²</span>
+    <span>psquared</span>
+  </div>
+  <div class="doc-label">AGB &amp; Konditionen</div>
+</div>
+
+<div class="terms-header">
+  <h1 style="font-size: 22pt; margin: 0;">Allgemeine Geschäftsbedingungen</h1>
+</div>
+
+<div class="terms-section">
+  <h3>1. Gültigkeit</h3>
+  <p>
+    Dieses Angebot ist
+    {{#if offer.validUntil}}gültig bis <strong>{{offer.validUntil}}</strong>{{else}}30 Tage ab Ausstellungsdatum gültig{{/if}}.
+    Mit schriftlicher Annahme (E-Mail genügt) durch den Auftraggeber kommt der Vertrag zustande.
+  </p>
+</div>
+
+<div class="terms-section">
+  <h3>2. Leistungsumfang</h3>
+  <p>
+    Es gelten ausschließlich die in diesem Angebot beschriebenen Leistungen.
+    Erweiterungen, Sonderwünsche oder Folgeleistungen werden separat angeboten und beauftragt.
+  </p>
+</div>
+
+<div class="terms-section">
+  <h3>3. Zahlungsbedingungen</h3>
+  <p>
+    {{#if terms.paymentTerms}}{{{terms.paymentTerms}}}{{else}}Einmalige Leistungen werden zu 50 % bei Auftragserteilung und zu 50 % bei Abnahme fakturiert. Laufende Leistungen werden monatlich im Voraus verrechnet. Zahlungsziel: 14 Tage netto ab Rechnungsdatum.{{/if}}
+  </p>
+</div>
+
+<div class="terms-section">
+  <h3>4. Mitwirkung des Auftraggebers</h3>
+  <p>
+    Für eine zügige Umsetzung benötigen wir zeitnahe Rückmeldungen, Zugriff auf relevante Daten/Systeme
+    sowie eine klare Ansprechperson auf Auftraggeberseite. Verzögerungen aufgrund fehlender Mitwirkung
+    gehen nicht zu Lasten des Auftragnehmers.
+  </p>
+</div>
+
+<div class="terms-section">
+  <h3>5. Vertraulichkeit &amp; Datenschutz</h3>
+  <p>
+    Alle im Rahmen des Projekts erhaltenen Informationen werden vertraulich behandelt.
+    Personenbezogene Daten werden DSGVO-konform verarbeitet. Auf Wunsch wird ein
+    Auftragsverarbeitungsvertrag (AVV) abgeschlossen.
+  </p>
+</div>
+
+<div class="terms-section">
+  <h3>6. Haftung</h3>
+  <p>
+    Die Haftung des Auftragnehmers ist auf Vorsatz und grobe Fahrlässigkeit beschränkt.
+    Bei leichter Fahrlässigkeit ist die Haftung der Höhe nach auf das Nettoauftragsvolumen
+    der jeweiligen Leistung begrenzt.
+  </p>
+</div>
+
+<div class="terms-section">
+  <h3>7. Nutzungsrechte</h3>
+  <p>
+    Nach vollständiger Bezahlung erhält der Auftraggeber ein nicht-exklusives, zeitlich
+    und örtlich unbeschränktes Nutzungsrecht an den vereinbarten Arbeitsergebnissen für
+    den vereinbarten Zweck. Vorbestehende Bibliotheken, Frameworks und Tools von psquared
+    bleiben Eigentum des Auftragnehmers.
+  </p>
+</div>
+
+{{#if terms.extra}}
+<div class="terms-section">
+  <h3>8. Zusatzvereinbarungen</h3>
+  {{{terms.extra}}}
+</div>
+{{/if}}
+
+<div class="terms-section">
+  <h3>{{#if terms.extra}}9{{else}}8{{/if}}. Gerichtsstand</h3>
+  <p>
+    Es gilt österreichisches Recht. Gerichtsstand ist
+    {{#if provider.jurisdiction}}{{provider.jurisdiction}}{{else}}Linz{{/if}}.
+  </p>
+</div>
+
+<div class="signature-block">
+  <div class="sig">
+    <div class="role">Ort, Datum &mdash; Auftraggeber</div>
+    <div style="margin-top: 2mm;">{{client.name}}{{#if client.contactPerson}}, {{client.contactPerson}}{{/if}}</div>
+  </div>
+  <div class="sig">
+    <div class="role">Ort, Datum &mdash; Auftragnehmer</div>
+    <div style="margin-top: 2mm;">{{provider.name}}{{#if provider.contactPerson}}, {{provider.contactPerson}}{{/if}}</div>
+  </div>
+</div>

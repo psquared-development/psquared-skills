@@ -1,0 +1,410 @@
+/* =============================================================================
+   psquared offer PDF — shared styles
+   Brand reference (extracted from psquared-websites/apps/psquared):
+     --primary:        #6b46c1  (Purple)
+     --primary-light:  #9f7aea
+     --primary-dark:   #553c9a
+     --secondary:      #1a202c  (Near-black for text)
+     --accent:         #8b5cf6  (Violet)
+     Font:             Inter (system fallback to -apple-system, sans-serif)
+   ============================================================================= */
+
+@page {
+  size: A4;
+  /* General @page has no margin — Playwright sets per-pass body margins. */
+}
+@page :first {
+  /* Title page must stay edge-to-edge in BOTH passes (the second pass
+     filters via pageRanges, but still has to render page 1 to know what
+     page 2 looks like). Without this rule, the title page would inherit
+     pass 2's body margin and overflow onto a second page, knocking the
+     pagination off by one. */
+  margin: 0;
+}
+
+:root {
+  --primary: #6b46c1;
+  --primary-light: #9f7aea;
+  --primary-dark: #553c9a;
+  --secondary: #1a202c;
+  --accent: #8b5cf6;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --bg-soft: #f8fafc;
+  --page-padding: 22mm;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+               'Helvetica Neue', Arial, sans-serif;
+  color: var(--secondary);
+  font-size: 11pt;
+  line-height: 1.55;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.page {
+  width: 100%;
+  position: relative;
+  page-break-after: always;
+  break-after: page;
+}
+.page:last-child { page-break-after: auto; break-after: auto; }
+/* Title page is rendered in a separate PDF pass with margin: 0, so it
+   needs its own internal padding + full A4 height. */
+.page--title {
+  padding: 22mm;
+  min-height: 297mm;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--secondary);
+  margin: 0 0 0.5em 0;
+  line-height: 1.2;
+  font-weight: 700;
+}
+h1 { font-size: 28pt; }
+h2 { font-size: 18pt; color: var(--primary-dark); margin-top: 1.2em; }
+h3 { font-size: 13pt; color: var(--primary-dark); margin-top: 1em; }
+h4 { font-size: 11pt; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+p { margin: 0 0 0.8em 0; }
+ul { margin: 0 0 0.8em 0; padding-left: 1.2em; }
+ul li { margin-bottom: 0.2em; }
+strong { color: var(--secondary); }
+
+/* ---------- Brand mark (placeholder if no SVG is dropped in assets/) -------- */
+/* TODO: drop a real psquared logo at assets/logo.svg, then swap the .brand
+   element below for an <img src="..."> in the templates. */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-weight: 700;
+  font-size: 16pt;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+}
+.brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13pt;
+  font-weight: 800;
+  font-family: 'Inter', sans-serif;
+}
+
+/* =============================================================================
+   Title page
+   ============================================================================= */
+.page--title {
+  background: linear-gradient(160deg, #ffffff 0%, #f5f1ff 60%, #ece3ff 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.title-top { display: flex; justify-content: space-between; align-items: center; }
+.title-top .meta {
+  font-size: 9.5pt;
+  color: var(--muted);
+  text-align: right;
+}
+.title-center { padding: 0 0 20mm 0; }
+.title-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--primary);
+  font-size: 9.5pt;
+  font-weight: 600;
+  margin-bottom: 14mm;
+}
+.title-client {
+  font-size: 12pt;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 4mm;
+}
+.title-headline {
+  font-size: 30pt;
+  line-height: 1.1;
+  font-weight: 800;
+  color: var(--secondary);
+  margin: 0 0 8mm 0;
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.title-sub {
+  font-size: 13pt;
+  color: var(--muted);
+  max-width: 140mm;
+}
+.title-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8mm;
+  padding-top: 8mm;
+  border-top: 2px solid var(--primary);
+  font-size: 10pt;
+}
+.title-bottom h4 { margin-top: 0; }
+.title-bottom .contact-line { color: var(--secondary); }
+.title-bottom .contact-line a { color: var(--primary); text-decoration: none; }
+
+/* =============================================================================
+   Body page (project description, problem, solution, screenshots)
+   ============================================================================= */
+.body-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4mm;
+  margin-bottom: 8mm;
+}
+.body-header .doc-label {
+  color: var(--muted);
+  font-size: 9.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.section { margin-bottom: 10mm; }
+.section + .section { page-break-inside: avoid; }
+
+.callout {
+  background: var(--bg-soft);
+  border-left: 4px solid var(--primary);
+  padding: 5mm 6mm;
+  border-radius: 0 4px 4px 0;
+  margin: 4mm 0 6mm 0;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.callout p:last-child { margin-bottom: 0; }
+
+.screenshot {
+  margin: 6mm 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  /* Keep image + caption together on the same page. */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.screenshot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.screenshot .caption {
+  padding: 3mm 5mm;
+  font-size: 9.5pt;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  background: var(--bg-soft);
+}
+
+/* =============================================================================
+   Angebot (pricing) page
+   ============================================================================= */
+.angebot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6mm;
+}
+.angebot-header h1 {
+  font-size: 20pt;
+  color: var(--primary-dark);
+  margin: 0;
+}
+.angebot-header .ref {
+  color: var(--muted);
+  font-size: 9pt;
+}
+
+.page--angebot { font-size: 9.5pt; }
+
+table.items {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 5mm 0 4mm 0;
+  font-size: 9pt;
+}
+table.items th {
+  text-align: left;
+  background: var(--primary);
+  color: #fff;
+  padding: 2.5mm 3.5mm;
+  font-weight: 600;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+table.items th.num, table.items td.num { text-align: right; }
+table.items td {
+  padding: 2mm 3mm;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+table.items td .item-title {
+  font-weight: 600;
+  color: var(--secondary);
+  margin-bottom: 1mm;
+  font-size: 9.5pt;
+}
+table.items td .item-desc {
+  color: var(--muted);
+  font-size: 8.5pt;
+  line-height: 1.45;
+}
+
+.totals {
+  margin: 3mm 0 0 auto;
+  width: 85mm;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 9.5pt;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.totals .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2mm 4mm;
+  border-bottom: 1px solid var(--border);
+}
+.totals .row:last-child { border-bottom: 0; }
+.totals .row.total {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 11pt;
+}
+.totals .row.discount { color: var(--primary-dark); }
+.totals .label { color: var(--muted); }
+.totals .row.total .label { color: rgba(255,255,255,0.85); }
+
+.payment-summary {
+  margin-top: 3mm;
+  padding: 2.5mm 3.5mm;
+  background: var(--bg-soft);
+  border-radius: 4px;
+  font-size: 8.5pt;
+  color: var(--secondary);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.payment-summary strong { color: var(--primary-dark); }
+
+.recurring {
+  margin-top: 4mm;
+  padding: 3mm 4mm;
+  border: 1px dashed var(--primary);
+  border-radius: 6px;
+  background: #faf7ff;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.recurring .label {
+  font-size: 8pt;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-bottom: 1mm;
+}
+.recurring .amount {
+  font-size: 13pt;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.recurring .amount .per {
+  font-size: 9pt;
+  color: var(--muted);
+  font-weight: 400;
+}
+.recurring .desc { font-size: 8.5pt; color: var(--muted); margin-top: 1mm; }
+
+.notes {
+  margin-top: 5mm;
+  font-size: 8.5pt;
+  color: var(--muted);
+}
+
+/* =============================================================================
+   Terms page
+   ============================================================================= */
+.terms-header {
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 3mm;
+  margin-bottom: 8mm;
+}
+.terms-section {
+  margin-bottom: 6mm;
+  font-size: 9.5pt;
+  line-height: 1.55;
+  color: var(--secondary);
+}
+.terms-section h3 {
+  font-size: 11pt;
+  color: var(--primary-dark);
+  margin-bottom: 2mm;
+  /* Keep section headings glued to the following content so they don't
+     orphan at the bottom of a page. */
+  break-after: avoid-page;
+  page-break-after: avoid;
+}
+.terms-section p {
+  /* Don't strand the first paragraph from its heading. */
+  break-before: avoid-page;
+  page-break-before: avoid;
+}
+/* Same widow protection on body sections. */
+.section h2 {
+  break-after: avoid-page;
+  page-break-after: avoid;
+}
+
+.signature-block {
+  margin-top: 14mm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12mm;
+}
+.signature-block .sig {
+  border-top: 1px solid var(--secondary);
+  padding-top: 2mm;
+  font-size: 9.5pt;
+  color: var(--muted);
+}
+.signature-block .sig .role { color: var(--secondary); font-weight: 600; }
+
+/* Footer line on each non-title page */
+.footer-line {
+  position: absolute;
+  bottom: 12mm;
+  left: var(--page-padding);
+  right: var(--page-padding);
+  display: flex;
+  justify-content: space-between;
+  font-size: 8.5pt;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 2mm;
+}
