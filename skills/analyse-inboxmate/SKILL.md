@@ -180,17 +180,20 @@ All in `/Users/martinpammesberger/Documents/psquared/claude-overlord-folder/.env
 | `NOTIFICATIONS_SERVICE_BEARER_TOKEN` | Notification service (admin) |
 | `ACKEE_TOKEN` | Ackee analytics |
 
-## Pricing Tiers
+## Pricing Tiers (credits model, since 2026-06)
 
 **Note:** If prices change, this table must be updated. The `/price-change` skill handles pricing updates across all touchpoints — make sure this file is included in the update list.
 
-| Tier | Monthly | Yearly | Demo Discount (yearly) |
-|---|---|---|---|
-| Starter | €59 | €49/mo | — |
-| Pro | €129 | €107/mo | -33% → €86/mo |
-| Business | €399 | €331/mo | -50% → €199/mo |
+Model: **pay per Postfach (mailbox) + AI credits** (chat reply 1, email draft 2, tool call/scrape/PDF 1; setup & rule-based sorting free). Manual invoicing — no Stripe checkout.
 
-All plans include 14-day free trial, no credit card required.
+| Tier | Price | Postfächer | Credits/mo | Notes |
+|---|---|---|---|---|
+| Free | €0 | 0 (chatbot only) | 50 | widget funnel |
+| Starter | €49/mo (monthly only) | 1 (extra €19) | 500 | full email automation from here |
+| Pro | €129/mo · €107 yearly | 3 (extra €15) | 2,500 | API+MCP, marketplace; demo discount → €86 first year |
+| Business | ab €349/mo, custom | 10+ | 10,000+ | custom integrations (first incl.), white-label, SLA; demo offer €199 first year |
+
+Top-ups: €9/€8 per 1,000 (Starter/Pro), instant grant, invoiced afterwards. All paid plans 14-day free trial, no credit card.
 
 ## Knowledge System
 
