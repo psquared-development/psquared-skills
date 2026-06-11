@@ -179,8 +179,8 @@ For each remaining opportunity, extract:
 |----------|----------|--------|------|
 | CHATBOT / null | demo-outreach | de | `b98926be-5977-40a6-9be6-ffe38989fc5a` |
 | CHATBOT / null | demo-outreach | en | `47381011-a737-4157-a177-f7646bb4aee3` |
-| INBOX | inbox-demo-outreach | de | `TBD — not yet seeded in the notification-service DB. If you hit an INBOX opportunity while this still says TBD, STOP and tell Martin.` |
-| INBOX | inbox-demo-outreach | en | `TBD — same` |
+| INBOX | inbox-demo-outreach | de | `0d928690-2be4-4f50-a3c7-988fc04424e9` |
+| INBOX | inbox-demo-outreach | en | `d064091f-145d-4f10-bcd3-a750c62a3eed` |
 
 For each opportunity, determine the locale:
 - If company domain is .at, .de, .ch → locale `de`
