@@ -74,11 +74,11 @@ Rules:
 - Senders: plausible German/Austrian names, free-mail or company domains. Times: same morning ("08:32", "09:14", "10:05") + one "Gestern".
 - Bodies 50–150 words; drafts 60–150 words, in the prospect's tone, signed by their team.
 
-### 2c — Offer + deadline
+### 2c — No offers
 
-Same rules as `/inboxmate-demo` 2g: ask the user for the deadline (once per batch), offerText is a time-limited InboxMate deal, NEVER "Kostenlose Beratung/Erstgespräch". Inbox-specific pattern: `"Inbox-Test starten und bis zu 50% Rabatt im ersten Jahr sichern"`.
+INBOX demos run WITHOUT offers (Martin, 2026-06-11): do NOT set `offerText` or `offerExpiresAt`, do not ask the user for a deadline. The pitch is the Demo-Postfach itself + the Inbox-Test — no discount, no countdown.
 
-> Show the plan summary (company, Befund, thread list with categories/actions, offer, deadline) and proceed after 5 seconds unless stopped.
+> Show the plan summary (company, Befund, thread list with categories/actions) and proceed after 5 seconds unless stopped.
 
 ## PHASE 3 — Build via MCP
 
@@ -93,8 +93,6 @@ One call does everything (no agent, no publish):
       "companyName": "[Company Name]",
       "companyDomain": "[domain.com]",
       "logoUrl": "[from OpenBrand]",
-      "offerText": "[from 2c]",
-      "offerExpiresAt": "[ISO date]",
       "customMessage": "So sieht Ihr Posteingang mit InboxMate aus — wir haben die häufigsten Mail-Typen von [Company] simuliert: vorsortiert, mit fertigen Antwortentwürfen.",
       "language": "de",
       "inboxThreads": [ /* threads from 2b */ ]
@@ -128,7 +126,6 @@ INBOX DEMO READY — [Company Name]
 Playground URL: [playgroundUrl]
 Befund: [5 one-liners]
 Threads: [N] ([categories] · [M] with AI draft)
-Offer: [offerText] (expires [date])
 Demo ID: [demoId] · Opportunity: demoType INBOX, PENDING_REVIEW
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -140,5 +137,5 @@ Demo ID: [demoId] · Opportunity: demoType INBOX, PENDING_REVIEW
 - [ ] Mixed actions: ≥1 reply-with-draft, ≥1 archive, ≥1 ticket/forward or urgent
 - [ ] Categories in prospect's language, consistent labels
 - [ ] Logo set (OpenBrand, with manual fallback per `/inboxmate-demo` 2f)
-- [ ] offerText is an InboxMate deal, no consultation language
+- [ ] NO offerText/offerExpiresAt set (inbox demos run offer-free)
 - [ ] CRM opportunity: `demoType: INBOX`, `outreachType: INBOXMATE`, stage SCREENING, PENDING_REVIEW

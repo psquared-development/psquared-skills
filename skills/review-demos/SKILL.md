@@ -131,10 +131,10 @@ From the response, record:
 | **No hallucinations (CRITICAL)** | AI drafts speak AS the prospect — they must NOT state prices, policies, opening hours or product names that are not on the company website. This is the top risk: check every draft against the site. |
 | **Draft quality** | Drafts match the company's tone (Sie/du) and are sendable as-is by their staff |
 | **Action mix** | ≥1 reply-with-draft, ≥1 archive (newsletter), ≥1 ticket/forward or urgent thread |
-| **Countdown set** | Same rule as chatbot: future `offerExpiresAt`, time-limited `offerText`, no consultation language |
+| **No offer** | INBOX demos run offer-free: `offerText`/`offerExpiresAt` must be EMPTY (an offer/countdown on an inbox demo is a FAIL — remove via update_inbox_demo) |
 | **CTA correct** | Page shows "Inbox-Test starten — 14 Tage gratis" as primary CTA (renders automatically for type=inbox) |
 
-INBOX auto-fixes go through the `update_inbox_demo` MCP tool (full `inboxThreads` replacement) — 2d (widget color) does not apply; 2e (countdown SQL) applies unchanged.
+INBOX auto-fixes go through the `update_inbox_demo` MCP tool (full `inboxThreads` replacement) — 2d (widget color) and 2e (countdown fix) do not apply — inbox demos have neither widget nor offer.
 
 ### 2d — Auto-Fix: Colors
 

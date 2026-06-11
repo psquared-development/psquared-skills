@@ -49,6 +49,8 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 
 After the response lands, filter out any edge where `node.company.outreachFor` contains `PERSONAL_ONLY`. Announce how many were dropped for that reason.
 
+**INBOX campaigns are offer-free** (Martin, 2026-06-11): for the inbox group, skip offer text and deadline entirely — create the campaign with the name only and do NOT ask the user for offer details. STEP 2 questions 3-4 apply to CHATBOT campaigns only.
+
 **Campaigns are single-type.** Group the remaining opportunities by `demoType` (`null` counts as `CHATBOT`). If both CHATBOT and INBOX demos are waiting, plan SEPARATE campaigns — never mix types in one campaign, because `/setup-email-drafts` routes the email template per campaign batch and the offer copy differs (chatbot deal vs "Inbox-Test starten"). Present both groups to the user and run STEP 2–4 once per group.
 
 > **Announce:**
