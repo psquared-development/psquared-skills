@@ -1,6 +1,6 @@
 ---
 name: inbox-outreach-pilot
-description: "Autonomous pilot for the InboxMate EMAIL outreach (Demo-Postfach/INBOX track). Assesses where the inbox pipeline stands (leads → demos → review → campaign → drafts) and executes the next sensible step end-to-end, always finishing with the inbox sanity check and a summary of what the user should do next (ideally: just schedule the mails). Use when asked to 'advance the email outreach', 'run the inbox pipeline', or 'what's next for the Demo-Postfach motion'."
+description: "Autonomous pilot for the InboxMate EMAIL outreach (Demo-Postfach/INBOX track). Assesses where the inbox pipeline stands (leads → demos → review → campaign → drafts) and executes the next sensible step end-to-end, always finishing with the inbox sanity check and a summary of what the user should do next (ideally: just schedule the mails). Runs in save mode by default: orchestration + all quality gates on the top model, data collection on haiku subagents, content generation on sonnet subagents (pass 'full' to disable). Use when asked to 'advance the email outreach', 'run the inbox pipeline', or 'what's next for the Demo-Postfach motion'."
 ---
 
 # Inbox Outreach Pilot (Demo-Postfach)
@@ -10,6 +10,24 @@ One command that moves the EMAIL outreach forward, wherever it stands. It NEVER 
 ## Autonomy
 
 Run autonomously through the stages. Only stop to ask when a step inherently needs the user (offer deadline for a new batch, confirmation of a new campaign's offer text). Process → report at the end.
+
+## Save mode — model routing (DEFAULT)
+
+`/inbox-outreach-pilot [full]` — save mode is the default; pass `full` to run everything on the main model.
+
+YOU (the orchestrator, on the session's top model) keep all judgment. Delegate volume work to subagents via the Agent tool with an explicit `model` override:
+
+| Work | Who/model | Examples |
+|------|-----------|----------|
+| Orchestration, decisions, ALL quality gates | **Main loop (no delegation)** — never delegate: sanity-result interpretation, hallucination spot-checks of drafts vs website, review verdicts (OK_TO_SEND/NEEDS_FIX), anything that writes demoStatus | STEP 2 routing, STEP 3 entirely |
+| Mechanical data collection | **Subagent, `model: "haiku"`** | CRM state queries + client-side joins (STEP 1b), website reachability checks, skip-list lookups, scraping page content for research, collecting draft lists from the notification API |
+| Customer-facing content generation | **Subagent, `model: "sonnet"`** | Per-company inbox demo building (research synthesis → Befund → seeded threads → `create_inbox_demo` → CRM opp), outreach draft copy via `/setup-email-drafts` variables. One subagent per company, parallel where independent. |
+
+Rules:
+- Content subagents (sonnet) must return the demoId/draftId AND their evidence (which website pages they used) so YOU can verify — their output is never trusted unverified; the STEP 3 sanity gate + your own spot-check always run on the main model.
+- If a sonnet subagent's demo fails review twice, rebuild that one yourself on the main model instead of a third delegation.
+- Haiku is for fetch-and-format only — never let it make include/exclude decisions about leads or content.
+- In `full` mode: same flow, no model overrides.
 
 ## STEP 0 — Environment
 
