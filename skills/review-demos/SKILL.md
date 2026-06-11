@@ -40,7 +40,7 @@ Query CRM for opportunities at SCREENING stage with demoStatus = PENDING_REVIEW:
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
-  -d '{"query":"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: PENDING_REVIEW } }, first: 50) { edges { node { id name stage demoStatus demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } } } } } }"}'
+  -d '{"query":"{ opportunities(filter: { stage: { eq: SCREENING }, demoStatus: { eq: PENDING_REVIEW } }, first: 50) { edges { node { id name stage demoStatus demoType outreachType noOutreach demoUrl { primaryLinkUrl } company { id name domainName { primaryLinkUrl } } } } } }"}'
 ```
 
 > **Announce:**
@@ -102,7 +102,9 @@ From the response, record:
 
 ### 2c — Quality Checklist
 
-Score each item as PASS or FAIL:
+**Branch on `demoType` first.** `demoType: INBOX` opportunities are Demo-Postfach demos (seeded inbox, no agent/widget) — use the INBOX checklist below. `CHATBOT` or `null` (legacy) → use the chatbot checklist.
+
+**CHATBOT checklist** — score each item as PASS or FAIL:
 
 | Check | What to verify |
 |-------|---------------|
@@ -114,6 +116,21 @@ Score each item as PASS or FAIL:
 | **Countdown set** | `offerExpiresAt` is present AND is a future date (not null, not expired) — this is set by the campaign, not during review. The `offerText` should describe a time-limited offer — NOT "Kostenlose Erstberatung" or generic text. |
 | **Content accuracy** | Any visible knowledge snippets reference real products/services from the website |
 | **No hallucinations** | Demo doesn't mention products, pricing, or features not on the company website |
+
+**INBOX checklist** (`demoType: INBOX`) — fetch the demo data from `https://app.psquared.dev/api/demo/<demoId>` (the `inboxThreads` array) in addition to the rendered page:
+
+| Check | What to verify |
+|-------|---------------|
+| **Company match** | Page shows the correct company name + logo; mailbox label fits their domain |
+| **Language match** | Threads, categories and drafts match the website language |
+| **Thread plausibility** | Every seeded email is plausible for THIS business (industry-typical requests, regional names) |
+| **No hallucinations (CRITICAL)** | AI drafts speak AS the prospect — they must NOT state prices, policies, opening hours or product names that are not on the company website. This is the top risk: check every draft against the site. |
+| **Draft quality** | Drafts match the company's tone (Sie/du) and are sendable as-is by their staff |
+| **Action mix** | ≥1 reply-with-draft, ≥1 archive (newsletter), ≥1 ticket/forward or urgent thread |
+| **Countdown set** | Same rule as chatbot: future `offerExpiresAt`, time-limited `offerText`, no consultation language |
+| **CTA correct** | Page shows "Inbox-Test starten — 14 Tage gratis" as primary CTA (renders automatically for type=inbox) |
+
+INBOX auto-fixes go through the `update_inbox_demo` MCP tool (full `inboxThreads` replacement) — 2d (widget color) does not apply; 2e (countdown SQL) applies unchanged.
 
 ### 2d — Auto-Fix: Colors
 
@@ -192,11 +209,13 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 
 ### If NEEDS_FIX:
 
+**Always clear `campaignId` when regressing to NEEDS_FIX.** If the opportunity was already linked to a campaign, that campaign's send batch may have already gone out. Leaving the `campaignId` set creates an orphan: the demo later gets re-approved, but `/plan-campaign` ignores it (filter `campaignId: { is: NULL }`) and `/setup-email-drafts` never catches up. Clearing it releases the opp so the next `/plan-campaign` run picks it up cleanly.
+
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
-  -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: NEEDS_FIX, demoReviewIssues: \"[Issue 1: description. Issue 2: description. Suggested fixes: ...]\" }) { id } }"}'
+  -d '{"query":"mutation { updateOpportunity(id: \"[opportunityId]\", data: { demoStatus: NEEDS_FIX, demoReviewIssues: \"[Issue 1: description. Issue 2: description. Suggested fixes: ...]\", campaignId: null }) { id campaignId } }"}'
 ```
 
 ---
@@ -229,6 +248,7 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 | 3 (OK) | `demoReviewIssues` | `null` | Clear any previous issues |
 | 3 (FIX) | `demoStatus` | `NEEDS_FIX` | Demo failed QA |
 | 3 (FIX) | `demoReviewIssues` | `"Issue 1: ... Issue 2: ..."` | What's wrong and how to fix |
+| 3 (FIX) | `campaignId` | `null` | Release campaign slot on status regression |
 
 **Reads:** `demoStatus` (filter PENDING_REVIEW), `demoUrl` (demo page link), company domain
 

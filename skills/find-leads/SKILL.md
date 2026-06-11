@@ -41,7 +41,7 @@ B2B cold email in Germany and Austria is a legal grey area. The strict reading o
 |---|-----------|---------------|----------------|
 | 1 | **German company** | Domain is .de, Impressum shows German address (DE), company is registered in Germany | Austrian law (TKG §174) is stricter — no B2B cold email exception. Germany (UWG) has more practical tolerance for relevant individual B2B outreach. |
 | 2 | **B2B only** | Company, not a private person | Consumer protection is stricter |
-| 3 | **Objectively relevant** | Company would genuinely benefit from a chatbot (has website traffic, customer-facing business) | UWG requires the offer to be relevant to the recipient's business |
+| 3 | **Objectively relevant** | Company would genuinely benefit from a chatbot OR from email automation (customer-facing business with visible inquiry/booking volume) | UWG requires the offer to be relevant to the recipient's business |
 | 4 | **Publicly available email** | Email found on their public website (contact page, imprint, team page) — NOT scraped from LinkedIn, purchased lists, or leaked databases | Data source must be GDPR-compliant (publicly made available by the company itself) |
 | 5 | **Specific contact person** | Email goes to a named person with decision authority (founder, CEO, marketing lead, head of sales) — NOT info@, office@, or generic addresses | Shows individual outreach, not bulk |
 | 6 | **Genuine value offer** | We built something specifically for them (a demo) — not a generic pitch | Differentiates from spam |
@@ -71,7 +71,7 @@ The file `skip-list.json` in the current working directory tracks companies that
 **Before checking any website:** Read `skip-list.json`, check if domain is already there. If yes, skip without fetching.
 
 **Short reason examples:**
-- `"has chatbot"` — already has a chat widget
+- `"has chatbot, no email volume"` — chat widget present AND no email-automation angle (a chatbot alone no longer disqualifies — it routes to the INBOX track)
 - `"no personal email"` — only info@/office@ found
 - `"dead website"` — site down or parked
 - `"outdated site"` — copyright 2+ years old
@@ -120,11 +120,17 @@ Use WebSearch to find German and Austrian businesses that would benefit from an 
 - E-commerce — product questions, order support
 - Healthcare (dental, physio) — appointment scheduling, FAQ
 
+**Email-volume signals (qualify for the INBOX track — the paid email product):**
+- Booking-heavy verticals: Thermen, Freibäder, Museen, hotels, event venues, tour operators, restaurants with group bookings
+- Visible info@/office@ as the main contact channel (no booking system — everything runs over the inbox)
+- Vouchers/Gutscheine, group requests, cancellations, opening-hours questions visible on the site
+- These businesses drown in repetitive email — the Demo-Postfach (`/inboxmate-inbox-demo`) proves the fix
+
 **Bad targets (skip):**
 - Very small sole proprietors with no website
 - Government / public institutions
 - Non-profits (unless large)
-- Companies that clearly don't need a chatbot (e.g., heavy industry, agriculture)
+- Companies with neither chatbot relevance nor email volume (e.g., heavy industry, agriculture)
 
 ---
 
@@ -143,9 +149,12 @@ Visit their website. Verify:
 - **Impressum shows a German address** (city in Germany, not Austria/Switzerland) — this confirms criterion #1
 - Content is current (check copyright year, last blog post, news)
 - Company does customer-facing business (not just B2B wholesale with no public presence)
-- They DON'T already have a chatbot on their site (check for chat widgets like Intercom, Drift, Zendesk, HubSpot, Tidio, Crisp, LiveChat in the HTML source)
+- Check whether they already have a chatbot on their site (chat widgets like Intercom, Drift, Zendesk, HubSpot, Tidio, Crisp, LiveChat in the HTML source). **Having a chatbot is NOT a skip anymore — it decides the track:**
+  - No chatbot + customer-facing site → **CHATBOT track** (`/inboxmate-demo`)
+  - Has a chatbot (or weak chatbot fit) + clear email-volume signals → **INBOX track** (`/inboxmate-inbox-demo`) — an existing chatbot even confirms they invest in automation
+  - Has a chatbot + NO email-volume signals → skip with reason `"has chatbot, no email volume"`
 
-**Skip if:** website is down, parked, outdated, has a chatbot, or is NOT a German company. **Add to skip-list.json with reason.**
+**Skip if:** website is down, parked, outdated, or NOT a German company. **Add to skip-list.json with reason.**
 
 ### 2c — Find a contact person with email
 
@@ -207,11 +216,13 @@ For each lead that passes ALL 7 criteria:
 
 ### 3a — Create Company
 
+Always set `outreachFor: [INBOX_MATE]` so downstream InboxMate skills pick this company up (demos, campaigns, email drafts filter on this field). Never set `PERSONAL_ONLY` or `INBOX_MATE_MUSEUM` here — `PERSONAL_ONLY` is reserved for companies Martin adds manually and must never be touched by automation; `INBOX_MATE_MUSEUM` is reserved for the curated museum list (imported 2026-05-08) and is handled outside this skill.
+
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
-  -d "{\"query\":\"mutation { createCompany(data: { name: \\\"[Company Name]\\\", domainName: { primaryLinkUrl: \\\"https://[domain]\\\" } }) { id name } }\"}"
+  -d "{\"query\":\"mutation { createCompany(data: { name: \\\"[Company Name]\\\", domainName: { primaryLinkUrl: \\\"https://[domain]\\\" }, outreachFor: [INBOX_MATE] }) { id name outreachFor } }\"}"
 ```
 
 ### 3b — Create Person (contact)
@@ -240,7 +251,7 @@ curl -s -X POST https://crm.psquared.dev/graphql \
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
-  -d "{\"query\":\"mutation { updateNote(id: \\\"[noteId]\\\", data: { body: \\\"Email source: [URL where email was found]\\\\nContact: [Name], [Role]\\\\nRelevance: [1-2 sentence justification]\\\\n\\\\nDemo approach: [suggest best angle for demo — e.g. 'FAQ automation for property listings' or 'lead qualification chatbot for service pages']\\\\n\\\\nChecks: German company ✓, B2B ✓, Relevant ✓, Public email ✓, Named contact ✓, Value offer ✓, Not in CRM ✓, Active website ✓\\\" }) { id } }\"}"
+  -d "{\"query\":\"mutation { updateNote(id: \\\"[noteId]\\\", data: { body: \\\"Email source: [URL where email was found]\\\\nContact: [Name], [Role]\\\\nRelevance: [1-2 sentence justification]\\\\n\\\\nTrack: [CHATBOT | INBOX]\\\\nDemo approach: [suggest best angle — CHATBOT e.g. 'FAQ automation for property listings'; INBOX e.g. 'Demo-Postfach: Gutschein-Anfragen, Gruppenbuchungen, Storno-Mails vorsortiert + beantwortet']\\\\n\\\\nChecks: German company ✓, B2B ✓, Relevant ✓, Public email ✓, Named contact ✓, Value offer ✓, Not in CRM ✓, Active website ✓\\\" }) { id } }\"}"
 ```
 
 **Step 3 — Link note to company:**

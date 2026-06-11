@@ -30,14 +30,22 @@ If the `.env` file is missing or the token is absent, **stop immediately** and a
 
 ## STEP 1 — Find Unassigned OK_TO_SEND Opportunities
 
-Query CRM for opportunities at SCREENING stage with `demoStatus = OK_TO_SEND` and no `campaignId` yet:
+Query CRM for **InboxMate** opportunities at SCREENING stage with `demoStatus = OK_TO_SEND` and no `campaignId` yet. Rules:
+
+- **`outreachType: { eq: INBOXMATE }`** — campaigns here are InboxMate-only. Services opportunities use their own flow (`/find-services-leads` handles the drafts directly). Museum opportunities (`INBOX_MATE_MUSEUM`) are excluded automatically by this filter and have their own future flow.
+- **`noOutreach: { eq: false }`** — never touch opportunities flagged do-not-contact (e.g. Austrian companies, unsubscribed).
+- **Post-fetch:** also pull `company { outreachFor }` and drop any opportunity whose company contains `PERSONAL_ONLY`. PERSONAL_ONLY companies are Martin's private contacts and must never be put into a campaign, even if someone manually created an opportunity on them.
 
 ```bash
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
-  -d "{\"query\":\"{ opportunities(first: 200, filter: { stage: { eq: SCREENING }, demoStatus: { eq: OK_TO_SEND }, campaignId: { is: NULL } }) { edges { node { id company { name } } } totalCount }\"}"
+  -d "{\"query\":\"{ opportunities(first: 200, filter: { stage: { eq: SCREENING }, demoStatus: { eq: OK_TO_SEND }, campaignId: { is: NULL }, noOutreach: { eq: false }, outreachType: { eq: INBOXMATE } }) { edges { node { id outreachType demoType company { id name outreachFor } } } totalCount } }\"}"
 ```
+
+After the response lands, filter out any edge where `node.company.outreachFor` contains `PERSONAL_ONLY`. Announce how many were dropped for that reason.
+
+**Campaigns are single-type.** Group the remaining opportunities by `demoType` (`null` counts as `CHATBOT`). If both CHATBOT and INBOX demos are waiting, plan SEPARATE campaigns — never mix types in one campaign, because `/setup-email-drafts` routes the email template per campaign batch and the offer copy differs (chatbot deal vs "Inbox-Test starten"). Present both groups to the user and run STEP 2–4 once per group.
 
 > **Announce:**
 > ```

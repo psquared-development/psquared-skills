@@ -71,6 +71,12 @@ Human review + send      → demoStatus: SENT, outreachSentAt timestamped
 | `SKIPPED` | Generic skip |
 | `DISQUALIFIED` | Permanently excluded |
 
+### Opportunity.demoType
+| Value | Meaning |
+|---|---|
+| `CHATBOT` (or null = legacy) | Personalized chatbot demo (`/inboxmate-demo`) |
+| `INBOX` | Demo-Postfach: seeded pre-triaged inbox (`/inboxmate-inbox-demo`), email-product outreach. CRM view "InboxMate Email Outreach" filters on this. |
+
 ### Opportunity.stage
 | Stage | Meaning |
 |---|---|
@@ -153,6 +159,7 @@ Key tools:
 - `create_agent`, `update_prompt`, `update_widget_style`, `publish_agent`
 - `create_knowledge_bucket`, `add_to_bucket`, `set_knowledge`
 - `create_demo_page`, `update_demo_page`, `list_demos`, `get_demo`
+- `create_inbox_demo`, `update_inbox_demo` — Demo-Postfach (type='inbox': seeded pre-triaged inbox, no agent)
 - `list_bucket_items`, `list_knowledge`, `get_knowledge`
 
 ## Key Metrics

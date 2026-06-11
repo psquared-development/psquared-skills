@@ -5,6 +5,30 @@ description: "Set up a personalized InboxMate demo chatbot for a sales prospect.
 
 # InboxMate Demo Setup Pipeline
 
+## 🚨 NON-NEGOTIABLE CHECKLIST (read before building)
+
+A demo is only "done" when ALL of these are true. Skipping any one of them kills conversion and has caused real bugs in past batches:
+
+- [ ] **Primary brand color fetched via OpenBrand** and set on the agent (`update_widget_style` → `primaryColor`). Default InboxMate emerald on a customer's demo is the single most visible "we didn't tailor this" signal — never ship without trying OpenBrand. If OpenBrand returns no usable hex (only white/black/near-white/near-black), fall back to manual CSS/HTML inspection; if that also yields nothing, leave default but flag it in the report.
+- [ ] **Logo fetched via OpenBrand** and set on the demo page (`update_demo_page` → `logoUrl`). Prefer non-favicon entries, pick the largest resolution. A real logo in the demo's company card builds immediate trust; the fallback initials look generic.
+- [ ] **`demoVersion: V3` on the CRM opportunity** AND **`version: "v3"` on the demo page.** Never ship v1 or v2.
+- [ ] **Quick questions are cards, not chips.** You MUST call `update_quick_questions` with `style: "cards"` and objects in the form `{ text, title, description, icon }`. `quick_setup_demo` does NOT set these — it's a known pitfall.
+- [ ] **`customMessage` is sales copy, not agent-greeting copy.** The demo page already shows a big "Hi, {Company}! 👋" headline — customMessage is the sub-line under it. Write ABOUT the bot, not AS the bot.
+  - ✅ "Wir haben einen KI-Assistenten speziell für [Company] gebaut — trainiert auf [concrete thing]. Testen Sie ihn rechts unten."
+  - ❌ "Willkommen bei [Company]! Ich helfe dir gerne weiter…" (that's the agent's greeting — don't duplicate it here)
+- [ ] **`useCases` is an array of OBJECTS, never strings.** Each entry MUST be `{ "text": "…", "icon": "lucide-name" }`. Plain strings like `"Beratung anbieten [icon:home]"` are a known failure mode — the frontend will render `[icon:home]` as literal text and fall back to a checkmark glyph. If your first impulse is to stuff the icon into the text, stop and use the object form.
+  - ✅ `{ "text": "Immobilienbewertung automatisch einleiten — …", "icon": "home" }`
+  - ❌ `"Immobilienbewertung automatisch einleiten — … [icon:home]"`
+- [ ] **Custom DE greeting set on the agent** via `update_widget_style` → `greetingMessageDe`. Do NOT rely on the auto-generated "Hallo! Ich bin der {Company}-Assistent. Wie kann ich Ihnen heute helfen?" default — that's the single most generic-feeling line and every prospect sees it. Write one line that references 2-3 concrete topics the bot can answer ("Hallo! Ich beantworte Fragen zu Radreisen, Gruppenreisen und Beratung"). Same rule for `greetingMessage` (EN) if the site is English.
+- [ ] **Quick questions in the RIGHT language slot.** The `update_quick_questions` tool has THREE fields: `questions` (bare/locale-agnostic), `questionsEn`, `questionsDe`. For a German site you MUST use `questionsDe`. Subagents have mis-routed cards into the EN slot repeatedly; the widget is locale-aware and will render nothing if DE is empty but EN has cards.
+- [ ] **Knowledge bucket has real site content.** Call `scrape_and_build_knowledge` with 2–3 relevant URLs from the prospect's site (beyond the homepage excerpt). Skip 404s silently; don't abort the demo.
+- [ ] **Agent is republished after any config change** (e.g. after `update_quick_questions`). Skip this and the widget bundle still serves stale config.
+- [ ] **CRM opportunity has `campaignId` set** to the active campaign UUID. Orphan opportunities never get drafts.
+
+If ANY of the above is missing, the demo is not done — loop back and fix before moving on.
+
+---
+
 > **Announce to the user at the very start:**
 > ```
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -248,11 +272,20 @@ The `OPENBRAND_API_KEY` is in the `.env` file (read it at startup along with the
 
 > **Also grab the logo URL** from `data.logos` — use the highest-resolution one as `logoUrl` in the demo page.
 
-If OpenBrand fails, fall back to manual inspection:
-1. Check the primary button/CTA color in HTML/CSS
-2. Look at logo colors and dominant accent
-3. Pick the darkest shade if multiple variants exist
-4. Use hex format (e.g. `#1a365d`)
+**Manual fallback is MANDATORY when OpenBrand has no hit.** Shipping a prospect's demo with the default InboxMate emerald is the single most obvious "we didn't tailor this" signal — it's not an acceptable default when we can do better in 30 seconds. Cases that commonly need the fallback:
+
+- OpenBrand returns 200 but `data.colors` is empty or only contains near-white / near-black / pure grayscale (e.g. `#000`, `#111`, `#fff`, `#eee`).
+- OpenBrand times out or the site is temporarily down. Try `https://web.archive.org/web/<YEAR>/https://<domain>` (use the current year first, then a prior year) to pull the cached version.
+- Site passed but OpenBrand misread the brand — e.g. picked a background accent rather than the real brand color.
+
+Fallback procedure:
+1. WebFetch the homepage. If it errors or OpenBrand failed, also try archive.org.
+2. Ask yourself: what hex is used for the primary CTA / header bar / logo mark? Read the inline CSS or rendered markup.
+3. Pick one hex (kebab format like `#1a365d`). Skip pure grayscale (black/white and anything brightness < 30 or > 230 after weighted-RGB calc).
+4. If the site truly has nothing colored (extremely rare — some minimalist funeral/medical sites), pick a thematically appropriate muted color (e.g. deep navy `#2c3e50` for professional services, forest green `#505d46` for nature/funeral, slate `#4a5568` for neutral) rather than leaving emerald.
+5. Pass the chosen hex to `update_widget_style` and republish the agent.
+
+Logo fallback when OpenBrand has no usable logo: grab the `<img>` used in the site header, or the `apple-touch-icon` from `<link rel="apple-touch-icon">`, or an `og:image` meta tag. Anything real is better than the auto-generated initials badge.
 
 ### 2g — Demo Page Content
 
@@ -286,7 +319,16 @@ Wait for the user's answer. Convert their response to an ISO 8601 date for `offe
 - DE: `"Jetzt starten und bis zu 50% Rabatt sichern"` / `"Sonderkonditionen für Ihren KI-Chatbot — nur bis [date]"` / `"Ihren KI-Assistenten jetzt aktivieren — exklusive Konditionen"`
 - EN: `"Start now and save up to 50% in your first year"` / `"Special pricing for your AI chatbot — limited time"` / `"Activate your AI assistant — exclusive terms available"`
 
-- **customMessage**: 1–2 sentences speaking directly to the prospect: "Wir haben diesen Demo-Bot speziell für [Company] konfiguriert. Probier ihn aus!"
+- **customMessage**: SALES-PAGE copy, NOT agent greeting. 1–2 sentences speaking ABOUT the bot TO the prospect — never in the bot's own voice. The demo page already shows a big "Hi, {Company}! 👋" headline; customMessage is the sub-headline under it.
+
+  **Must hit the Value Equation levers** — see `~/.claude/skills/inboxmate-demo-with-outreach/references/value-equation.md`. Every customMessage should include at least:
+  - a specific thing we built for them (perceived likelihood),
+  - an explicit speed signal ("in 10 Minuten live", "läuft bereits"),
+  - a removed friction ("kein Setup", "keine Anmeldung").
+
+  - ✅ Right: `"Ihr KI-Assistent für [Company] ist fertig — trainiert auf [specific area], in 10 Minuten auf Ihrer Seite live. Einfach rechts unten testen, kein Setup, keine Anmeldung."`
+  - ⚠️  Only-hook, missing levers: `"Wir haben einen KI-Assistenten speziell für [Company] gebaut — trainiert auf Ihre Leistungen. Testen Sie ihn rechts unten."` (acceptable but weak — no TTV, no removed friction)
+  - ❌ Wrong: `"Willkommen bei [Company]! Ich helfe dir gerne weiter — ob X, Y oder Z."` (agent greeting — not for this field)
 
 > **After planning, show a summary to the user:**
 > ```
@@ -517,6 +559,7 @@ You do NOT need to call `update_widget_style` manually for this.
       "offerExpiresAt": "[ISO date 7 days from today]",
       "customMessage": "[from 2g]",
       "language": "[en or de — must match the language you chose in Phase 2]",
+      "version": "v3",
       "useCases": [
         { "text": "[Use case 1 — specific to this company, 1 sentence]", "icon": "[lucide-icon-name]" },
         { "text": "[Use case 2 — specific to this company, 1 sentence]", "icon": "[lucide-icon-name]" },
@@ -544,7 +587,9 @@ Create an opportunity in the CRM so the demo enters the review pipeline:
 curl -s -X POST https://crm.psquared.dev/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
-  -d "{\"query\":\"mutation { createOpportunity(data: { name: \\\"[Company Name] — InboxMate Demo\\\", stage: SCREENING, demoStatus: PENDING_REVIEW, demoUrl: { primaryLinkUrl: \\\"[playgroundUrl]\\\" }, companyId: \\\"[companyId]\\\" }) { id name stage demoStatus } }\"}"
+  -d "{\"query\":\"mutation { createOpportunity(data: { name: \\\"[Company Name] — InboxMate Demo\\\", stage: SCREENING, demoStatus: PENDING_REVIEW, demoType: CHATBOT, demoUrl: { primaryLinkUrl: \\\"[playgroundUrl]\\\" }, companyId: \\\"[companyId]\\\", outreachType: INBOXMATE, demoVersion: V3 }) { id name stage demoStatus } }\"}"
+
+> **`demoType: CHATBOT` is required** — it separates chatbot demos from inbox demos (`/inboxmate-inbox-demo`, `demoType: INBOX`) in campaigns, drafts and CRM views. Opportunities with `demoType: null` are treated as legacy CHATBOT.
 ```
 
 > **Note:** The `companyId` comes from the CRM. If this company doesn't exist in the CRM yet (standalone demo, not from batch pipeline), look it up first or create it.
