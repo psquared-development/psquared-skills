@@ -5,7 +5,7 @@ description: "Autonomous pilot for the InboxMate EMAIL outreach (Demo-Postfach/I
 
 # Inbox Outreach Pilot (Demo-Postfach)
 
-One command that moves the EMAIL outreach forward, wherever it stands. It NEVER touches the chatbot track (`demoType: CHATBOT`/null) and it NEVER sends emails — sending/scheduling stays human, at **notifications.psquared.dev → sidebar switch "Inbox"**.
+One command that moves the EMAIL outreach forward, wherever it stands. It NEVER touches the chatbot track (`demoType: CHATBOT`/null) and it NEVER sends emails — sending/scheduling stays human. Inbox demos are meeting-only (no signup CTA): success = prospect books a call, at **notifications.psquared.dev → sidebar switch "Inbox"**.
 
 ## Autonomy
 
