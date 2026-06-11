@@ -9,7 +9,7 @@ description: "Find new B2B leads in Germany for InboxMate outreach. Validates ea
 
 `/find-leads [N] [track]` — `track` is optional:
 
-- **`inbox`** — EMAIL-ONLY mode: search ONLY email-volume verticals (Thermen, Freibäder, Museen, hotels, event venues, tour operators, booking-heavy businesses). Every qualified lead gets `Track: INBOX` in its note. A chatbot on their site is a positive signal here, never a skip. Demos for these run via `/inboxmate-inbox-demo`.
+- **`inbox`** — EMAIL-ONLY mode: search email-ops-heavy verticals (see "Email-volume signals" below — rotate 2-3 verticals per wave, never fixate on one industry). Every qualified lead gets `Track: INBOX` in its note. A chatbot on their site is a positive signal here, never a skip. Demos for these run via `/inboxmate-inbox-demo`.
 - **`chatbot`** — chatbot-only mode: classic behavior, skip companies that already have a chatbot, every lead gets `Track: CHATBOT`.
 - omitted — mixed: decide the track per lead (see Step 2b).
 
@@ -129,10 +129,12 @@ Use WebSearch to find German and Austrian businesses that would benefit from an 
 - Healthcare (dental, physio) — appointment scheduling, FAQ
 
 **Email-volume signals (qualify for the INBOX track — the paid email product):**
-- Booking-heavy verticals: Thermen, Freibäder, Museen, hotels, event venues, tour operators, restaurants with group bookings
-- Visible info@/office@ as the main contact channel (no booking system — everything runs over the inbox)
-- Vouchers/Gutscheine, group requests, cancellations, opening-hours questions visible on the site
-- These businesses drown in repetitive email — the Demo-Postfach (`/inboxmate-inbox-demo`) proves the fix
+InboxMate's email product is NOT just answering inquiries — it sorts, routes, answers and triggers actions on operational mail. Target ANY German B2B whose operations run through the inbox. Pick 2-3 verticals per wave and ROTATE — do not fixate on one industry (e.g. not only Thermen):
+- **Order/booking-heavy**: hotels, venues, tour operators, leisure (Thermen/parks), restaurants with group business, Werkstätten/Autohäuser (Terminanfragen)
+- **Ops-mail-heavy**: Großhandel/Distributoren (Bestellungen per Mail), Hausverwaltungen (Mieteranfragen, Handwerker-Koordination), Logistik/Spedition (Transportanfragen), Handwerksbetriebe (Angebotsanfragen), Personaldienstleister (Bewerbungseingang)
+- **Document-heavy**: businesses with visible Rechnungseingang/Lieferanten flows — InboxMate erkennt Rechnungen und routet sie an die Buchhaltung
+- Universal signals: visible info@/office@ as THE contact channel, forms that just send email, no ticket system, Gutscheine/Stornos/Angebotsanfragen on the site
+- The Demo-Postfach (`/inboxmate-inbox-demo`) proves the fix — seeded threads should mirror THEIR ops mail, incl. a Rechnung or Bewerbung being auto-routed where plausible
 
 **Bad targets (skip):**
 - Very small sole proprietors with no website

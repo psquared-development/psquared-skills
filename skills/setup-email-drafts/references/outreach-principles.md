@@ -74,6 +74,17 @@ A perfect email that lands in spam converts at exactly 0%. Content is one of thr
 - Footer keeps the full imprint (psquared GmbH · Dametzstraße 2-4 · 4020 Linz, Austria) + working unsubscribe — the template provides both, never strip them
 - Plain, personal business German. The more an email reads like one human writing to another (and the less like a campaign), the better it delivers — which is the same thing Rules 2/7/9 demand for conversion.
 
+## Length — Hormozi Cold-Email Format (Rule 20, HARD limits)
+
+Cold emails get skimmed on a phone in 3 seconds. Hormozi's format: lead with THEIR problem, prove you did work for THEM, one ask. Everything else is deleted weight.
+
+- **Outreach body: max 110 words** across greeting + all paragraphs + closing (befundItems bullets count as ~4 words each). If you're over, cut bodyParagraph2 detail first.
+- **Follow-up body: max 50 words.** One reminder thought + the link. Never re-pitch.
+- Paragraphs are 1-2 sentences. No paragraph over 25 words.
+- ONE ask only (the demo link → meeting). No "P.S.", no second CTA.
+- Subject: max 7 words.
+- The Befund list does the proving — don't repeat its content in prose.
+
 ## Checklist Before Submitting
 
 Run this mentally for every email before creating the draft:
@@ -87,6 +98,7 @@ Run this mentally for every email before creating the draft:
 - [ ] **Name swap test passed** — this email could NOT go to a different company unchanged?
 - [ ] **No first name in subject?** (use company name or pain-point question instead)
 - [ ] **Deliverability blocklist clean?** (no Rabatt/%/gratis/kostenlos/Letzte Chance/urgency in subject or body — Rule 19)
+- [ ] **Short enough?** (outreach ≤110 words, follow-up ≤50 words, paragraphs ≤2 sentences — Rule 20)
 - [ ] **Sie-Form?** (unless prior du-contact or clearly du-culture company)
 - [ ] **Subject is a question or specific teaser?** (not "[Name], eine Idee für...")
 - [ ] **Under ~150 words** body total?
