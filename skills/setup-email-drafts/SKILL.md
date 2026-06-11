@@ -189,7 +189,17 @@ For each opportunity, determine the locale:
 
 Use the matching UUID above.
 
-**INBOX template extras:** `inbox-demo-outreach` accepts the same variables as `demo-outreach` PLUS the Inbox-Befund block: `befundTitle` (e.g. "Ihr Inbox-Befund — diese Mails beantworten Sie jede Woche:") and `befundItems` (array of 4-5 short strings, the recurring email types researched for the demo). Email skeleton for INBOX drafts: Befund hook (bodyParagraph1 + befundItems) → the artifact ("wir haben Ihr Postfach simuliert — vorsortiert, mit fertigen Antwortentwürfen") → highlight (one punchy outcome line) → TTV + meeting nudge in bodyParagraph3 ("Der Blick hinein dauert zwei Minuten — und im kurzen Gespräch richten wir es an Ihren echten Mails ein; Termin direkt auf der Demo-Seite"). Inbox demos have NO signup — the goal is a booked meeting. → closing. `buttonText`: "Ihr Demo-Postfach ansehen".
+**INBOX template extras:** `inbox-demo-outreach` accepts the same variables as `demo-outreach` PLUS the Inbox-Befund block: `befundTitle` and `befundItems` (4-5 short strings — the recurring email types; include ops mails like Rechnungseingang/Bewerbungen where the research supports it, not only customer inquiries). 
+
+**INBOX email skeleton (Rule 20: ≤110 words total):**
+- bodyParagraph1 (≤25 words): their inbox pain in one sentence, then a colon into the Befund list. Never opens with "Ich/Wir".
+- befundItems: the proof. Keep bullets ≤6 words each.
+- bodyParagraph2 (≤25 words): "Dafür gibt es ein Demo-Postfach für [Company]: vorsortiert, mit fertigen Antwortentwürfen — und Rechnungen/Bewerbungen automatisch an die richtige Stelle."
+- bodyParagraph3 (≤20 words): "Zwei Minuten Blick genügt. Den Rest zeigen wir an Ihren echten Mails — Termin direkt auf der Seite."
+- highlightText (≤15 words), closingText (≤15 words, unique per company), buttonText "Ihr Demo-Postfach ansehen".
+Inbox demos have NO signup — the goal is a booked meeting.
+
+**MANDATORY follow-up pair (combo of 2):** every INBOX outreach gets a hand-written follow-up in the SAME create-loop — do NOT rely on `/drafts/setup-followups` auto-copy (it splices truncated text). Create it via `POST /drafts/create` with: same `templateId` (inbox UUID), `draftType: "followup"`, `parentDraftId: <outreach draftId>`, `sendAfterDays: 4`, same recipient/crm ids/campaignId. Follow-up copy (≤50 words): subject = short curiosity nudge WITHOUT first name and WITHOUT "Follow-up/Nachfrage" (e.g. "[Company] — die Demo läuft noch"); body = one sentence reminding what waits in the demo + the link. Omit befundItems/highlight in the follow-up. A batch is only DONE when outreach count == follow-up count.
 
 ---
 

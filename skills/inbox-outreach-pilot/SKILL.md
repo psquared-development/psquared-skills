@@ -82,6 +82,7 @@ curl -s -X POST https://notifications.psquared.dev/drafts/sanity-check \
 
 The backend detects `demoType: INBOX` automatically and checks: demo API reachable with `type=inbox`, ≥3 seeded threads, ≥1 AI draft present, action mix (archive thread), no offer set (inbox demos are offer-free), not already claimed, draft HTML (CTA href = demo link, footer, campaign_id set, umlauts, body length), follow-up linkage.
 
+- Every outreach draft MUST have its hand-written follow-up (combo of 2, same inbox template, sendAfterDays 4) — outreach count != follow-up count in the inbox track is a blocker, fix before handing over.
 - Any `healthy: false` → fix the cause first (demo via `update_inbox_demo`, draft via `PUT /drafts/:id`), re-run the check, only then hand over.
 - ADDITIONALLY spot-check 2-3 drafts yourself: open the demoUrl, read one AI draft against the prospect's website — **no invented prices/policies** (the check can't catch hallucinations; you can).
 
