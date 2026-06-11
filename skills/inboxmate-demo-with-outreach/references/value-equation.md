@@ -64,9 +64,9 @@ Always add at least one risk-reversal signal. Pick the strongest that's true for
 | Level | Phrasing (DE) | When to use |
 |---|---|---|
 | **Implied** (no commitment to make) | "Die Demo läuft bereits — einfach anschauen." / "Kein Formular, kein Setup." | Default for the demo page customMessage + email CTA line. |
-| **Unconditional** | "14 Tage gratis, keine Kreditkarte. Schließen jederzeit, ohne Rückfrage." | For the self-serve signup path (v3 secondary CTA). |
+| **Unconditional** | "Der 14-Tage-Test endet von selbst — nichts zu kündigen, keine Rückfrage." | For the self-serve signup path (v3 secondary CTA). |
 | **Anti-guarantee** | "Wenn's nicht passt, haben wir beide Zeit verloren — aber keinen Cent." | Contrarian hook. Rare but powerful. |
-| **Performance-stacked** | "14 Tage gratis + 30 Tage: wenn die Antwortrate nicht steigt, volle Rückerstattung." | Use in outreach to larger prospects / decision-makers. |
+| **Performance-stacked** | "14-Tage-Test + 30 Tage: wenn die Antwortrate nicht steigt, volle Rückerstattung." | Use in outreach to larger prospects / decision-makers. |
 
 Rule: never write "kostenlose Beratung" or "unverbindliches Angebot" — those are filler. Every risk-reversal line must name a SPECIFIC removed risk.
 
@@ -89,7 +89,7 @@ Each card frames ONE operational outcome + one removed effort.
 ### Demo page `highlightText` (green box on email template)
 Their exact operation, automated, with a speed signal and risk-reversal tail.
 
-- ✅ "Reservierungsfragen, Menü-Infos, Öffnungszeiten — **24/7 beantwortet**, ohne dass jemand am Telefon hängt. **14 Tage gratis, kein Vertrag.**"
+- ✅ "Reservierungsfragen, Menü-Infos, Öffnungszeiten — **24/7 beantwortet**, ohne dass jemand am Telefon hängt. **14-Tage-Test, endet von selbst.**"
 
 ### Outreach email `bodyParagraph1` (hook)
 Dream outcome + perceived likelihood, in one sentence. No "wir haben" passive voice — active operational outcome.

@@ -189,7 +189,7 @@ For each opportunity, determine the locale:
 
 Use the matching UUID above.
 
-**INBOX template extras:** `inbox-demo-outreach` accepts the same variables as `demo-outreach` PLUS the Inbox-Befund block: `befundTitle` (e.g. "Ihr Inbox-Befund — diese Mails beantworten Sie jede Woche:") and `befundItems` (array of 4-5 short strings, the recurring email types researched for the demo). Email skeleton for INBOX drafts: Befund hook (bodyParagraph1 + befundItems) → the artifact ("wir haben Ihr Postfach simuliert — vorsortiert, mit fertigen Antwortentwürfen") → highlight (one punchy outcome line) → TTV/risk-reversal in bodyParagraph3 ("Inbox-Test: 5 echte Mails weiterleiten, 14 Tage gratis, keine Kreditkarte") → closing. `buttonText`: "Ihr Demo-Postfach ansehen".
+**INBOX template extras:** `inbox-demo-outreach` accepts the same variables as `demo-outreach` PLUS the Inbox-Befund block: `befundTitle` (e.g. "Ihr Inbox-Befund — diese Mails beantworten Sie jede Woche:") and `befundItems` (array of 4-5 short strings, the recurring email types researched for the demo). Email skeleton for INBOX drafts: Befund hook (bodyParagraph1 + befundItems) → the artifact ("wir haben Ihr Postfach simuliert — vorsortiert, mit fertigen Antwortentwürfen") → highlight (one punchy outcome line) → TTV/risk-reversal in bodyParagraph3 ("Inbox-Test: 5 echte Mails weiterleiten — der Test endet von selbst, nichts zu kündigen") → closing. `buttonText`: "Ihr Demo-Postfach ansehen".
 
 ---
 
@@ -267,7 +267,7 @@ Distilled: every email must hit at least **3 of these 5** across its copy:
 2. **Perceived likelihood** — proof / specific thing we built for them.
 3. **TTV** — explicit speed number ("10 Minuten live", "sofort einsatzbereit").
 4. **Removed effort** — "kein Setup", "keine Anmeldung", "kein Vertrag".
-5. **Risk reversal** — "einfach schließen wenn's nicht passt" / "14 Tage gratis, keine Kreditkarte".
+5. **Risk reversal** — "einfach schließen wenn's nicht passt" / "der Test endet von selbst — nichts zu kündigen". (NOT "gratis"/"keine Kreditkarte" — spam triggers AND violate Rule 3.)
 
 Levers 1 & 2 are where most people stop. Levers 3, 4, 5 are where InboxMate actually wins — competitors also promise outcomes, but nobody else says "läuft schon, in 10 Minuten auf Ihrer Seite, keine Anmeldung."
 

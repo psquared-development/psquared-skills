@@ -50,6 +50,30 @@ Subjects that ask a pain-point question convert at 2.4x the rate of statement su
 
 ---
 
+## Deliverability — Spam-Filter Blocklist (Rule 19, applies to subject AND body AND follow-ups)
+
+A perfect email that lands in spam converts at exactly 0%. Content is one of three spam signals (besides DNS/auth and sender reputation) and the only one the copy controls. HARD bans:
+
+**Never in the SUBJECT:**
+- Discounts/prices of any kind: "Rabatt", "%", "€", "sparen", "Angebot", "Deal"
+- Urgency: "Letzte Chance", "nur noch", "nur heute", "läuft ab", "jetzt"
+- Free-bait: "gratis", "kostenlos", "free", "geschenkt"
+- "!"/"?" stacking, ALL-CAPS words, emoji
+- Spam classics: "exklusiv", "garantiert", "Gewinn", "limitiert"
+
+**Never in the BODY:**
+- Percentage discounts ("50% Rabatt", "50% off") — write "Sonderkonditionen"/"special pricing" if a deal must be mentioned at all
+- "gratis"/"kostenlos"/"keine Kreditkarte" (also violates Rule 3) — frame trials as "der Test endet von selbst — nichts zu kündigen"
+- Urgency phrases ("Letzte Chance", "nur noch X Tage") — the countdown lives on the DEMO PAGE, not in the email
+- More than ONE link besides the footer (the CTA button is the one link; never add tracking pixels or link shorteners)
+- Link text that differs from the link target's domain (e.g. text "google.com" pointing elsewhere)
+- Attachments of any kind
+
+**Always:**
+- The CTA links to demo.inboxmate.psquared.dev (established sending pattern) — never bit.ly/t.co/etc.
+- Footer keeps the full imprint (psquared GmbH · Dametzstraße 2-4 · 4020 Linz, Austria) + working unsubscribe — the template provides both, never strip them
+- Plain, personal business German. The more an email reads like one human writing to another (and the less like a campaign), the better it delivers — which is the same thing Rules 2/7/9 demand for conversion.
+
 ## Checklist Before Submitting
 
 Run this mentally for every email before creating the draft:
@@ -62,6 +86,7 @@ Run this mentally for every email before creating the draft:
 - [ ] **No filler phrases** — no "wir freuen uns", "unser Produkt", "als führendes", "in heutiger Zeit"
 - [ ] **Name swap test passed** — this email could NOT go to a different company unchanged?
 - [ ] **No first name in subject?** (use company name or pain-point question instead)
+- [ ] **Deliverability blocklist clean?** (no Rabatt/%/gratis/kostenlos/Letzte Chance/urgency in subject or body — Rule 19)
 - [ ] **Sie-Form?** (unless prior du-contact or clearly du-culture company)
 - [ ] **Subject is a question or specific teaser?** (not "[Name], eine Idee für...")
 - [ ] **Under ~150 words** body total?

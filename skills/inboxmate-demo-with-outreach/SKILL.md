@@ -109,7 +109,7 @@ Core rule distilled: across each surface, hit at least **3 of these 5**:
 2. **Perceived likelihood** — proof / specific thing we built for them
 3. **TTV** — an explicit speed number ("10 Minuten", "sofort", "ab Minute 1")
 4. **Removed effort** — "kein Setup / keine Anmeldung / kein Vertrag"
-5. **Risk reversal** — "einfach schließen wenn's nicht passt" / "14 Tage gratis, keine Kreditkarte"
+5. **Risk reversal** — "einfach schließen wenn's nicht passt" / "der Test endet von selbst — nichts zu kündigen" (NOT "gratis"/"keine Kreditkarte" — spam triggers, see outreach-principles Rule 19)
 
 If your `customMessage` or `bodyParagraph3` is missing an explicit time signal AND a removed-friction line, rewrite.
 
