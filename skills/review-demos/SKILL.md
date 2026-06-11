@@ -132,7 +132,7 @@ From the response, record:
 | **Draft quality** | Drafts match the company's tone (Sie/du) and are sendable as-is by their staff |
 | **Action mix** | ≥1 reply-with-draft, ≥1 archive (newsletter), ≥1 ticket/forward or urgent thread |
 | **No offer** | INBOX demos run offer-free: `offerText`/`offerExpiresAt` must be EMPTY (an offer/countdown on an inbox demo is a FAIL — remove via update_inbox_demo) |
-| **CTA correct** | Page shows "Inbox-Test starten — 14 Tage gratis" as primary CTA (renders automatically for type=inbox) |
+| **CTA correct** | Page shows "Kostenloses Beratungsgespräch buchen" as the ONLY CTA (meeting-only; a signup button on an inbox demo is a FAIL) |
 
 INBOX auto-fixes go through the `update_inbox_demo` MCP tool (full `inboxThreads` replacement) — 2d (widget color) and 2e (countdown fix) do not apply — inbox demos have neither widget nor offer.
 

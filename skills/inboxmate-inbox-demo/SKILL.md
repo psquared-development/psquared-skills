@@ -105,7 +105,7 @@ One call does everything (no agent, no publish):
 
 ## PHASE 4 — Verify
 
-WebFetch the `playgroundUrl` (`demo.inboxmate.psquared.dev/?id=<demoId>`): company name + logo render, thread list shows categories and action chips, CTA reads "Inbox-Test starten — 14 Tage gratis". The API response is at `https://app.psquared.dev/api/demo/<demoId>` (`type: "inbox"`, `inboxThreads` populated).
+WebFetch the `playgroundUrl` (`demo.inboxmate.psquared.dev/?id=<demoId>`): company name + logo render, thread list shows categories and action chips, CTA reads "Kostenloses Beratungsgespräch buchen" (meeting-only — no signup button on inbox demos). The API response is at `https://app.psquared.dev/api/demo/<demoId>` (`type: "inbox"`, `inboxThreads` populated).
 
 ## PHASE 5 — CRM Opportunity
 

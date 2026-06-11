@@ -189,7 +189,7 @@ For each opportunity, determine the locale:
 
 Use the matching UUID above.
 
-**INBOX template extras:** `inbox-demo-outreach` accepts the same variables as `demo-outreach` PLUS the Inbox-Befund block: `befundTitle` (e.g. "Ihr Inbox-Befund — diese Mails beantworten Sie jede Woche:") and `befundItems` (array of 4-5 short strings, the recurring email types researched for the demo). Email skeleton for INBOX drafts: Befund hook (bodyParagraph1 + befundItems) → the artifact ("wir haben Ihr Postfach simuliert — vorsortiert, mit fertigen Antwortentwürfen") → highlight (one punchy outcome line) → TTV/risk-reversal in bodyParagraph3 ("Inbox-Test: 5 echte Mails weiterleiten — der Test endet von selbst, nichts zu kündigen") → closing. `buttonText`: "Ihr Demo-Postfach ansehen".
+**INBOX template extras:** `inbox-demo-outreach` accepts the same variables as `demo-outreach` PLUS the Inbox-Befund block: `befundTitle` (e.g. "Ihr Inbox-Befund — diese Mails beantworten Sie jede Woche:") and `befundItems` (array of 4-5 short strings, the recurring email types researched for the demo). Email skeleton for INBOX drafts: Befund hook (bodyParagraph1 + befundItems) → the artifact ("wir haben Ihr Postfach simuliert — vorsortiert, mit fertigen Antwortentwürfen") → highlight (one punchy outcome line) → TTV + meeting nudge in bodyParagraph3 ("Der Blick hinein dauert zwei Minuten — und im kurzen Gespräch richten wir es an Ihren echten Mails ein; Termin direkt auf der Demo-Seite"). Inbox demos have NO signup — the goal is a booked meeting. → closing. `buttonText`: "Ihr Demo-Postfach ansehen".
 
 ---
 
