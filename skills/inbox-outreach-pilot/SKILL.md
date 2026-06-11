@@ -9,7 +9,7 @@ One command that moves the EMAIL outreach forward, wherever it stands. It NEVER 
 
 ## Autonomy
 
-Run autonomously through the stages. Only stop to ask when a step inherently needs the user (offer deadline for a new batch, confirmation of a new campaign's offer text). Process → report at the end.
+Run autonomously through the stages. The INBOX track runs offer-free (no offerText, no deadlines — never ask for them). The only human gate is scheduling the mails. Process → report at the end.
 
 ## Save mode — model routing (DEFAULT)
 
@@ -63,10 +63,10 @@ Work TOP-DOWN through this priority list. Execute the FIRST matching action; aft
 |---|-----------|--------|
 | 1 | Unscheduled inbox drafts exist (`DRAFT` > 0) | **Sanity-gate them (STEP 3), then stop** — the user's move is scheduling. Do NOT create more work in parallel; a pending send batch has priority. |
 | 2 | `okAssigned` > 0 but those campaigns have no drafts yet | Run `/setup-email-drafts` for that campaign (it routes INBOX opps to the inbox-demo-outreach template UUIDs automatically). |
-| 3 | `okUnassigned` > 0 | Run `/plan-campaign inbox` (ask the user for offer text + deadline — that's a legitimate stop). |
+| 3 | `okUnassigned` > 0 | Run `/plan-campaign inbox` (inbox campaigns are offer-free — name only, no questions). |
 | 4 | `needsFix` > 0 | Fix inbox demos: read `demoReviewIssues` from the CRM, repair via `update_inbox_demo` (full inboxThreads replacement), reset to PENDING_REVIEW — then continue to #5. |
 | 5 | `pending` > 0 | Run `/review-demos inbox`. |
-| 6 | INBOX-track leads without demos exist (b) | Run `/inboxmate-inbox-demo` per company (or `/inboxmate-batch-demo inbox` for >3). Ask ONCE for the offer deadline. |
+| 6 | INBOX-track leads without demos exist (b) | Run `/inboxmate-inbox-demo` per company (or `/inboxmate-batch-demo inbox` for >3). No offers/deadlines. |
 | 7 | No INBOX leads at all | Run `/find-leads 15 inbox`. |
 | 8 | Everything empty AND `sent` > 0 | Run `/check-outreach-status` and report follow-up state. |
 
@@ -80,7 +80,7 @@ curl -s -X POST https://notifications.psquared.dev/drafts/sanity-check \
   -d '{"draft_ids": ["<id>", ...]}'   # or {"campaign_id": "<uuid>"}
 ```
 
-The backend detects `demoType: INBOX` automatically and checks: demo API reachable with `type=inbox`, ≥3 seeded threads, ≥1 AI draft present, action mix (archive thread), countdown not expired, not already claimed, draft HTML (CTA href = demo link, footer, campaign_id set, umlauts, body length), follow-up linkage.
+The backend detects `demoType: INBOX` automatically and checks: demo API reachable with `type=inbox`, ≥3 seeded threads, ≥1 AI draft present, action mix (archive thread), no offer set (inbox demos are offer-free), not already claimed, draft HTML (CTA href = demo link, footer, campaign_id set, umlauts, body length), follow-up linkage.
 
 - Any `healthy: false` → fix the cause first (demo via `update_inbox_demo`, draft via `PUT /drafts/:id`), re-run the check, only then hand over.
 - ADDITIONALLY spot-check 2-3 drafts yourself: open the demoUrl, read one AI draft against the prospect's website — **no invented prices/policies** (the check can't catch hallucinations; you can).
@@ -101,7 +101,7 @@ Was diesem Lauf passiert ist: [1-3 Zeilen]
 
 ➡ DEIN NÄCHSTER SCHRITT: [exactly ONE action, e.g.
   "Drafts prüfen & schedulen: notifications.psquared.dev/drafts → Sidebar 'Inbox' → Kampagne [X] → Schedule"
-  or "Offer-Deadline bestätigen, dann läuft /plan-campaign inbox weiter"]
+  or the concrete blocker]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -110,5 +110,5 @@ Was diesem Lauf passiert ist: [1-3 Zeilen]
 - NEVER send or schedule emails — human-only.
 - NEVER touch chatbot-track opportunities, campaigns or drafts.
 - NEVER mix demoTypes in one campaign.
-- The closed-campaign guard in `/setup-email-drafts` (sent drafts or expired offer ⇒ refuse) applies unchanged.
+- The closed-campaign guard in `/setup-email-drafts`: for offer-free inbox campaigns only the sent-drafts half applies.
 - Companies whose `outreachFor` contains `PERSONAL_ONLY`: hands off, always.
