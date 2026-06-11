@@ -1,15 +1,23 @@
 ---
 name: find-leads
-description: "Find new B2B leads in Germany for InboxMate outreach. Validates each lead against legal requirements (UWG), checks email is publicly visible, documents justification, and adds to CRM. Germany only — Austrian law (TKG) is stricter. Pass the number of leads to find as a parameter."
+description: "Find new B2B leads in Germany for InboxMate outreach. Validates each lead against legal requirements (UWG), checks email is publicly visible, documents justification, and adds to CRM. Germany only — Austrian law (TKG) is stricter. Parameters: number of leads, optionally a track ('inbox' for email-automation leads only, 'chatbot' for chatbot leads only; default mixed)."
 ---
 
 # Find New Leads for InboxMate
+
+## Parameters
+
+`/find-leads [N] [track]` — `track` is optional:
+
+- **`inbox`** — EMAIL-ONLY mode: search ONLY email-volume verticals (Thermen, Freibäder, Museen, hotels, event venues, tour operators, booking-heavy businesses). Every qualified lead gets `Track: INBOX` in its note. A chatbot on their site is a positive signal here, never a skip. Demos for these run via `/inboxmate-inbox-demo`.
+- **`chatbot`** — chatbot-only mode: classic behavior, skip companies that already have a chatbot, every lead gets `Track: CHATBOT`.
+- omitted — mixed: decide the track per lead (see Step 2b).
 
 > **Announce:**
 > ```
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > Lead Finder started.
-> Target: [N] new leads
+> Target: [N] new leads · Track: [INBOX / CHATBOT / mixed]
 > Checking environment...
 > ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 > ```

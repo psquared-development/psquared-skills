@@ -1,9 +1,17 @@
 ---
 name: inboxmate-batch-demo
-description: "Batch-create InboxMate demos for CRM prospects. Queries Twenty CRM for companies without opportunities, validates their websites, creates demos for valid ones, and marks unreachable/outdated ones as DISQUALIFIED."
+description: "Batch-create InboxMate demos for CRM prospects. Queries Twenty CRM for companies without opportunities, validates their websites, creates demos for valid ones, and marks unreachable/outdated ones as DISQUALIFIED. Optional parameter: track ('inbox' builds Demo-Postfächer via /inboxmate-inbox-demo, 'chatbot' builds chatbot demos; default reads the Track from each company's qualification note)."
 ---
 
 # InboxMate Batch Demo Pipeline
+
+## Track routing (which demo to build)
+
+`/inboxmate-batch-demo [track]` — `track` is optional:
+
+- **`inbox`** — build a Demo-Postfach for every company in the batch via `/inboxmate-inbox-demo` (no agent, no widget; opportunity gets `demoType: INBOX`).
+- **`chatbot`** — build chatbot demos via `/inboxmate-demo` for every company (`demoType: CHATBOT`).
+- omitted — read each company's qualification note (`Track: CHATBOT | INBOX` set by `/find-leads`) and route per company; if no Track noted, default to CHATBOT.
 
 ## Prerequisites — Environment Variables
 
@@ -41,11 +49,22 @@ Wait for the answer. Convert to an ISO 8601 date. Pass this deadline to every de
 
 Read `PSQUARED_CRM_TOKEN` from `.env` and use it to query the Twenty CRM (GraphQL at `https://crm.psquared.dev/graphql`) for companies that do NOT yet have an opportunity. Use this approach:
 
-1. Fetch all companies (up to 100)
+1. Fetch companies where `outreachFor` contains `INBOX_MATE` (up to 100)
 2. Fetch all opportunities (up to 200)
 3. Filter out companies that already have ANY opportunity (regardless of stage)
 
-The remaining companies are unprocessed prospects.
+The remaining companies are unprocessed InboxMate prospects.
+
+**Critical filter:** Only fetch companies tagged for InboxMate outreach. Never process `PERSONAL_ONLY` companies — these are Martin's private contacts. Companies tagged `PSQUARED_SERVICES` only are handled by `/find-services-leads` and its own funnel, not this pipeline. Companies tagged `INBOX_MATE_MUSEUM` only (the curated museum list) are also excluded automatically — they get a separate museum-specific outreach flow when one is built.
+
+```bash
+curl -s -X POST https://crm.psquared.dev/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $PSQUARED_CRM_TOKEN" \
+  -d '{"query":"{ companies(filter: { outreachFor: { containsAny: [INBOX_MATE] } }, first: 100) { edges { node { id name domainName { primaryLinkUrl } outreachFor } } totalCount } }"}'
+```
+
+> **Legacy companies (pre-field):** Companies created before the `outreachFor` field existed have `outreachFor: null` and will NOT match this filter. That is intentional — they need to be tagged before automation touches them. If the user wants to process legacy untagged companies, they should tag them first (or we do it under explicit instruction).
 
 > **Announce:** `Found [N] unprocessed prospects.`
 

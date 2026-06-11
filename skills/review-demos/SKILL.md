@@ -1,7 +1,11 @@
 ---
 name: review-demos
-description: "Review InboxMate demos waiting for QA. Finds CRM opportunities at SCREENING with demoStatus=PENDING_REVIEW, opens each demo link, checks quality, and flags as OK_TO_SEND or NEEDS_FIX with a note explaining why."
+description: "Review InboxMate demos waiting for QA. Finds CRM opportunities at SCREENING with demoStatus=PENDING_REVIEW, opens each demo link, checks quality, and flags as OK_TO_SEND or NEEDS_FIX with a note explaining why. Optional parameter: track ('inbox' reviews only Demo-Postfach demos, 'chatbot' only chatbot demos)."
 ---
+
+## Parameters
+
+`/review-demos [track]` — optional. `inbox` → review only opportunities with `demoType: INBOX`; `chatbot` → only `demoType: CHATBOT`/`null`. Omitted → all pending, each with its matching checklist (2c).
 
 # Review InboxMate Demos
 

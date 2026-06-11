@@ -1,7 +1,11 @@
 ---
 name: plan-campaign
-description: "Plan an outreach campaign. Groups OK_TO_SEND demos (no campaign yet) into a named campaign with an offer text and deadline, creates the campaign in CRM, and links the selected opportunities to it. Run after /review-demos and before /setup-email-drafts."
+description: "Plan an outreach campaign. Groups OK_TO_SEND demos (no campaign yet) into a named campaign with an offer text and deadline, creates the campaign in CRM, and links the selected opportunities to it. Run after /review-demos and before /setup-email-drafts. Optional parameter: track ('inbox' plans only Demo-Postfach/INBOX opportunities, 'chatbot' only chatbot ones)."
 ---
+
+## Parameters
+
+`/plan-campaign [track]` — optional. `inbox` → only opportunities with `demoType: INBOX`; `chatbot` → only `demoType: CHATBOT` or `null` (legacy). Omitted → both groups, planned as separate campaigns (see STEP 1).
 
 # Plan Outreach Campaign
 
