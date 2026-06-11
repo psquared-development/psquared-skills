@@ -191,7 +191,7 @@ Model: **pay per Postfach (mailbox) + AI credits** (chat reply 1, email draft 2,
 | Free | €0 | 0 (chatbot only) | 50 | widget funnel |
 | Starter | €49/mo (monthly only) | 1 (extra €19) | 500 | full email automation from here |
 | Pro | €129/mo · €107 yearly | 3 (extra €15) | 2,500 | API+MCP, marketplace; demo discount → €86 first year |
-| Business | ab €349/mo, custom | 10+ | 10,000+ | custom integrations (first incl.), white-label, SLA; demo offer €199 first year |
+| Business | ab €349/mo, custom | 15+ | 10,000+ | custom integrations (first incl.), white-label, SLA; demo offer €199 first year |
 
 Top-ups: €9/€8 per 1,000 (Starter/Pro), instant grant, invoiced afterwards. All paid plans 14-day free trial, no credit card.
 
