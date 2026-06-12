@@ -121,7 +121,7 @@ Never use ae/oe/ue/ss instead of ä/ö/ü/ß. 38% of Campaign 15 emails had miss
 **Rule 16: Every outreach email must be unique — no identical closings across a batch.**
 Campaign 15 had 74% identical "Bei Fragen einfach antworten." closings. Vary the closing: "Falls es passt, sprechen wir gern kurz.", "Bin gespannt, was Sie davon halten.", "Einfach auf diese Mail antworten." — each email should feel hand-written.
 
-**Rule 17: Minimum outreach body depth.**
+**Rule 17: Minimum outreach body depth.** *(Superseded by Rule 20 for length — the floor is substance, not chars: outreach still needs hook + proof + ask, but within the Rule 20 limits.)*
 bodyParagraph1 + bodyParagraph2 + bodyParagraph3 must total at least 450 characters. Anything shorter means the email is too thin to convey value. Campaign 15 averaged 402 chars vs 515 in engaged campaigns.
 
 ---
