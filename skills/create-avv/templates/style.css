@@ -81,10 +81,11 @@ strong { color: var(--secondary); }
   font-size: 9.5pt; font-weight: 600; margin-bottom: 14mm;
 }
 .title-headline {
-  font-size: 30pt; line-height: 1.1; font-weight: 800; color: var(--secondary);
+  font-size: 30pt; line-height: 1.1; font-weight: 800;
+  /* Solid brand color — the gradient + background-clip:text trick renders as a
+     solid purple box in PDF viewers (Preview/Quick Look), so don't use it. */
+  color: var(--primary-dark);
   margin: 0 0 8mm 0;
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
 .title-sub { font-size: 13pt; color: var(--muted); max-width: 150mm; }
 .title-bottom {
