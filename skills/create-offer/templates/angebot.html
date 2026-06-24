@@ -18,6 +18,10 @@
   Alle Preise verstehen sich in Euro, exkl. USt., sofern nicht anders angegeben.
 </p>
 
+<!-- One-time line items + totals only render when there are items. A
+     subscription-only offer (recurring fee, no one-time costs) skips this
+     block and shows just the recurring box below, avoiding a €0,00 total. -->
+{{#if angebot.items}}
 <table class="items">
   <thead>
     <tr>
@@ -68,6 +72,7 @@
     <span>{{angebot.totalDisplay}}</span>
   </div>
 </div>
+{{/if}}
 
 {{#if angebot.paymentSummary}}
 <div class="payment-summary">{{{angebot.paymentSummary}}}</div>
