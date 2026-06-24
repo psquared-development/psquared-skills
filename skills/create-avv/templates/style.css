@@ -145,7 +145,8 @@ strong { color: var(--secondary); }
   font-size: 9.5pt; color: var(--muted);
 }
 .signature-block .sig .role { color: var(--secondary); font-weight: 600; }
-/* Reserve two lines for the party name so a one-line and a two-line name keep
-   the following signature lines at the same height across both columns. */
-.signature-block .sig .party { margin-top: 2mm; min-height: 2.7em; }
+/* Reserve two full lines for the party name (line-height 1.55 → 2 lines ≈
+   3.1em) so a one-line and a two-line name keep the following signature lines
+   at the same height across both columns. */
+.signature-block .sig .party { margin-top: 2mm; min-height: 3.2em; }
 .signature-block .sig .line { margin-top: 9mm; border-top: 1px solid var(--border); padding-top: 1.5mm; }
