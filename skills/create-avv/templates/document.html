@@ -1,0 +1,40 @@
+<div class="doc-header">
+  <div class="brand">
+    <span class="brand-mark">p²</span>
+    <span>psquared</span>
+  </div>
+  <div class="doc-label">Auftragsverarbeitungsvertrag · Art. 28 DSGVO</div>
+</div>
+
+{{#if preamble}}
+<div class="preamble">{{{preamble}}}</div>
+{{/if}}
+
+{{#each sections}}
+<div class="avv-section">
+  <h2>{{#if num}}§ {{num}} {{/if}}{{title}}</h2>
+  {{{html}}}
+</div>
+{{/each}}
+
+<div class="signature-block">
+  <div class="sig">
+    <div class="role">Verantwortlicher</div>
+    <div style="margin-top: 2mm;">{{controller.name}}</div>
+    <div class="line">Ort, Datum</div>
+    <div class="line">Unterschrift / Name</div>
+  </div>
+  <div class="sig">
+    <div class="role">Auftragsverarbeiter</div>
+    <div style="margin-top: 2mm;">{{provider.name}}{{#if provider.contactPerson}}, {{provider.contactPerson}}{{/if}}</div>
+    <div class="line">Ort, Datum</div>
+    <div class="line">Unterschrift / Name</div>
+  </div>
+</div>
+
+{{#each annexes}}
+<div class="annex avv-section">
+  <h2>{{title}}</h2>
+  {{{html}}}
+</div>
+{{/each}}

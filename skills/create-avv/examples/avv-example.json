@@ -1,0 +1,82 @@
+{
+  "language": "de",
+  "doc": {
+    "title": "Auftragsverarbeitungsvertrag",
+    "eyebrow": "Auftragsverarbeitungsvertrag · Art. 28 DSGVO",
+    "subtitle": "Vereinbarung über die Verarbeitung personenbezogener Daten im Auftrag im Rahmen des Produkts InboxMate (psquared AgentHub).",
+    "referenceNumber": "2026-0624-001",
+    "date": "24. Juni 2026",
+    "version": "2026-06-24"
+  },
+  "controller": {
+    "name": "[Firmenname des Kunden]",
+    "contactPerson": "[Name, Funktion]",
+    "address": "[Straße, PLZ Ort]<br/>[Land]",
+    "email": "[E-Mail]"
+  },
+  "provider": {
+    "name": "psquared GmbH",
+    "contactPerson": "Martin Pammesberger, Geschäftsführer",
+    "address": "Dametzstraße 2-4<br/>4020 Linz, Österreich",
+    "email": "office@psquared.dev",
+    "website": "psquared.dev"
+  },
+  "preamble": "<p>Der Auftragsverarbeiter erbringt für den Verantwortlichen Leistungen im Rahmen des Produkts <strong>InboxMate</strong> (psquared AgentHub) — einer Software zur Triage, Kategorisierung und (teil-)automatisierten Bearbeitung von E-Mail-Postfächern. Dabei verarbeitet der Auftragsverarbeiter personenbezogene Daten im Auftrag und nach Weisung des Verantwortlichen. Dieser Vertrag konkretisiert die datenschutzrechtlichen Pflichten gemäß Art. 28 DSGVO und ist Bestandteil des zugrunde liegenden Hauptvertrags (Angebot/Auftrag).</p>",
+  "sections": [
+    {
+      "num": "1",
+      "title": "Gegenstand, Dauer, Art und Zweck der Verarbeitung",
+      "html": "<ul><li><strong>Gegenstand:</strong> Verarbeitung personenbezogener Daten zur Bereitstellung der InboxMate-Leistungen (Anbindung von E-Mail-Postfächern, KI-gestützte Kategorisierung, Antwortvorschläge/-versand, Kontakt- und Ticketverwaltung).</li><li><strong>Art:</strong> Erheben, Speichern, Auslesen, Analysieren (auch mittels KI/LLM), Verändern, Übermitteln, Löschen.</li><li><strong>Zweck:</strong> Erbringung der vertraglich vereinbarten Leistungen.</li><li><strong>Dauer:</strong> für die Laufzeit des Hauptvertrags; dieser AVV gilt, solange personenbezogene Daten im Auftrag verarbeitet werden.</li></ul>"
+    },
+    {
+      "num": "2",
+      "title": "Art der Daten und Kategorien betroffener Personen",
+      "html": "<p><strong>Datenkategorien:</strong> Account-Stammdaten (Name, E-Mail, Firma), E-Mail-Inhalte und -Metadaten (Betreff, Absender/Empfänger, Zeitstempel), Kontakt-/Adressdaten, Nutzungs- und Protokolldaten, vom Nutzer als „sensibel“ gekennzeichnete Inhalte (stark verschlüsselt). Besondere Kategorien (Art. 9 DSGVO) sind nicht Gegenstand, es sei denn, der Verantwortliche führt sie zu.</p><p><strong>Betroffene Personen:</strong> Mitarbeiter und Ansprechpartner des Verantwortlichen sowie dessen Kunden, Interessenten, Lieferanten und sonstige E-Mail-Korrespondenten.</p>"
+    },
+    {
+      "num": "3",
+      "title": "Pflichten des Auftragsverarbeiters",
+      "html": "<ul><li>Verarbeitung ausschließlich auf dokumentierte Weisung des Verantwortlichen.</li><li>Verpflichtung der zur Verarbeitung befugten Personen auf Vertraulichkeit.</li><li>Technische und organisatorische Maßnahmen gemäß Art. 32 DSGVO (siehe Anlage 1).</li><li>Unterstützung des Verantwortlichen bei Betroffenenrechten, Datenschutz-Folgenabschätzungen und Meldepflichten.</li><li>Löschung/Rückgabe aller Daten nach Wahl des Verantwortlichen nach Leistungsende (siehe § 8).</li><li>Bereitstellung der für Nachweise/Audits erforderlichen Informationen mit angemessener Vorankündigung.</li><li>Unverzügliche Information, wenn eine Weisung gegen Datenschutzrecht verstößt.</li></ul>"
+    },
+    {
+      "num": "4",
+      "title": "Unterauftragsverarbeiter",
+      "html": "<p>Der Verantwortliche genehmigt allgemein den Einsatz der in <strong>Anlage 2</strong> genannten Unterauftragsverarbeiter. Der Auftragsverarbeiter informiert über beabsichtigte Änderungen (Hinzufügung/Ersetzung) und räumt ein Widerspruchsrecht ein. Unterauftragsverarbeiter werden auf ein gleichwertiges Datenschutzniveau verpflichtet; der Auftragsverarbeiter bleibt verantwortlich.</p>"
+    },
+    {
+      "num": "5",
+      "title": "Betroffenenrechte",
+      "html": "<p>Der Auftragsverarbeiter unterstützt den Verantwortlichen mit geeigneten Maßnahmen bei der Erfüllung von Betroffenenanfragen. Richtet sich eine betroffene Person direkt an den Auftragsverarbeiter, leitet dieser die Anfrage unverzüglich an den Verantwortlichen weiter.</p>"
+    },
+    {
+      "num": "6",
+      "title": "Meldung von Verletzungen des Schutzes personenbezogener Daten",
+      "html": "<p>Der Auftragsverarbeiter meldet jede Verletzung unverzüglich nach Bekanntwerden, stellt die nach Art. 33 Abs. 3 DSGVO erforderlichen Informationen bereit, ergreift Maßnahmen zur Eindämmung und unterstützt die Meldepflichten des Verantwortlichen.</p>"
+    },
+    {
+      "num": "7",
+      "title": "Datenübermittlung in Drittländer",
+      "html": "<p>Eine Verarbeitung außerhalb der EU/des EWR findet nur im in <strong>Anlage 2</strong> genannten Umfang statt. Übermittlungen in die USA (OpenAI, Stripe) sind durch die EU-Standardvertragsklauseln und — soweit anwendbar — das EU-US Data Privacy Framework abgesichert. Der Verantwortliche kann die US-Übermittlung für die KI-Inferenz vollständig ausschließen, indem er in den Kontoeinstellungen <strong>„EU models only“</strong> aktiviert; die Inferenz erfolgt dann ausschließlich über Microsoft Azure OpenAI in der EU (Region Sweden Central).</p>"
+    },
+    {
+      "num": "8",
+      "title": "Löschung und Rückgabe nach Beendigung",
+      "html": "<p>Nach Abschluss der Leistung löscht oder retourniert der Auftragsverarbeiter — nach Wahl des Verantwortlichen — sämtliche personenbezogenen Daten und löscht vorhandene Kopien, sofern keine gesetzliche Aufbewahrungspflicht besteht. Auf Verlangen wird die Löschung bestätigt.</p>"
+    },
+    {
+      "num": "9",
+      "title": "Schlussbestimmungen",
+      "html": "<ul><li>Bei Widerspruch zwischen diesem AVV und dem Hauptvertrag gehen die Datenschutz-Regelungen dieses AVV vor.</li><li>Änderungen bedürfen der Schriftform.</li><li>Es gilt österreichisches Recht; Gerichtsstand ist Linz, soweit gesetzlich zulässig.</li></ul>"
+    }
+  ],
+  "annexes": [
+    {
+      "title": "Anlage 1 — Technische und organisatorische Maßnahmen (Art. 32 DSGVO)",
+      "html": "<ul><li><strong>Verschlüsselung:</strong> TLS für alle Verbindungen; Verschlüsselung ruhender Daten; sensible Inhalte und OAuth-Tokens zusätzlich AES-256. E-Mail-Inhalte werden nur im Arbeitsspeicher verarbeitet, nicht dauerhaft gespeichert.</li><li><strong>Zugriffskontrolle:</strong> Authentifizierung, rollenbasierte Berechtigungen, Mandantentrennung (Account-Scoping); Produktivdaten-Zugriff nur für autorisiertes, zur Vertraulichkeit verpflichtetes Personal.</li><li><strong>Pseudonymisierung/Datenminimierung:</strong> Produktanalyse nur pseudonym (keine Inhalte, IP-Anonymisierung); automatische Löschfristen (Chats nach 60 Tagen, Widget-Kontaktdaten nach 90 Tagen).</li><li><strong>Verfügbarkeit & Integrität:</strong> gehostete EU-Infrastruktur mit Backups; Wiederherstellbarkeit; regelmäßige Tests der Maßnahmen.</li><li><strong>Protokollierung & Auditierbarkeit:</strong> Zugriffs- und Aktivitätsprotokolle.</li><li><strong>Incident Response:</strong> definierte Prozesse zur Erkennung, Eindämmung und Meldung von Sicherheitsvorfällen.</li></ul>"
+    },
+    {
+      "title": "Anlage 2 — Genehmigte Unterauftragsverarbeiter",
+      "html": "<table><thead><tr><th>Unterauftragsverarbeiter</th><th>Zweck</th><th>Standort</th></tr></thead><tbody><tr><td>Heroku (Salesforce)</td><td>Anwendungs-Hosting</td><td>EU (europäische Region)</td></tr><tr><td>Supabase</td><td>Datenbank, Authentifizierung, Datei-Speicher</td><td>EU — Frankfurt (AWS eu-central-1)</td></tr><tr><td>Microsoft Azure OpenAI</td><td>KI-Inferenz bei aktiviertem „EU models only“</td><td>EU — Sweden Central</td></tr><tr><td>OpenAI, L.L.C.</td><td>KI-Inferenz (Standard, wenn „EU models only“ deaktiviert)</td><td>USA (SCC / EU-US DPF)</td></tr><tr><td>PostHog</td><td>Pseudonyme Produktanalyse (keine Inhalte, IP anonymisiert)</td><td>EU — Frankfurt</td></tr><tr><td>Stripe</td><td>Zahlungsabwicklung für Aufladungen (nur bei Nutzung)</td><td>USA (SCC / EU-US DPF)</td></tr><tr><td>Shopify</td><td>App-Store-Distribution & Abrechnung (nur bei Shopify-Installation)</td><td>EU / international (SCC)</td></tr></tbody></table><p style=\"margin-top:4mm;font-size:9pt;color:#64748b;\">Hinweis: Das vom Verantwortlichen angebundene E-Mail-Postfach (z. B. Microsoft Outlook/365 oder ein IMAP-Anbieter wie GMX, world4you, Hetzner) wird vom Verantwortlichen selbst gewählt und kontrolliert und ist kein Unterauftragsverarbeiter im Sinne dieses AVV.</p>"
+    }
+  ]
+}

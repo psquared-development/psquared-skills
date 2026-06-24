@@ -1,0 +1,35 @@
+<div class="title-top">
+  <div class="brand">
+    <span class="brand-mark">p²</span>
+    <span>psquared</span>
+  </div>
+  <div class="meta">
+    {{#if doc.referenceNumber}}<div>AVV-Nr. {{doc.referenceNumber}}</div>{{/if}}
+    {{#if doc.date}}<div>{{doc.date}}</div>{{/if}}
+    {{#if doc.version}}<div>Fassung {{doc.version}}</div>{{/if}}
+  </div>
+</div>
+
+<div class="title-center">
+  <div class="title-eyebrow">{{#if doc.eyebrow}}{{doc.eyebrow}}{{else}}Auftragsverarbeitungsvertrag · Art. 28 DSGVO{{/if}}</div>
+  <h1 class="title-headline">Auftragsverarbeitungsvertrag</h1>
+  {{#if doc.subtitle}}<p class="title-sub">{{doc.subtitle}}</p>{{else}}<p class="title-sub">Vereinbarung über die Verarbeitung personenbezogener Daten im Auftrag gemäß Art. 28 DSGVO.</p>{{/if}}
+</div>
+
+<div class="title-bottom">
+  <div>
+    <h4>Verantwortlicher</h4>
+    <div class="contact-line"><strong>{{controller.name}}</strong></div>
+    {{#if controller.contactPerson}}<div class="contact-line">{{controller.contactPerson}}</div>{{/if}}
+    {{#if controller.address}}<div class="contact-line">{{{controller.address}}}</div>{{/if}}
+    {{#if controller.email}}<div class="contact-line">{{controller.email}}</div>{{/if}}
+  </div>
+  <div>
+    <h4>Auftragsverarbeiter</h4>
+    <div class="contact-line"><strong>{{provider.name}}</strong></div>
+    {{#if provider.contactPerson}}<div class="contact-line">{{provider.contactPerson}}</div>{{/if}}
+    {{#if provider.address}}<div class="contact-line">{{{provider.address}}}</div>{{/if}}
+    {{#if provider.email}}<div class="contact-line">{{provider.email}}</div>{{/if}}
+    {{#if provider.website}}<div class="contact-line"><a href="https://{{provider.website}}">{{provider.website}}</a></div>{{/if}}
+  </div>
+</div>
