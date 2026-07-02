@@ -104,6 +104,23 @@ Maintenance (run anytime):
 | [price-change](./skills/price-change/SKILL.md) | Change pricing across all touchpoints (website, app, docs, Stripe) |
 | [create-offer](./skills/create-offer/SKILL.md) | Generate a branded multi-page client offer PDF (title + project description + screenshots + Angebot + AGB) from a JSON config. Two-pass Playwright render with pagination + pdf-lib merge. |
 
+### ProcessFlow Review (neverlost)
+
+psquared red-teams **and** refines the AI-generated process analyses in neverlost's **ProcessFlow**
+app (paid engagement per customer). Load both skills together: `processflow-review` = judgement,
+`processflow-app` = how to drive it (helper app + Chrome-MCP).
+
+| Skill | Description |
+|-------|-------------|
+| [processflow-review](./skills/processflow-review/SKILL.md) | Second-opinion review of ProcessFlow analyses per company — canvas↔transcript check, right-sizing, guardrails (Definition of Done), diagram + solution-concept critique. `references/guardrails.md` is the canonical checklist. |
+| [processflow-app](./skills/processflow-app/SKILL.md) | Driver for the local ProcessFlow Review Tool + Chrome-MCP editing (Konzept-Copilot, Canvas-Copilot). Repo: [processflow-tool](https://github.com/psquared-development/processflow-tool). |
+
+Key guardrails (from real ZIWA + Stütz reviews): transcript-check every process; **industry-correct**
+(the AI hallucinates a wrong branch); **pricing_verified** (cross-check "included/free" claims on the
+web); smallest-but-not-undermotorized; roles-not-initials; architecture diagram + storyline test per
+process; BMD = unverified integration risk; the agent never sets HI-freigegeben (human) or names the
+presentation date (Dominik).
+
 ## Contributing
 
 1. `mkdir skills/<skill-name>`

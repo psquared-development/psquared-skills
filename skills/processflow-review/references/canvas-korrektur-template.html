@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<!--
+  TEMPLATE — canvas-korrektur diff/copy tool. To use for a process:
+  1. Copy this file to <company>/processes/<slug>/canvas-korrektur.html
+  2. Replace the `data` array and `note` string in the <script> with the process's corrected fields.
+     Per item: status = "same" | "changed" | "new" | "removed".
+       - "changed"/"removed" SHOULD include `old:` (the ProcessFlow original) and `reason:`.
+       - sections are type "meta" (label+value rows) | "text" (one paragraph) | "list" (bullets/steps).
+  2b. FIDELITY (critical): for status:"same" rows, reproduce the ACTUAL digitized canvas text VERBATIM
+      (read it from raw/process.json) — never paraphrase or shorten. "Alles kopieren" pastes these into
+      ProcessFlow, so a paraphrase corrupts the canvas. Reproduce ALL items of each list (don't drop any).
+      Only mark a row "changed"/"removed"/"new" for a GENUINE difference; never badge an item that was
+      already in the canvas as "new". PRESERVE paragraph breaks in multi-paragraph fields (problem_definition
+      often has 2-3 Absätze) using \n\n, and reproduce EVERY paragraph — do not drop or merge them. Best
+      practice: copy each field's text straight from raw/process.json; do not retype from memory.
+      Reproduce ALL sections (Metadaten, 1 Problem, 2 Beschreibung, 3 Zielgruppe, 4 Datenquellen,
+      5 Vision, 6 Nutzen, 7 Aufgaben&Rollen) — the 'benefits' field (§6 Nutzen) is easy to forget; check it.
+  2c. CORRECT-AND-SHOW, don't silently leave: a genuine error (OCR garble like '(Tikers)', an AI-invented
+      number, a token the whiteboard contradicts) IS a genuine difference → set status:"changed", put the
+      CORRECTED text in value, the original in old:, and explain in reason:. Do NOT leave a known error sitting
+      in a status:"same" row (the user wants to SEE the fix as an update), and do NOT silently change it without
+      old:+reason. Correcting an error and dropping/paraphrasing content are different things — fix errors,
+      preserve everything else verbatim.
+  3. QUOTE-SAFETY (critical): JS strings are delimited by ASCII ". Do NOT put an ASCII " inside content —
+     a German „…" pair whose closing quote is a straight " will silently terminate the string and BLANK
+     the page. Use ASCII single quotes ' for any inner quote, or the curly “ ” pair. Never mix „ + ".
+  4. ALWAYS run scripts/verify_html.sh on the result before handing it over.
+  Update the <title> and <h1> to the process name.
+-->
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROZESSNAME — Canvas-Korrektur (mit Änderungen)</title>
+<style>
+  :root{--bg:#0f172a;--accent:#22c55e;--accent2:#16a34a;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:#f1f5f9;color:#0f172a;font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:32px 16px;}
+  .wrap{max-width:900px;margin:0 auto;}
+  h1{font-size:22px;margin:0 0 4px;}
+  .sub{color:#475569;margin:0 0 16px;font-size:14px;}
+  .toolbar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:0 0 22px;padding:12px 14px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#475569;}
+  .tag{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .dot.changed{background:#f59e0b;} .dot.new{background:#22c55e;} .dot.removed{background:#ef4444;} .dot.same{background:#cbd5e1;}
+  label.toggle{margin-left:auto;font-size:13px;color:#334155;display:flex;gap:7px;align-items:center;cursor:pointer;}
+  .section{background:#fff;border:1px solid #e2e8f0;border-radius:12px;margin:0 0 18px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .section > header{background:var(--bg);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .section > header h2{font-size:14px;letter-spacing:.04em;text-transform:uppercase;margin:0;}
+  .section .body{padding:6px 16px 14px;}
+  .row{display:flex;gap:10px;align-items:flex-start;padding:11px 10px;border-bottom:1px dashed #e2e8f0;border-left:4px solid transparent;border-radius:4px;}
+  .row:last-child{border-bottom:none;}
+  .row.changed{border-left-color:#f59e0b;background:#fffbeb;}
+  .row.new{border-left-color:#22c55e;background:#f0fdf4;}
+  .row.removed{border-left-color:#ef4444;background:#fef2f2;}
+  .row .num{flex:0 0 22px;color:#94a3b8;font-variant-numeric:tabular-nums;padding-top:6px;text-align:right;}
+  .row .label{flex:0 0 170px;color:#64748b;font-size:13px;font-weight:600;padding-top:6px;}
+  .row .main{flex:1;min-width:0;}
+  .row .val{white-space:pre-wrap;padding-top:5px;}
+  .row.removed .val{text-decoration:line-through;color:#b91c1c;}
+  .old{margin-top:6px;font-size:12.5px;color:#9a3412;}
+  .old s{color:#b45309;}
+  .reason{margin-top:5px;font-size:12px;color:#64748b;font-style:italic;}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:99px;margin-top:5px;}
+  .badge.changed{background:#fef3c7;color:#92400e;} .badge.new{background:#dcfce7;color:#166534;}
+  .badge.removed{background:#fee2e2;color:#991b1b;} .badge.same{background:#f1f5f9;color:#64748b;}
+  button.copy{flex:0 0 auto;border:1px solid var(--accent2);background:#fff;color:var(--accent2);
+    border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap;align-self:flex-start;margin-top:3px;}
+  button.copy:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+  button.copy.done{background:var(--accent2);color:#fff;border-color:var(--accent2);}
+  header button.copy{background:transparent;color:#fff;border-color:#475569;}
+  header button.copy:hover{background:#fff;color:var(--bg);}
+  .note{background:#fffbeb;border:1px solid #fde68a;}
+  .note pre{white-space:pre-wrap;margin:0;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#3f3f1f;}
+  body.only-changes .row.same{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>PROZESSNAME — Canvas-Korrektur <span style="font-weight:400;color:#64748b;font-size:16px;">(mit Änderungen)</span></h1>
+  <p class="sub">Unsere bereinigte Version vs. ProcessFlow-Original (Whiteboard + Transkript geprüft). Kopier-Button = korrigierter Wert. Stand JJJJ-MM-TT · psquared.</p>
+  <div class="toolbar">
+    <div class="legend">
+      <span class="tag"><span class="dot changed"></span>Geändert</span>
+      <span class="tag"><span class="dot new"></span>Neu</span>
+      <span class="tag"><span class="dot removed"></span>Entfernt</span>
+      <span class="tag"><span class="dot same"></span>Unverändert</span>
+    </div>
+    <label class="toggle"><input type="checkbox" id="onlyChanges"> nur Änderungen anzeigen</label>
+  </div>
+  <div id="app"></div>
+</div>
+<script>
+// ===== REPLACE THIS DATA per process. status: same|changed|new|removed. Use ' for inner quotes, never " =====
+const data = [
+  {title:"Metadaten", type:"meta", items:[
+    {label:"Prozessname", value:"PROZESSNAME", status:"same"},
+    {label:"Betroffene Mitarbeiter:innen", value:"2", status:"changed",
+      old:"4", reason:"Whiteboard nennt 2; '4' war eine KI-Annahme -> ROI war doppelt."},
+  ]},
+  {title:"3. Zielgruppe", type:"list", items:[
+    {value:"Alle Mitarbeiter der Firma", status:"changed",
+      old:"Alle Mitarbeiter ... (lange KI-Aufschlüsselung)", reason:"Whiteboard sagt nur 'alle Mitarbeiter'."},
+    {value:"Erfundene Rolle X", status:"removed", reason:"Nicht auf dem Whiteboard — KI-erfunden."},
+    {value:"Neuer, im Transkript belegter Punkt", status:"new", reason:"Aus dem Workshop-Transkript ergänzt."},
+  ]},
+];
+const note =
+`psquared-Review (JJJJ-MM-TT) — PROZESSNAME
+Quelle: Whiteboard + Workshop-Transkript.
+
+• Kurzer, kopierbarer Changelog der Änderungen für das ProcessFlow-Feld 'Notizen'.
+• Solution-seitige Hinweise (Synergie-Effekt, fehlende Datenfelder, Referenzen) hier ebenfalls vermerken.`;
+// ===== END REPLACE =====
+
+function copy(text, btn){
+  const done=()=>{const o=btn.textContent;btn.textContent="✓ Kopiert";btn.classList.add("done");setTimeout(()=>{btn.textContent=o;btn.classList.remove("done");},1200);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(()=>fb(text,done));}
+  else fb(text,done);
+}
+function fb(text,done){const t=document.createElement("textarea");t.value=text;document.body.appendChild(t);t.select();try{document.execCommand("copy");}catch(e){}document.body.removeChild(t);done();}
+function mkbtn(text,label){const b=document.createElement("button");b.className="copy";b.textContent=label||"Kopieren";b.onclick=()=>copy(text,b);return b;}
+function badge(status){const map={changed:"Geändert",new:"Neu",removed:"Entfernt",same:"Unverändert"};const s=document.createElement("span");s.className="badge "+status;s.textContent=map[status];return s;}
+function oldLine(it){if(!it.old)return null;const d=document.createElement("div");d.className="old";d.innerHTML="vorher: <s>"+it.old.replace(/</g,"&lt;")+"</s>";return d;}
+function reasonLine(it){if(!it.reason)return null;const d=document.createElement("div");d.className="reason";d.textContent="-> "+it.reason;return d;}
+
+const app=document.getElementById("app");
+data.forEach(sec=>{
+  const s=document.createElement("div");s.className="section";
+  const h=document.createElement("header");
+  const t=document.createElement("h2");t.textContent=sec.title;h.appendChild(t);
+  if(sec.type!=="meta"){const active=sec.items.filter(i=>i.status!=="removed").map(i=>i.value).join("\n");h.appendChild(mkbtn(active,"Alles kopieren"));}
+  s.appendChild(h);
+  const body=document.createElement("div");body.className="body";
+  sec.items.forEach((it)=>{
+    const r=document.createElement("div");r.className="row "+it.status;
+    if(sec.type==="list"){const n=document.createElement("div");n.className="num";n.textContent=(it.status==="removed"?"–":(body.querySelectorAll('.row:not(.removed)').length+1)+".");r.appendChild(n);}
+    if(sec.type==="meta"){const l=document.createElement("div");l.className="label";l.textContent=it.label;r.appendChild(l);}
+    const main=document.createElement("div");main.className="main";
+    const v=document.createElement("div");v.className="val";v.textContent=it.value;main.appendChild(v);
+    main.appendChild(badge(it.status));
+    const ol=oldLine(it);if(ol)main.appendChild(ol);
+    const rl=reasonLine(it);if(rl)main.appendChild(rl);
+    r.appendChild(main);
+    if(it.status!=="removed")r.appendChild(mkbtn(it.value));
+    body.appendChild(r);
+  });
+  s.appendChild(body);app.appendChild(s);
+});
+const ns=document.createElement("div");ns.className="section note";
+const nh=document.createElement("header");const nt=document.createElement("h2");
+nt.textContent="Notiz für ProcessFlow (Changelog)";nh.appendChild(nt);nh.appendChild(mkbtn(note,"Notiz kopieren"));
+ns.appendChild(nh);
+const nb=document.createElement("div");nb.className="body";const pre=document.createElement("pre");pre.textContent=note;nb.appendChild(pre);
+ns.appendChild(nb);app.appendChild(ns);
+document.getElementById("onlyChanges").addEventListener("change",e=>{document.body.classList.toggle("only-changes",e.target.checked);});
+</script>
+</body>
+</html>
