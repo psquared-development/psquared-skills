@@ -135,6 +135,13 @@ and produce presentation-ready concepts.
 4. **The human** (Martin) then flips **HI-freigegeben** per process; **Dominik** names the presentation
    date. Agents never do either.
 
+**Crew coordination:** the parallel agents share a company-wide **Team-Update feed** in the helper app
+(`GET/POST /api/update(s)`). Each `processflow-run` reads it at start + periodically and posts any
+cross-cutting finding (invented/real tools, industry, shared modules like InboxMate intake or
+article-matching, OS-consolidation, pricing facts, system-of-record) so the others don't re-derive or
+contradict it. Process-specific detail stays in `review.json`; only cross-cutting goes to the feed. Each
+agent stays on its own process.
+
 Key guardrails distilled from real ZIWA + Stütz reviews: transcript-check every process ·
 **scenario-correct** (concept ≠ real process) · **industry-correct** (wrong branch hallucinated) ·
 **no-invent** (tools/brands/ERP names — e.g. SAP, XEROX were invented) · **use existing ERP/tool

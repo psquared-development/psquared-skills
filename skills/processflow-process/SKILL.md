@@ -57,6 +57,13 @@ Every **required** guard is true, or set to **n.a. with a documented reason** (e
 a single-tool process; compliance_synced n.a. = read-only field → flag). Fresh token when the ~1h JWT
 expires (pull again from Chrome localStorage).
 
+## Parallel-Betrieb (du bist evtl. einer von mehreren)
+Andere Agenten bearbeiten parallel andere Prozesse derselben Firma. **Vor dem Rework den Team-Update-Feed
+lesen** (`GET /api/updates?company=<slug>`) und **eigene Querschnitts-Findings teilen**
+(`POST /api/update {company,agent,process,tags,text}`): erfundene/echte Tools, Branche, geteilte
+Module/Eingänge (InboxMate, Artikel-Matching), OS-Konsolidierung, Preis-/Lizenz-Fakten, System-of-Record.
+Prozess-Details → `review.json`; nur Übergreifendes → Feed. Nur DEINEN Prozess anfassen.
+
 ## Hard rules
 - **NEVER** set `approved`/HI-freigegeben (human) or name the presentation date (Dominik).
 - Every write is **live customer data** — outside an explicitly-authorized batch run, confirm each
