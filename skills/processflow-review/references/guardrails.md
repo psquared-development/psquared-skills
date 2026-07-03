@@ -46,7 +46,10 @@ sicherstellen · *(falls zutreffend)* = bedingter Guard.
   **OS-Hub selbst** (z. B. Aufgabenmanager) und jeder eigenständige Prozess **müssen** Schritte haben.
   (Dieser Guard fehlte zuerst → leere Umsetzung beim OS-Hub rutschte durch.)
 - 👁 **hours_real** — Stundenschätzung realistisch. Die KI schätzt **zu niedrig** (6h für ein
-  Modul geht nie aus) → gegen echten Dev-Aufwand validieren.
+  Modul geht nie aus) → gegen echten Dev-Aufwand validieren. **Besonders den menschlichen Rollout**
+  (Einschulung, Change-Management, Team-Meetings/Abstimmung) unterschätzt die KI systematisch — diese
+  Schritte gezielt hochziehen (bei Stütz mehrfach nötig). **Schritt-Stunden nur über den Konzept-Copilot
+  ändern** — das manuelle Feld persistiert nicht (s. `processflow-app`, „Zuverlässigkeit").
 - 🤖 **phases_compact** — Phasen kompakt beschrieben; jede Phase in sich abgeschlossen.
 - 👁 **analysis_per_phase** *(falls Phasen vorhanden)* — **JEDE Phase beginnt mit einem eigenen
   Analyse-/Feinkonzept-Schritt** (Auftragsabgleich vor Umsetzung, abrechenbar). Nimmt Risiko von
@@ -69,7 +72,10 @@ sicherstellen · *(falls zutreffend)* = bedingter Guard.
   Sinn?** KI-First heißt **nicht** KI um jeden Preis. Nutzen gegen Umstellungsaufwand, Praktikabilität
   und Compliance abwägen (SOP: „die Umstellung muss in Relation zum Erfolg stehen"). Keine KI, wo eine
   einfache Lösung dem Kunden mehr dient — und umgekehrt keine Standardlösung, wo der Kunde echten
-  KI-Mehrwert erwartet. (Gegengewicht zu `ki_anteil`; zusammen mit `smallest_fit`.)
+  KI-Mehrwert erwartet. (Gegengewicht zu `ki_anteil`; zusammen mit `smallest_fit`.) **Beispiel:** eine
+  **deterministische Rechen-/Kalkulations-Engine braucht kein LLM** — die KI verdient ihren Platz nur an
+  den **Rändern** (Extraktion aus Lieferanten-Excel/PDF, Plausibilitäts-/Ausreißerprüfung). Bei Stütz war
+  winkk.ai auf der Kalkulation daher nur **optionales Edge-Tooling**, nicht der Kern.
 - 👁 **neverlost_defaults** *(falls zutreffend)* — **neverlost-Produkte als Default mitgedacht**
   (z.B. **InboxMate** für Inbox-/ToDo-Management statt bespoke n8n+LLM). Bei Empfehlung eines
   eigenen Produkts **Interessenkonflikt offenlegen**.
@@ -171,7 +177,9 @@ sicherstellen · *(falls zutreffend)* = bedingter Guard.
   noch alte Logik/Initialen/„Stufe A-B" steht. Fix nur über ein zeitlich richtig gesetztes
   „Neu generieren" (vor dem finalen Diagramm-/Solution-Feinschliff) oder Backend. **Bedingter Guard:**
   ist das Feld nicht synchronisierbar (kein Backend/Feature), als **n.a.** markieren und als bekannte
-  Restabweichung flaggen (NICHT als harte Freigabe-Blockade behandeln).
+  Restabweichung flaggen (NICHT als harte Freigabe-Blockade behandeln). **Ebenfalls NICHT per
+  Konzept-Copilot editierbar:** die **„Begründung der Empfehlung"**-Textbox und der Empfehlungs-Typ (C) —
+  diese direkt im Textfeld setzen + „Speichern" (s. `processflow-app`).
 
 ## Abschluss / Finishing (nach jeder Analyse)
 - 👁 **presentation_date** — **Präsentationstermin genannt**: ab wann das Konzept beim Kunden
@@ -219,3 +227,5 @@ Reale Fehler aus ZIWA + Stütz. Bei JEDEM Prozess aktiv danach suchen — die KI
 | 18 | **OS-Solution-Klasse falsch** | ziwa-OS als „Workflow" statt „Individuelle Software" | `os_class_software` |
 | 19 | **Score veraltet nach Rework** | Quick-Win bleibt, obwohl Konzept jetzt 120h/strategic | Prozessanalyse neu bewerten |
 | 20 | **Agent gibt selbst frei / nennt Termin** | HI-freigegeben / Präsentationstermin | `approved`, `presentation_date` |
+| 21 | **Deliverable-Zahl aus veraltetem Cache** | Kalkulation 140h / #2 8,5h aus Cache, live 76h / 24h | live nachlesen (`processflow-app`, „Cache-Falle") |
+| 22 | **4-to-present ohne Kunden-#1-Priorität** | Erstauswahl ließ Kalkulation (expliziter #1-Wunsch) weg | 4-to-present-Schlussgate (`processflow-review` Phase 4) |

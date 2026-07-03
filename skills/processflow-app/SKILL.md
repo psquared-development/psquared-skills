@@ -78,9 +78,14 @@ verifizieren → Scoring verifizieren → Lösungskonzept verfeinern → **„HI
 - **BESTES Werkzeug für Lösungskonzept-Edits: „Vom Copilot überarbeiten lassen"** (Konzept-Copilot,
   Button-title genau so). Ihm eine präzise Liste der gezielten Änderungen geben → er ändert
   **formatierungserhaltend** UND kann in einem Rutsch zusätzlich das **Diagramm** aktualisieren und
-  **Tools als Solution verknüpfen** (manage_diagrams / Solutions). Persistiert server-seitig
+  Solutions/Tools verknüpfen (manage_diagrams / Solutions). Persistiert server-seitig
   (tool calls); falls danach ein „Speichern" sichtbar ist, klicken. Danach immer verifizieren
   (Felder + dass keine ungewollte 2. Stelle übrig blieb, z. B. BMD-Begründung an zwei Orten).
+- **Grenzen des Konzept-Copilots (Stütz beobachtet — je Session verifizieren, nicht blind glauben):**
+  Er editiert **nicht** die **„Begründung der Empfehlung"**-Textbox und **nicht** den Empfehlungs-Typ
+  (C) → diese direkt im Textfeld setzen (Value-Setter + input/change + blur) und **„Speichern"**. Das
+  **Entfernen** einer verknüpften Solution lief manuell über das **Papierkorb-/lucide-trash2-Icon** in
+  der Solutions-Liste, nicht über den Copilot. Verknüpfen kann er vorschlagen — Ergebnis immer prüfen.
 - **NICHT** lange/formatierte Rich-Text-Felder per MCP komplett neu tippen (TipTap/ProseMirror) —
   das plättet Überschriften/Bullets. MCP-Tippen nur für kurze, unformatierte Felder. Für gezielte
   Edits in langen Feldern → Konzept-Copilot.
@@ -115,6 +120,26 @@ verifizieren → Scoring verifizieren → Lösungskonzept verfeinern → **„HI
   Lauf bestehen → separat behandeln/flaggen. Der Copilot kann den Wunsch-Text zwar *anzeigen*, aber
   nicht speichern.
 
+## Zuverlässigkeit & Datenaktualität (gelernt, WICHTIG)
+- **Der Konzept-Copilot ist langsam und kann stumm scheitern.** Läufe dauern regelmäßig 60–110 s; ein
+  Lauf hing ~5 min und hat **nicht** persistiert (nur durchs Neuladen aufgefallen). Regel: **nach JEDEM
+  Copilot-Lauf Seite neu laden und die Änderung verifizieren** — nicht darauf vertrauen, dass sie ankam.
+  Lieber **kurze, gezielte Prompts** (lange/verkettete Anweisungen hängen häufiger). Hängt ein Lauf
+  > ~2 min, von „nicht gespeichert" ausgehen und vor dem Retry den Ist-Stand prüfen.
+- **Schritt-Stunden (C) „Umsetzungshinweis" / `next_steps`) gehören dem Copilot.** Die Stunden direkt im
+  manuellen Feld zu ändern hat bei Stütz **nicht persistiert**; zuverlässig war die Anweisung an den
+  Konzept-Copilot. Stundenänderungen also über den Copilot fahren und per Reload verifizieren.
+- **Radix-Switches/Tabs (z. B. Bestand/neu) unmittelbar nach dem Klick unzuverlässig auslesen.** Der
+  Zustand kippte bei Stütz hin und her → erst **nach Neuladen** (oder per Screenshot) als gesichert
+  werten; schreibende Klicks brauchen die volle Pointer-Event-Sequenz.
+- **Cache-Falle: die lokale Helper-App-JSON (`processes/reports/scores.json`) ist ein Snapshot.** Nach
+  JEDER Live-Änderung via Chrome-MCP ist sie veraltet — bei Stütz stand im Cache Kalkulation 140 h /
+  #2 8,5 h, live waren es 76 h / 24 h. **Nie Stunden/Scores aus dem Cache in ein Deliverable schreiben —
+  vorher live nachlesen.**
+- **Leeres Ergebnis ≠ „sauber".** Ein abgelaufener Supabase-JWT liefert eine **leere** Antwort, die wie
+  „Canvas sauber / keine Findings" aussieht (hat einmal einen falschen Freibrief erzeugt). Vor jedem
+  Schluss aus einem Fetch: **Zeilenzahl > 0** prüfen.
+
 ## Token refresh
 When the timer runs low, **↻ Token** → paste a fresh curl (any authenticated request).
 `apikey`/base are kept; only the Bearer is replaced.
@@ -123,4 +148,9 @@ When the timer runs low, **↻ Token** → paste a fresh curl (any authenticated
 Diffs and checklists live **in the app** (`review.json`), not in separate HTML files.
 Prompts are copy-ready in the Prompts / Canvas-Korrektur tabs. For a client/colleague
 hand-off, build a shareable summary Artifact (4-to-present + key insights + transcript
-excerpts), as done for ZIWA.
+excerpts), as done for ZIWA. **Zwei Ausgabeformen anbieten:** eine **claude.ai-Artifact**
+(Login/Share nötig) UND eine **eigenständige, self-contained HTML-Datei** (Inline-CSS,
+System-Fonts, keine externen Abhängigkeiten → offline & als Anhang teilbar) für manuelles
+Teilen. Immer die **ProcessFlow-Deeplinks** je Prozess einbetten
+(`…/process/<id>/wizard?tab=feasibility`), damit Dominik direkt ins Konzept springt, und
+Ranking-Umstufungen mit **▲/▼ + Begründung** transparent zeigen.
