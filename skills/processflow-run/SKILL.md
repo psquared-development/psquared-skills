@@ -32,6 +32,21 @@ done-criteria.
 - Final helper-app sync: guard flags + notes reflect the true state (verified vs. n.a.-with-reason).
 - Report a tight summary: what changed, final guard status, any residual/n.a. items and why.
 
+## Parallel-Koordination (WICHTIG — du bist einer von ~10)
+Aktuell arbeiten **mehrere Agenten gleichzeitig**, je Terminal ein anderer Prozess. Ihr teilt euch die
+Firma, die Helper-App (`review.json`), die Tool-Landkarte, das ERP und den Chrome-Login. Deshalb:
+- **Am Start den Team-Update-Feed lesen:** `GET /api/updates?company=<slug>` (localhost:8765) — dort
+  stehen Querschnitts-Findings der anderen (z. B. „SAP→IPTOR", „Branche=Schmuck", „Artikel-Matching ist
+  geteiltes Modul", „InboxMate = gemeinsamer Eingang", Preis-Checks). Vor Doppelarbeit/Widerspruch schützt das.
+- **Regelmäßig re-checken** (vor jedem Rework-Schritt, mind. zu Beginn + nach dem Critic).
+- **Eigene Querschnitts-Findings SOFORT teilen:** `POST /api/update {company, agent:"<terminal/prozess>",
+  process:"<name>", tags:[…], text:"…"}` — alles, was für andere relevant ist: erfundene/echte Tools,
+  Branche, geteilte Module/Eingänge (InboxMate, Artikel-Matching), OS-Konsolidierung, Preis-/Lizenz-Fakten,
+  System-of-Record, wiederkehrende KI-Fehler. Prozess-spezifische Details bleiben in `review.json`; der
+  Feed ist NUR für Firmen-/prozessübergreifend Relevantes.
+- **Bleib auf DEINEM Prozess.** Andere Prozesse gehören anderen Terminals — nicht mitbearbeiten; wenn du
+  dort etwas siehst, per Feed melden statt selbst ändern.
+
 ## Hard rules (every terminal)
 - **NEVER** set `approved`/HI-freigegeben (that's the human/Martin) or name the presentation date
   (that's Dominik). Prepare everything up to freigabe-ready; leave the switch to the human.

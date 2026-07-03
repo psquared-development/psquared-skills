@@ -61,4 +61,12 @@ concepts, edit canvases, or touch diagrams here.
 3. Tell the user: next, open one terminal per process and run **`processflow-run <process name>`**
    (works the process to guardrail-completion + self-critique + fix). Overview does not build.
 
+## Seed the Team-Update-Feed (for the parallel crew)
+The per-process terminals coordinate through the helper app's **shared update feed** (company-wide).
+**Post your context brief + cross-cutting findings there** so every worker starts informed:
+`POST /api/update {company, agent:"overview", tags:[…], text:"…"}` — e.g. exact industry, real
+ERP/systems (and any invented ones to avoid), stated priorities, shared modules/intake (InboxMate,
+article-matching), OS-consolidation angle, known pitfalls. Each `processflow-run` reads this feed at
+start and keeps posting its own cross-cutting findings.
+
 Never set `approved`/HI-freigegeben (human) or name the presentation date (Dominik).

@@ -38,6 +38,12 @@ claim as suspect until verified.** You do NOT edit anything; you output a priori
 4. **Smallest-solution + KI-First tension**: is this over-engineered, or under-motorized where the
    customer expects real KI? Does the KI actually make sense for THIS customer?
 
+## Coordination
+Read the shared **Team-Update-Feed** first (`GET /api/updates?company=<slug>`) — other parallel agents
+may already have flagged the industry, invented tools, shared modules, or pricing facts you'd otherwise
+re-derive. If your critique surfaces something **cross-cutting** (affects other processes), note it so it
+gets posted to the feed (the wrapper/worker posts `POST /api/update`).
+
 ## Output — the issue list
 For each issue: **[severity] short title — evidence (quote/field) — which guardrail — concrete fix.**
 Group by severity. End with a one-line verdict: is the concept sound, or does it need rework (and on
