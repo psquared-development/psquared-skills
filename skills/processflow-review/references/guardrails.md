@@ -25,6 +25,10 @@ sicherstellen · *(falls zutreffend)* = bedingter Guard.
 - 👁 **transcript** — Gegen Transkript geprüft, inkl. Schreib-/Semantik-Varianten (nicht nur den
   KI-Begriff; 0-Treffer erst nach Variantencheck = Verdacht).
 - 👁 **no_invent** — Keine KI-Erfindungen / OCR-Fehler (falsche Domäne, erfundene Rollen/Zahlen).
+  **Auch erfundene Tools/Marken/Geräte** gegen das Transkript prüfen: jedes namentlich genannte
+  Produkt/System/Gerät muss belegt sein. Beispiele Stütz: „SAP" (nie genannt → echtes ERP = Dynamics
+  365 + IPTOR); „XEROX-Drucker / Scan-to-Mail" (nie genannt → das Fax kommt laut IT-Leiter bereits
+  **digital** herein). Marken/Geräte/ERP-Namen also immer grep-en, nicht der KI glauben.
 - 👁 **industry_correct** — **Branche/Produktwelt des Kunden stimmt im GESAMTEN Text.** Die KI
   halluziniert gern eine plausible, aber falsche Branche und zieht sie durch alle Felder (Ausgangs-
   situation, Beispiele, Prompt-Vorlagen, Benchmark-„industry"-Tags, Diagramm-Knoten). Prüfen: passen
@@ -82,6 +86,35 @@ sicherstellen · *(falls zutreffend)* = bedingter Guard.
   Anbieter-Preisseite per WebSearch/WebFetch prüfen, Stand + Quelle notieren; wenn unklar → als
   „zu verifizieren / Stand prüfen" kennzeichnen statt eine Zahl fest behaupten. Gerade bei
   Volumen-Cases (z. B. ~200 Bilder/Halbjahr) Credit-/Nutzungslimits explizit bedenken.
+
+## Lösungs-Substanz (Red-Team-Kern — die teuersten Fehler)
+> Nicht nur Oberfläche (Name/Tools/Diagramm) prüfen, sondern ob die **Lösung selbst** stimmt. Annahme:
+> das aktuelle Konzept wurde von einer schwächeren KI ohne perfekten Kontext erzeugt — alles hinterfragen.
+- 👁 **scenario_correct** — **Der Prozess beschreibt das RICHTIGE Szenario** (was passiert real?), und
+  Canvas + Konzept + Diagramme meinen **dasselbe** Szenario. Die KI baut gern ein plausibles, aber
+  falsches Szenario. Beispiel #3 „Foto-zu-Artikelnummer": Konzept baute eine **mobile Lager-App**
+  („unbekanntes Teil vor Ort fotografieren"), das Transkript meinte aber **Back-Office** (Shooting-Fotos
+  der Artikelnummer fürs Shop-Upload zuordnen). Szenario zuerst am Transkript festmachen.
+- 👁 **use_existing_capabilities** — **Prüfen, ob vorhandene ERP/Tools/Produkte das schon können —
+  nicht nachbauen.** Vor jedem Custom-Build: kann das Bestandssystem oder ein fertiges Produkt das
+  (teilweise) out-of-the-box? Nur den **Delta** bauen. Beispiele: **IPTOR DC1** hat natives Demand-/
+  Supply-Plan + Bestellvorschläge (Reorder-Point, Saison) → #8 baute ~80 % nach; **IDP-Tools**
+  (Rossum/Nanonets) liefern Belegextraktion+Validierung+Matching → #5 Build-vs-Buy statt Eigenbau;
+  **Adobe Firefly** statt Eigenbau für Bildbearbeitung; **InboxMate** statt bespoke Mail-Klassifikation.
+  Build-vs-Buy gehört in Schritt 0 (echter Test), nicht in eine fixe Eigenbau-Annahme.
+- 👁 **right_ai_technique** — **Technisch korrektes KI-Verfahren wählen** (recherchieren, nicht raten).
+  Beispiele: SKU-/Bildabgleich → **Bild-Embeddings + Vektorsuche** (Fashion-CLIP/SigLIP), NICHT ein
+  beschreibendes Vision-LLM wie Pixtral (unzuverlässig bei fast identischen Artikeln); wo der Kunde
+  eine **regelbasierte** Logik beschreibt → Rule-Engine, nicht schweres ML; Belegextraktion → IDP/OCR
+  statt reiner Prompt-Extraktion. Bei Unsicherheit per WebSearch den Stand der Technik prüfen.
+- 👁 **discovery_first** *(falls unklar / groß / sensibel)* — Bei unklarem Szenario, hohem Aufwand,
+  fehlender Datenbasis oder sensiblen Daten: **Schritt 0 / Discovery + PoC als erste (abrechenbare)
+  Phase** voranstellen, die die offenen Fragen entscheidet (Szenario, Datenverfügbarkeit, Build-vs-Buy,
+  System-of-Record). Aufwand danach präzisieren; Vorab-Stunden als „vorläufig" kennzeichnen.
+- 👁 **os_module_option** *(falls zutreffend)* — **Frontends als „schlankes Web-Tool / Modul eines
+  Kunden-OS" rahmen**, nicht als wegwerfbare Einzel-App — wenn mehrere Prozesse konsolidieren (gemeinsame
+  Datenbasis/Oberfläche, ROI auf OS-Ebene). Entscheidung Einzel-Tool vs. OS-Modul auf Portfolio-Ebene.
+  Verknüpft mit `synergie_effekt`.
 
 ## Tools & Diagramme
 - 👁 **tools_assigned** — Tool-Zuordnungen **vollständig VOR der Diagrammerstellung**. Inkl. dem
@@ -158,3 +191,31 @@ sicherstellen · *(falls zutreffend)* = bedingter Guard.
 > **KI-First** (echter KI-Mehrwert, keine bloße Standardlösung), **Kunden-/Risikoperspektive**
 > (Analyseschritt je Phase), **Kompaktheit**, **Präsentationsreife** (Architekturdiagramm gehört dazu).
 > Begründungen & Hintergrund in `review-lens.md` (Abschnitte 4b–4d).
+
+---
+
+## Gelernte Fehlermuster (Register — Grundlage für den Critic)
+Reale Fehler aus ZIWA + Stütz. Bei JEDEM Prozess aktiv danach suchen — die KI wiederholt sie.
+
+| # | Fehlermuster | Beispiel | Gegen-Guard |
+|---|---|---|---|
+| 1 | **Falscher Firmenname** durchgezogen | „Schütz" statt „Stütz" (~105×) | `no_invent` |
+| 2 | **Erfundenes Tool/ERP** | „SAP" (real: Dynamics 365 + IPTOR) | `no_invent` |
+| 3 | **Erfundene Marke/Gerät** | „XEROX-Drucker/Scan-to-Mail" (Fax kommt digital) | `no_invent` |
+| 4 | **Falsche Branche** durchgezogen | Schmuck-Firma als „Maschinenbau/Kabelverarbeitung/Baustelle" (8/10) | `industry_correct` |
+| 5 | **Falsches Szenario** (Konzept ≠ realer Prozess) | #3 mobile Lager-App statt Back-Office-Foto-Tagging | `scenario_correct` |
+| 6 | **Nachbau vorhandener Fähigkeiten** | #8 Custom-Engine, obwohl IPTOR nativ Bestellvorschläge kann | `use_existing_capabilities` |
+| 7 | **Falsches KI-Verfahren** | Pixtral-VLM statt Bild-Embeddings; ML statt Rule-Engine | `right_ai_technique` |
+| 8 | **Build statt Buy nicht geprüft** | #5 bespoke n8n+LLM statt IDP-Tool evaluieren | `use_existing_capabilities` |
+| 9 | **Preis-/„enthalten"-Halluzination** | „Adobe Firefly ohne Zusatzkosten" (Credits gedeckelt) | `pricing_verified` |
+| 10 | **Über-/Unter-motorisiert** | volle Custom-„Cockpit"-App statt schlanker Prüfschritt | `smallest_fit` |
+| 11 | **Stunden zu niedrig** | 6h-Module; MVP-Werte als Gesamtaufwand | `hours_real` |
+| 12 | **Nur Phase 1 hat Analyseschritt** | Folgephasen starten direkt mit Umsetzung | `analysis_per_phase` |
+| 13 | **Bestandssystem als frei angenommen** | in BMD „buchen" als gesichert (Schnittstelle offen) | `bmd_safe` |
+| 14 | **Canvas ≠ Konzept ≠ Diagramm ≠ E) Compliance** | KI-first im Konzept, „Stufe A/B" im Umsetzungshinweis/Compliance | `consistency_check`, `compliance_synced` |
+| 15 | **Rollen als Personen-Initialen** | „JS/JK" statt „Controlling-Leitung" | `roles_not_initials` |
+| 16 | **Diagramm-Jargon / zu komplex / falsche Story** | „:::custom/C4/Layer" in Caption; 22 Knoten; startet beim Embedding statt beim Nutzer | `diag_caption_clean`, `diag_simple`, `diag_storyline` |
+| 17 | **OS-Modul als Einzel-App** | Frontend fix als PWA statt „Web-Tool / OS-Modul" | `os_module_option`, `synergie_effekt` |
+| 18 | **OS-Solution-Klasse falsch** | ziwa-OS als „Workflow" statt „Individuelle Software" | `os_class_software` |
+| 19 | **Score veraltet nach Rework** | Quick-Win bleibt, obwohl Konzept jetzt 120h/strategic | Prozessanalyse neu bewerten |
+| 20 | **Agent gibt selbst frei / nennt Termin** | HI-freigegeben / Präsentationstermin | `approved`, `presentation_date` |

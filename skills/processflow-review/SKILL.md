@@ -23,13 +23,26 @@ description: >
 > - **Schreiben in ProcessFlow** läuft über **Chrome-MCP als der eingeloggte Nutzer → jeder
 >   Schreibvorgang trifft ECHTE Kundendaten** (Mechanik + „jede Schreibaktion einzeln bestätigen" in
 >   `processflow-app`, Abschnitt „ProcessFlow-Bedienung über Chrome-MCP").
-> - **Token/Transkript bekommst du NICHT selbst:** den authentifizierten `curl` (Token ~1h) und das
->   Workshop-Transkript musst du **vom User erfragen** (DevTools→Network). Ohne Transkript: die
->   transkript-abhängigen Guards als n.a. markieren + reduzierte Confidence flaggen.
+> - **Token:** Chrome ist als Nutzer eingeloggt → Session-Token aus `localStorage`
+>   (`sb-…-auth-token` → `access_token`) + anon `apikey` aus einem Request ziehen; kein curl-Paste nötig
+>   (~1h gültig, bei Ablauf neu ziehen). **Transkript** liegt im Firmenordner
+>   (`technical-analysis/<firma>/meeting-notes.txt`).
 > - **Der Agent setzt NIE `approved`/HI-freigegeben** (macht der User) und **nennt NIE den
 >   Präsentationstermin** (macht Dominik) — siehe Memory `rule-agent-never-approves`.
 > - Standard = Dominiks **SOP** (Memory `dominik-sop-prozessanalyse`); Definition of Done =
->   `references/guardrails.md`.
+>   `references/guardrails.md` (inkl. **Fehlermuster-Register** am Ende).
+
+## Skill-Landkarte (aufgeteilter Workflow — für Multi-Terminal)
+Dieser Skill (`processflow-review`) ist die **Wissensbasis** (Guardrails/Prinzipien); `processflow-app`
+ist der **Driver** (Chrome-MCP + Helper-App). Der operative Ablauf ist in vier Skills gesplittet:
+- **`processflow-overview`** — Start bei 0: Kontext + Transkript lesen + Prozesse ingesten + nach
+  Analyse-Reihenfolge triagieren → Top-10-Worklist. Baut nichts.
+- **`processflow-process <name>`** — arbeitet EINEN Prozess bis alle Guards erfüllt sind.
+- **`processflow-critic <name>`** — red-teamt EINEN Prozess (Fehlermuster-Register + Web-Recherche) → Issue-Liste.
+- **`processflow-run <name>`** — Wrapper pro Terminal: process → critic → Feedback einarbeiten (Loop).
+
+**Multi-Terminal-Muster für eine neue Firma:** 1 Agent macht `processflow-overview` → Conversation auf
+~10 Terminals splitten → jedes Terminal `processflow-run <sein Prozess>`. Siehe Repo-README.
 
 ## What this is
 neverlost (Dominik Rockenschaub) runs paid workshops; trainers fill a **canvas** per process (on a
