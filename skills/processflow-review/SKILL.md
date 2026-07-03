@@ -67,6 +67,14 @@ customer's best interest, never the most billable build.
 ## Workflow (4 phases)
 
 ### Phase 1 — Gather
+> **Leseweg (User-Präferenz, verbindlich):** Daten kommen über **Chrome-MCP (DOM)** bzw. die
+> **Helper-App-Ingestion** — der Agent feuert **keine ad-hoc Supabase-REST/Token-Calls von Hand**,
+> außer der User erlaubt es ausdrücklich. Chrome ist als Nutzer eingeloggt → Token bei Bedarf aus
+> `localStorage` (`sb-…-auth-token`), kein curl-Paste nötig (vgl. `processflow-overview` Phase 3).
+> **Leeres Ergebnis ≠ „sauber":** ein abgelaufener JWT liefert leer und sieht wie „keine Findings"
+> aus → immer **Zeilenzahl > 0** prüfen, bevor man etwas daraus schließt. **Nach jeder Live-Änderung
+> ist die lokale JSON ein veralteter Snapshot** → Zahlen fürs Deliverable live nachlesen (s.
+> `processflow-app`, „Cache-Falle"). Die CLI-Scripts unten sind **Fallback** (nur mit User-OK).
 1. Create a per-company auth file from the user's browser session (the bearer JWT lasts ~1h):
    copy `assets/processflow-auth.env.example` → `<company>/_tooling/processflow-auth.env`, fill
    `PF_BASE`, `PF_PROJECT` (project UUID from the app URL), `PF_APIKEY` (the `apikey` header) and
@@ -149,10 +157,27 @@ finance/BMD, Mieter-CRM, one-off tool fixes). Decide which feed ONE OS vs stay s
 Synergie-Effekt map so nothing is double-built/double-counted. This is also where you advise neverlost on
 the "build the OS" decision at portfolio level.
 
+**Die 4-to-present — Schlussgate (gelernt aus Stütz).** Bevor die vier finalen Präsentationsprozesse
+stehen, prüfen: **(i)** jede vom Kunden **explizit genannte Top-Priorität** taucht in den vier auf —
+oder die Auslassung ist begründet (bei Stütz fehlte zuerst die **Kalkulation**, der #1-Wunsch);
+**(ii)** keine zwei der vier sind **Varianten desselben Clusters** (z. B. drei Bild-/Marketing-Prozesse)
+→ einen zeigen, den Rest als Vision anteasern; **(iii)** möglichst **~2 Quick Wins + 2 Strategische**
+für einen guten Präsentationsbogen; **(iv)** ritten **mehr als einer der vier auf einem
+psquared-Eigenprodukt** (InboxMate traf 2 von 4), Interessenkonflikt offenlegen und als
+Plattform-Synergie rahmen. (Ergänzt die Ranking-Frage aus `processflow-overview` Phase 4, greift aber
+später — auf der finalen Vierer-Auswahl.)
+
 ## Output language & artifacts
 Customer-facing deliverables in **German** (Austrian context). Keep a `prozess-tracker.md` per company
 (process · score · quadrant · review status · verdict). Save durable engagement facts to memory; don't
 duplicate what the repo already records.
+
+**Abschluss-/Hand-off-Deliverable (an Dominik):** ein teilbares Review-Dokument mit den **4-to-present**,
+den **Ranking-Umstufungen (▲/▼ + Begründung)** und den **Kundenprioritäten aus dem Transkript**. Zwei
+Formen liefern — eine **claude.ai-Artifact** (Login/Share) und eine **eigenständige self-contained
+HTML-Datei** (Inline-CSS, System-Fonts, keine externen Abhängigkeiten) zum manuellen/Offline-Teilen — und
+je Prozess den **ProcessFlow-Deeplink** (`…/process/<id>/wizard?tab=feasibility`) einbetten. Vor dem
+Ausliefern **Zahlen live gegen ProcessFlow prüfen** (Cache ist Snapshot). Mechanik in `processflow-app`.
 
 ## Files
 - `references/guardrails.md` — **Definition-of-Done checklist** per process (mirrors the helper-app
