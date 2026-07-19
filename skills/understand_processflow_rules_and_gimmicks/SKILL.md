@@ -70,6 +70,9 @@ Bei Widerspruch gilt: neueste User-Anweisung > dieser Skill > Default.
 - Editor-Bedienung: „Schritt hinzufügen" für neue Zeilen; Löschen = **`lucide-x`-Icon** je Zeile
   (kein Trash-Icon); Phasen-Überschriften = Zeilen mit 0h. Vorher zählen, wie viele Alt-Zeilen
   existieren — sonst stapeln sich neue auf alte (22 Zeilen/98h-Falle).
+- **„Schritte vorschlagen" zieht aus `implementation_custom`** — nicht aus `next_steps` oder der
+  Tool-Variante. Bei „kein Entwicklungsprojekt empfohlen" (Tool-Fälle) kommt genau eine 0h-Zeile
+  → Button ist dort nutzlos; Schritte manuell aus den next_steps übertragen (Bettenrid P4).
 
 ## 4 · Save-/Persistenz-Gimmicks (die teuersten Fallen)
 
@@ -101,15 +104,67 @@ Bei Widerspruch gilt: neueste User-Anweisung > dieser Skill > Default.
 ## 5 · In-App-KI (Konzept-Copilot) richtig bedienen
 
 - **Work-Modus** (nicht Ask). Canvas-Änderungen erzeugen Vorschläge → „Übernehmen" nötig.
+  **Achtung: Der Modus resettet nach Browser-/Chrome-Neustart auf Ask** — vor jedem Prompt auf
+  der Seite prüfen, sonst antwortet er nur beschreibend („Sobald Sie auf Work umschalten…").
 - **Mikro-Prompts statt Sammel-Prompts:** große verkettete Aufträge enden in
   Endlos-Denkschleifen (>2 min „Reasoning…") — eine gezielte Änderung pro Nachricht; bei Hänger
   Seite neu laden und erneut senden. Für gezielte Textkorrekturen **exakte Ersetzungen** angeben
   („Ersetze X durch Y"), nicht beschreiben.
 - **Formatierungserhaltend arbeiten** („kein Voll-Neuschrieb") — außer ein Feld soll bewusst neu.
 - Die **Executive Summary ist ein eigenes Feld** und wird bei Konzept-Updates NICHT mitgezogen —
-  immer separat prüfen/nachziehen.
+  immer separat prüfen/nachziehen. **Ein Voll-Rework via Copilot lässt sie sogar LEER zurück**
+  (Bettenrid P1/P2: `concrete_approach` neu, `executive_summary` = leer, fiel erst im Review auf)
+  → nach jedem Rework auf Nicht-Leere prüfen.
+- **`update_report`-Schreibfelder** (vom Copilot selbst offengelegt — was fehlt, geht nur nativ
+  oder gar nicht): `ai_content_score`, `ai_percentage`, `ai_solution_categories`,
+  `ai_technologies`, `concrete_approach`, `estimated_hours`, `executive_summary`,
+  `external_components(_structured)`, `implementation_custom/_recommendation/_tool_based`,
+  `known_solutions`, `next_steps`, `pain_point_categories`, `quick_win_or_project`,
+  `score_reasoning`, `solution_level(_reasoning)`, `tool_recommendations`.
+- **Die Copilot-Solution-Suche findet Bestandseinträge oft nicht** („Solutions gesucht ·
+  0 gefunden" trotz existierendem Katalogeintrag) → er legt dann Duplikate an oder behauptet
+  fälschlich, ein Eintrag „war diesem Prozess nicht zugeordnet". Für BESTEHENDE Einträge immer
+  den nativen „Manuell zuordnen"-Picker nutzen; den Copilot nur zum Entfernen von Zuordnungen
+  und zum Anlegen projekteigener Solutions (OS-Module) einsetzen.
 
-## 6 · Diagramme
+## 6 · Solutions-Landkarte & Katalog
+
+- **Bestand/Neu hängt am LINK, nicht am Eintrag:** `process_solutions.is_existing_system` ist
+  pro Prozess-Zuordnung — derselbe Katalogeintrag kann auf Prozess A Bestand und auf B Neu sein.
+- **„Solution bearbeiten" am Prozess editiert den KATALOGEINTRAG** — ein Rename propagiert auf
+  ALLE Links. Als Massen-Fix nutzbar („ERP-System (nicht näher spezifiziert)"→„Navision" fixte
+  25 Links auf einmal), aber gefährlich bei geteilten Einträgen: vorher zählen, ob Links
+  außerhalb des Projekts existieren.
+- **Katalogeinträge sind org-scope** und tauchen in den Pickern ALLER Kundenprojekte auf →
+  kundenspezifische Systeme eindeutig benennen; im Prozess-Picker nie „…als Tool anlegen"
+  klicken, wenn der Eintrag existieren könnte (so entstehen die Landkarten-Duplikate).
+- **Massen-Hygiene nativ:** Projekt-Einstellungen → Tools: „**Tausch**" ersetzt ein Tool in
+  allen N Prozessen des Projekts (Bestand-Marks + Notizen bleiben erhalten; der Ziel-Eintrag
+  muss existieren — der Dialog kann keinen anlegen) · „**Duplikate zusammenführen (KI)**" für
+  Namens-Dubletten (z. B. „Microsoft Outlook" vs. „… / Exchange Online").
+- **Die Erstanalyse sprüht Default-Tools über zig Prozesse** (Bettenrid: winkk.ai×40,
+  Mistral×50, Easy Contract×28 von 68) → Landkarten-Hygiene fest einplanen; die „N Prozesse"-
+  Spalte der Tools-Seite ist der Indikator. Konzept-Fixes ziehen die Links NICHT nach — nach
+  jeder Konzeptänderung „Zugeordnete Solutions" gegenprüfen (Konzept↔Links driften).
+
+## 7 · Reihenfolge, Rollen & Freigaben
+
+- **`processes.manual_priority` ist DIE Analyse-/Top-10-Reihenfolge** — gepflegt über die
+  Spinner im **Präsentationsdesigner**; Zugriff nur Projektleiter:in/Projektmitarbeiter:in
+  (Berater-Login sieht „Kein Zugriff"). Innerhalb der Leitplanken gibt es KEINEN anderen
+  Schreibweg (weder Copilot noch Projektliste) → Änderungen mit exakten Ziel-Nummern an die
+  Rolle mit Zugriff delegieren.
+- **Nie eigene Nummernkreise erfinden:** Artifacts/Handovers referenzieren `manual_priority`;
+  Alt-Nummern höchstens als Alias daneben (Bettenrid-Lektion: Artifact-P# vs. Prio-Feld =
+  zwei Wahrheiten, Verwirrung im Team).
+- **„Berater-freigegeben"-Schalter = `processes.solution_concept_reviewed_at/_by`** — REST-lesbar
+  für Status-Boards; das „Berater-OK"-Badge in Listen liest daraus.
+- **Mehrere Akteure am selben Projekt:** vor jedem Arbeits-/Re-Audit-Lauf Live-Delta ziehen
+  (`solutions?updated_at=gte.<datum>`, `process_solutions`-Links, Report-Marker-Grep) statt dem
+  lokalen Helper-Snapshot zu trauen. Fremde Edits dokumentieren und abstimmen — nie still
+  zurückdrehen (vielleicht weiß die andere Person etwas Neues).
+
+## 8 · Diagramme
 
 - Je Prozess **End-to-End-Ablauf + Architektur** (Dominiks G1); Ausnahme triviale Ein-Tool-Fälle.
 - **Kurze Labels mit explizitem `<br/>`-Umbruch** (2–3 Zeilen à ~25 Zeichen) — der Renderer
@@ -121,7 +176,7 @@ Bei Widerspruch gilt: neueste User-Anweisung > dieser Skill > Default.
   Quelltext sauber ≠ Rendering sauber. Farb-Logik: magenta=Individualsoftware, grün=neues Tool,
   schwarz=Bestand, grau=Akteur.
 
-## 7 · Nie (hart)
+## 9 · Nie (hart)
 
 - **HI-/Berater-Freigabe setzen** → immer der Mensch. **Präsentationstermin nennen** → Dominik.
 - Kundendaten (`data/`) committen. „Neu generieren" klicken. Der Chat-Antwort des Copilots ohne
