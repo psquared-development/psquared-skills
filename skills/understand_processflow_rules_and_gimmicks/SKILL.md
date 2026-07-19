@@ -92,6 +92,10 @@ Bei Widerspruch gilt: neueste User-Anweisung > dieser Skill > Default.
   `?select=type` prüfen.
 - **Bestand/Neu-Toggles** (Radix-Switches): nach Klick unzuverlässig auslesen → erst nach Reload
   als gesichert werten; Klicks brauchen die volle Pointer-Event-Sequenz.
+- **Copilot schreibt manchmal wörtliche `\n`-Escapes** in Textfelder (v. a. `external_components`)
+  — im UI erscheint dann sichtbarer „\n-"-Text statt Zeilenumbrüchen. Nach Feld-Rewrites das Feld
+  auf die zwei Zeichen Backslash+n greppen; Fix per Mikro-Prompt („ersetze jedes wörtliche \n- durch
+  echten Zeilenumbruch") oder Feld komplett mit sauberer Liste neu diktieren.
 - **Nicht-Copilot-Felder:** `gdpr_compliance` (E), `process_scores.rationales` und `phases` kann
   der Copilot nicht schreiben — Stale-Referenzen (winkk/n8n/Mistral/alte Varianten) überleben
   dort. Vor Präsentation PDF-Export ziehen und prüfen, ob diese Felder ausgegeben werden.
