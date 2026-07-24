@@ -14,25 +14,46 @@ Bei Widerspruch gilt: neueste User-Anweisung > dieser Skill > Default.
 > `processflow-overview` sind damit überschrieben — Triage bleibt gleich, Cut liegt bei 5.
 > Nicht bearbeitete, unauditierte KI-Entwürfe per Prio-Spinner HINTER die auditierten schieben.
 
-## 1 · Bevor irgendein Prozess bearbeitet wird: Gesamtbild + Duplikate
+## 1 · Standard-Ablauf neue Firma (verbindliche Reihenfolge)
 
-1. **ALLE Prozesse der Firma zuerst sichten** (Liste + Scores + Kurzbeschreibung), nie direkt in
-   einen einzelnen springen. Die KI-Erstanalyse erzeugt **Duplikate und Überlappungen** (z. B.
-   „Kundendubletten – Falschbuchungen" [Buchhaltungs-OP-Abgleich] vs. „CRM-Datenqualität" — klingt
-   gleich, sind zwei verschiedene Szenarien; oder mehrere E-Mail-/Termin-Prozesse, die dasselbe
-   meinen). Je Prozess das **Szenario am Transkript festmachen**, nicht am Namen.
-2. **Kombinationen vorschlagen, nicht stillschweigend mergen:** verwandte Prozesse als
-   Konsolidierungs-Kandidaten markieren (OS-Hub-Cluster vs. Standalone) und **dem Menschen zur
-   Entscheidung vorlegen**. Elevations/Umstufungen gegen das KI-Ranking immer mit ▲/▼ + Begründung
-   ausweisen (Kundenpriorität + Canvas-Foto schlagen den Score).
-3. **Artifact-Zwischenschritte einbauen** (bewährt bei Bettenrid): (a) Transkript-Analyse →
-   Artifact, Mensch bestätigt Prozessliste; (b) Lösungsplanung mit recherchierten
-   Preisen/Tools → Artifact, Mensch gibt Richtung frei; (c) erst DANN in ProcessFlow schreiben;
-   (d) am Ende Review-Handoff-Artifact (vorher→nachher, 4-to-present, offene Punkte). Der Mensch
-   reviewt zwischen den Stufen — nie alles in einem Rutsch bis in die App durchschreiben.
-4. **Reihenfolge im Schreiben je Prozess:** Konzept-Text → Executive Summary (eigenes Feld,
-   driftet sonst!) → Umsetzungsschritte → Solutions/Tools → Diagramme → Phasen-Feld → Guards.
-   Nach JEDEM Schritt live verifizieren (DB-Grep bzw. Screenshot), nie der Chat-Antwort glauben.
+**Phase A — Kickoff (Session-Start):**
+1. Skills laden: diesen + `processflow-review` + `processflow-app`; Engagement-Memory lesen.
+2. Helper-App starten (`python3 app.py`), Chrome-MCP verbinden, Token aus `localStorage`,
+   Firma ingesten (**immer per `project_id` filtern**), Transkript(e) in die App laden.
+3. Transkript VOLLSTÄNDIG lesen: Branche/Produkte exakt, echte Systeme/ERP, wer sagte was,
+   Kundenprioritäten. ASR-Verhörer notieren (Namen im Zweifel gegen Canvas-Fotos prüfen).
+
+**Phase B — Duplikat-/Redundanz-Pass über ALLE Prozesse (vor jeder Einzelarbeit):**
+1. Alle Prozesse der Firma sichten (Liste + Scores + Kurzbeschreibung). Dabei wissen:
+   **`source_image_url` gesetzt = echtes Workshop-Canvas** (Foto), **null = KI-synthetisiert**
+   (ganzer Canvas ist eine Annahme → besonders duplikat-/halluzinationsverdächtig).
+2. Jedem Prozess sein **Szenario aus dem Transkript** zuordnen — nicht dem Namen trauen
+   (Bettenrid: „Kundendubletten – Falschbuchungen" = Buchhaltungs-OP-Abgleich, NICHT das
+   CRM-Datenthema; mehrere E-Mail-/Termin-Entwürfe meinten denselben Prozess).
+3. **Merge-Vorschlag als Artifact/Übersicht an den Menschen** (nichts still mergen):
+   je Cluster ein **Hauptprozess** (der mit Canvas-Foto bzw. dem klarsten Transkript-Beleg)
+   + Liste der Duplikate/Satelliten, die er absorbiert; **Namensvorschlag** für den
+   Hauptprozess, wenn der KI-Name das Szenario schlecht trifft; Begründung je Entscheidung.
+4. Nach menschlicher Freigabe umsetzen:
+   - **Duplikate → Schalter „Nicht benötigt"** auf dem Lösungskonzept-Tab setzen (native
+     Toggle neben „Berater-freigegeben"; DB-Spalte `processes.solution_concept_not_needed`
+     — REST-lesbar zum Verifizieren). **Nicht löschen** — sie bleiben nachvollziehbar.
+   - **Hauptprozesse umbenennen** (freigegebener Vorschlag): der Prozessname ist ein echtes
+     Textfeld in den Canvas-Metadaten → direkt editierbar (kein Copilot nötig).
+   - Merge-Entscheidungen in den Team-Feed + `list_notes` dokumentieren (was absorbiert wen).
+5. **Top-5-Auswahl** (aktuelle Scope-Regel, s. o.): Analyse-Reihenfolge + Kundenprioritäten
+   aus dem Transkript; Umstufungen mit ▲/▼ + Begründung; Prio-Spinner 1…5 setzen, Rest dahinter.
+
+**Phase C — Einzelarbeit, 1 nach 1** (je Prozess §§2–8): Recherche → Kritik → Copilot-Rework →
+Steps → Solutions → Diagramme → Phasen-Feld → live verifizieren. Artifact-Checkpoints zwischen
+den Stufen: (a) Transkript-Analyse, (b) Lösungsplanung mit recherchierten Preisen — Mensch gibt
+je Richtung frei, ERST DANN in ProcessFlow schreiben.
+
+**Phase D — Abschluss:** Final-Sweep (§9) → Dominik-HTML 4+1 (§10). Freigaben setzt der Mensch.
+
+**Schreib-Reihenfolge je Prozess:** Konzept-Text → Executive Summary (eigenes Feld, driftet!) →
+Umsetzungsschritte → Solutions/Tools → Diagramme → Phasen-Feld → Guards. Nach JEDEM Schritt live
+verifizieren (DB-Grep bzw. Screenshot), nie der Chat-Antwort glauben.
 
 ## 2 · Stilregeln Lösungskonzept + Executive Summary (Martin, verbindlich)
 
