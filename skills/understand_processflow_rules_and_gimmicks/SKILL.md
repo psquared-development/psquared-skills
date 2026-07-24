@@ -9,6 +9,11 @@ Wissens-Skill aus den realen Engagements (ZIWA → Stütz → Bettenrid). Ergän
 `processflow-review` (Guardrails/Fehlermuster) und `processflow-app` (Driver) — ersetzt sie nicht.
 Bei Widerspruch gilt: neueste User-Anweisung > dieser Skill > Default.
 
+> **⚠️ AKTUELLE SCOPE-REGEL (Martin, 07/2026): Ab jetzt werden je Firma nur noch 5 Prozesse
+> tief bearbeitet** (nicht mehr 10). Ältere „Top-10/max 10"-Angaben in `processflow-review`/
+> `processflow-overview` sind damit überschrieben — Triage bleibt gleich, Cut liegt bei 5.
+> Nicht bearbeitete, unauditierte KI-Entwürfe per Prio-Spinner HINTER die auditierten schieben.
+
 ## 1 · Bevor irgendein Prozess bearbeitet wird: Gesamtbild + Duplikate
 
 1. **ALLE Prozesse der Firma zuerst sichten** (Liste + Scores + Kurzbeschreibung), nie direkt in
@@ -153,11 +158,16 @@ Bei Widerspruch gilt: neueste User-Anweisung > dieser Skill > Default.
 
 ## 7 · Reihenfolge, Rollen & Freigaben
 
-- **`processes.manual_priority` ist DIE Analyse-/Top-10-Reihenfolge** — gepflegt über die
-  Spinner im **Präsentationsdesigner**; Zugriff nur Projektleiter:in/Projektmitarbeiter:in
-  (Berater-Login sieht „Kein Zugriff"). Innerhalb der Leitplanken gibt es KEINEN anderen
-  Schreibweg (weder Copilot noch Projektliste) → Änderungen mit exakten Ziel-Nummern an die
-  Rolle mit Zugriff delegieren.
+- **`processes.manual_priority` ist DIE Analyse-Reihenfolge** — die maßgebliche Ansicht für
+  alle Beteiligten („Prio-Ansicht stimmt") und der Nummernkreis in Handovers/Deliverables.
+- **Spinner setzen (funktionierender Weg, 07/2026):** Auf der **Projekt-Prozessliste** hat jede
+  Zeile ein spinbutton „Manuelle Priorität". Mit passender Rolle (Org-/Projektzugriff)
+  persistiert **MCP `fill` auf die spinbutton-uid + anschließend `Tab`** (echte/trusted
+  CDP-Events). **JS-value-setter und synthetische Events speichern NICHT** (UI zeigt den neuen
+  Wert, DB behält den alten — immer per REST `?select=manual_priority` gegenprüfen). Berater-
+  Login ohne Zugriff → mit exakten Ziel-Nummern delegieren.
+- **Nach der Auditrunde die Prio-Ansicht herstellen:** auditierte Prozesse auf 1…N, verdrängte
+  unauditierte Entwürfe auf N+1/N+2 — sonst zeigt die „richtige" Ansicht falsche Einträge.
 - **Nie eigene Nummernkreise erfinden:** Artifacts/Handovers referenzieren `manual_priority`;
   Alt-Nummern höchstens als Alias daneben (Bettenrid-Lektion: Artifact-P# vs. Prio-Feld =
   zwei Wahrheiten, Verwirrung im Team).
@@ -179,8 +189,67 @@ Bei Widerspruch gilt: neueste User-Anweisung > dieser Skill > Default.
 - **Nach jedem Diagramm-Update visuell per Screenshot verifizieren** (Diagramme-Subtab) —
   Quelltext sauber ≠ Rendering sauber. Farb-Logik: magenta=Individualsoftware, grün=neues Tool,
   schwarz=Bestand, grau=Akteur.
+- **Auch Kanten-Labels werden abgeschnitten** — kurz halten („Golden Records", nicht
+  „Bereinigte Datensätze · Golden Records · …").
+- **Screenshot-Timeout-Fallback:** Wenn `take_screenshot` in `Page.captureScreenshot timed out`
+  läuft, das Rendering per DOM messen (SVG-Textknoten suchen, `getBoundingClientRect` von Text
+  vs. Box vergleichen) — nicht blind weitermachen.
+- **Browser-Lock:** „The browser is already running for …chrome-profile" = eine ANDERE Session
+  (Kollege/zweites Terminal) hält den MCP-Chrome → User bitten freizugeben; kein --isolated
+  starten (eigene Session hätte keinen Login).
 
-## 9 · Nie (hart)
+## 9 · Final-Sweep vor der Übergabe (Checkliste, alle live aus der DB)
+
+Vor „fertig" EINEN Batch-Sweep über alle bearbeiteten Prozesse fahren — nie einzeln abhaken:
+1. **Freigaben:** `solution_concept_reviewed_at/_by` gesetzt (durch Mensch!).
+2. **Stunden-Dreiklang:** phases-Summe = `estimated_hours` = next_steps-Summe.
+3. **Executive Summary** vorhanden (> ~100 Zeichen) — Voll-Reworks lassen sie leer.
+4. **Stil-Grep über ALLE Textfelder**, nicht nur die zuletzt editierten: `concrete_approach`,
+   `executive_summary`, `external_components`, `solution_level_reasoning`,
+   `tool_recommendations`, `known_solutions`, `implementation_recommendation`. Verbotsliste:
+   „## Datenschutz"/„### Datenschutz", „Canvas-Foto"/„lt. Canvas", „Schätzung —",
+   „zu bestätigen", „nicht bestätigt", „zu verifizieren", wörtliches Backslash-n.
+   **Altlasten verstecken sich in Konzept-KÖRPERN früherer Bearbeiter** — Sweeps, die nur
+   ExecSums prüfen, übersehen sie.
+5. **Diagramme:** je 2 (Ablauf+Architektur), Rendering visuell geprüft.
+6. **Solution-Links = Konzeptstand** (Auto-Link-Falle!), Bestand-Flags korrekt,
+   Entweder-Oder nur einfach verknüpft, gemeinsame `<firma>-OS`-Solution überall.
+7. **Prio-Ansicht 1…N = auditierte Menge** (Spinner, s. §7).
+8. **Fremd-Flags klären:** Meldungen der Kollegen-KI ernst nehmen, Verursachung über
+   `created_at`-Zeitstempel belegen (nicht raten, wer's war), Antwort in den Team-Feed.
+
+## 10 · Ideal-Endergebnis: das Dominik-HTML (4+1) — Standard-Abschluss
+
+Das Abschluss-Deliverable, das sich bewährt hat („kam extrem gut an"): **eine einzige
+selbstständige HTML-Datei** (inline CSS, Systemfonts, keine externen Abhängigkeiten, hell,
+via Slack teilbar — KEIN claude.ai-Artifact), Ablage im Firmenordner. Inhalt in dieser
+Reihenfolge:
+1. **Kopf:** Review abgeschlossen, N Prozesse auditiert + freigegeben, Hinweis „die
+   Prio-Ansicht in ProcessFlow ist die maßgebliche Sicht", Stand-Datum.
+2. **Empfehlung in einem Satz** (Box).
+3. **Die Top-4 als Karten in Präsentations-Dramaturgie:** 2 Quick Wins zuerst (Vertrauen,
+   kleine Stundenzahlen), dann die strategischen `<firma>-OS`-Module als EINE Plattform-Story.
+   Je Karte: Chip (Quick Win/Strategisch + Stunden), Abteilung, Lösung, **1–2 wörtliche
+   Transkript-Zitate** (stärkstes Element!), 2–3 Sätze warum.
+4. **„+1"-Ausblick:** der explizite Wunsch des Entscheiders (GF-Prio-1) als fünfte Folie, die
+   die OS-Story zu Ende erzählt und beim Entscheider endet — inkl. dokumentierter
+   Tausch-Option, falls Dominik die andere Dramaturgie will. (4-to-present-Gate beachten:
+   2+2-Balance, verschiedene Abteilungen, jede Top-Kundenpriorität abgedeckt oder begründet,
+   max. 1 Eigenprodukt.)
+5. **Präsentations-Tipps:** mit Kunden-Zitaten eröffnen; OS als eine Geschichte; Quick-Win-
+   Stunden zuerst nennen; Termin-Anker nutzen (z. B. Jubiläum); KEINE „auf Anfrage"-Preise
+   improvisieren; offene Technik-Fragen souverän auf den Klärungstermin verweisen;
+   Impact-Bewertung an den Kunden zurückspielen (5. Säule).
+6. **Tabelle aller auditierten Prozesse in Prio-Reihenfolge** mit ProcessFlow-Deeplinks
+   (`…/process/<id>/wizard?tab=feasibility`), Stunden, Typ-Chips; Gesamtsumme; Hinweis auf
+   verschobene unauditierte Entwürfe.
+7. **Fragen für den nächsten Kundentermin** (ERP-Version/API, Lizenzstatus, Schnittstellen,
+   offene Namen).
+8. **Fußzeile:** Basis (Transkripte, Canvas-Fotos, Tool-Recherche mit Datum), „HI-Freigabe &
+   Präsentationstermin bei Dominik".
+Vor dem Verschicken die Datei im Browser öffnen und per Screenshot prüfen.
+
+## 11 · Nie (hart)
 
 - **HI-/Berater-Freigabe setzen** → immer der Mensch. **Präsentationstermin nennen** → Dominik.
 - Kundendaten (`data/`) committen. „Neu generieren" klicken. Der Chat-Antwort des Copilots ohne
