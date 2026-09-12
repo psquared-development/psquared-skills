@@ -1,0 +1,35 @@
+{
+  "eyebrow": "<Produkt> · Stage-Review vom <TT.MM.JJJJ>",
+  "title": "<Name der Runde>",
+  "lede": "<Zwei Sätze: was geliefert wurde, wie es geprüft wurde, was diese Seite zeigt.>",
+  "facts": [
+    { "k": "Prod-Freigabe", "v": "<prod-Tag oder Version>" },
+    { "k": "Commit auf main", "v": "<sha> (PR #<n>)" },
+    { "k": "Unit-Tests", "v": "<n> grün" },
+    { "k": "E2E gegen Stage", "v": "<n> grün" },
+    { "k": "Browser-Review", "v": "<n> Prüfer · <n> Screenshots" },
+    { "k": "Befunde", "v": "<n> Blocker · <n> mittel · <n> niedrig" }
+  ],
+  "sections": [
+    {
+      "title": "<Änderung 1>",
+      "status": "Funktioniert",
+      "status_kind": "ok",
+      "before": "<Was vorher falsch lief, mit der Ursache.>",
+      "after": "<Was jetzt gilt, in Nutzersprache; technische Namen nur wo nötig.>",
+      "review": "<Was die Prüfer gesehen haben, inklusive Befunde.>",
+      "shots": [
+        { "file": "a/01-<kurzname>.png", "caption": "<Ein Satz: was das Bild belegt.>" }
+      ]
+    }
+  ],
+  "findings": [
+    { "sev": "mittel", "sev_label": "Mittel", "text": "<Seite: Beobachtung. Nachbesserung: …>" },
+    { "sev": "info", "sev_label": "Info", "text": "<Umgebungshinweise, Screenshot-Artefakte, Aufräumbestätigung.>" }
+  ],
+  "todo": {
+    "title": "<Betreiberaufgabe / Offene Entscheidung>",
+    "text": "<Was jemand außerhalb des Codes noch tun muss, mit Frist.>"
+  },
+  "footer": "Stand <Datum> · Review auf <Stage-URL> mit dem Testkonto <…> · Prod läuft <sha>."
+}

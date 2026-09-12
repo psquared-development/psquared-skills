@@ -1,0 +1,271 @@
+{
+  "eyebrow": "NovaKnows · Stage-Review vom 12.09.2026",
+  "title": "Matthias-Runde 2",
+  "lede": "Sechs Punkte aus Matthias' Rückmeldung, an einem Tag umgesetzt, auf Stage und Prod ausgeliefert und von zwei unabhängigen Prüfern im Browser abgenommen. Die Befunde des Reviews sind behoben und seit 17:03 auf Prod; die Anmerkungen aus den Kommentaren zu dieser Seite sind eingearbeitet und in Auslieferung. Je Punkt: was vorher falsch lief, was jetzt gilt, wie es auf Stage aussieht.",
+  "facts": [
+    {
+      "k": "Prod-Freigabe",
+      "v": "prod-20260912-1503"
+    },
+    {
+      "k": "Commits auf main",
+      "v": "95e95c6 · 2490af2 (PR #5, #6)"
+    },
+    {
+      "k": "Unit-Tests",
+      "v": "359 grün"
+    },
+    {
+      "k": "E2E gegen Stage",
+      "v": "91 grün · 6 übersprungen"
+    },
+    {
+      "k": "Browser-Review",
+      "v": "2 Prüfer · 39 Screenshots"
+    },
+    {
+      "k": "Befunde",
+      "v": "6 behoben und ausgeliefert · 4 aus Kommentaren in Auslieferung"
+    }
+  ],
+  "sections": [
+    {
+      "title": "Abgelaufene Testversion sperrt die App",
+      "status": "Funktioniert · Nachbesserungen ausgeliefert",
+      "status_kind": "ok",
+      "before": "Nach Ablauf öffnete sich einmal pro Sitzung ein Dialog mit „Später“. Danach war die App uneingeschränkt nutzbar, und kein Server prüfte das Ablaufdatum. Der Tarif in der Konsole (global_org_billing.plan_key) und der Tarif, den App und Stripe-Webhook lesen (settings.education.plan), waren nie synchron.",
+      "after": "Für Mitglieder ersetzt eine Vollbild-Sperre den Inhalt: Kopfzeile mit Organisationswechsel und Abmelden bleibt, Seitenleiste verschwindet. Organisations-Admins können einen Tarif wählen, alle können dem Vertrieb schreiben (neue Function novaknows-testversion-kontakt, Empfänger aus den Systemeinstellungen). Serverseitig weist credit_gate abgelaufene Testversionen vor der Kontingentprüfung ab, damit alle 14 KI-Pfade dicht sind. Plattform-Admins sehen ein Banner statt der Sperre. Die Konsole hat unter Tarife & Abrechnung ein Feld „Testversion bis“ und einen Tarifwechsel, der beide Stellen atomar schreibt (platform_set_org_plan).",
+      "review": "Sperre, Banner, Kontaktformular und Ausnahmen (/settings, Org-Wechsel) verhalten sich wie geplant. Gefunden: das Datumsfeld speichert erst beim Klick auf ein anderes Feld, nicht per Tab oder Enter, und ohne Rückmeldung; der Sperrtext nennt den Folgetag des eingetragenen Datums (Tagesende in UTC); die Tabelle läuft bei 1440 px seitlich über.",
+      "shots": [
+        {
+          "file": "a/16-billing-testversion-bis.png",
+          "caption": "Konsole → Tarife & Abrechnung: neue Spalte „Testversion bis“ je Organisation, Tarif per Auswahl."
+        },
+        {
+          "file": "a/18-trial-banner-superadmin.png",
+          "caption": "Plattform-Admin in einer abgelaufenen Organisation: App bleibt nutzbar, Banner weist auf die Sperre für Mitglieder hin."
+        },
+        {
+          "file": "a/19-trial-lock-screen.png",
+          "caption": "Mitarbeitersicht: Vollbild-Sperre „Ihre Testversion ist abgelaufen“, Seitenleiste weg, Kopfzeile bleibt."
+        },
+        {
+          "file": "a/20-trial-lock-kontaktformular.png",
+          "caption": "Kontaktformular an den Vertrieb mit vorbelegten Feldern (im Review nicht abgeschickt)."
+        },
+        {
+          "file": "b/17-b7-ki-suche-antwort.png",
+          "caption": "Gegenprobe: KI-Suche antwortet weiter mit Quellen — der geänderte credit_gate lässt laufende Tarife durch."
+        }
+      ]
+    },
+    {
+      "title": "Eine Anmelde- und Registrierungsseite",
+      "status": "Funktioniert",
+      "status_kind": "ok",
+      "before": "Zwei Seiten mit unterschiedlichem Aufbau: /auth mit Reitern „Anmelden“ und „Account erstellen“ (der zweite Reiter war nur ein Teaser, der auf /register verlinkte) und /register mit eigenem Formular. Links stand „KI Wissenssuche / Knowledge & Education“ und ein Link auf www.novaknows.at, die abzulösende Anwendung. Dazu ein toter Einladungsantrag mit Captcha.",
+      "after": "Eine Komponente in zwei Modi: /auth ist Anmelden, /register ist Registrieren, der Wechsel ist ein Link (Passwort-Manager, Website-Links und Auth-Mails bleiben gültig). Reiter und Captcha-Code sind weg. Der Markenbereich trägt die Botschaft der Website: „Turn Knowledge into Performance.“, „Ihr Weg zum selbstlernenden Unternehmen.“, vier belegbare Punkte, „Zur Website“ → nova-ai.at. Nebenbei behoben: die Einladungsannahme schickte Abgemeldete mit ?redirect= auf eine Seite, die nur ?next= las.",
+      "review": "Beide Seiten, Querverweise, Passwortregeln, Mobil-Ansicht und Seitentitel bestanden. Kosmetik: /register scrollt bei 1440×900 leicht, im Mobil-Layout von /auth bleibt eine Lücke zwischen Kopf und Karte.",
+      "shots": [
+        {
+          "file": "a/01-auth-login-desktop.png",
+          "caption": "/auth: Markenbereich mit Claim und neuer Überschrift, rechts nur das Anmeldeformular ohne Reiter."
+        },
+        {
+          "file": "a/03-register-desktop.png",
+          "caption": "/register: dieselbe linke Seite plus Vertrauenszeile, vollständiges Formular mit Passwort-Checkliste."
+        },
+        {
+          "file": "a/02-auth-login-mobile.png",
+          "caption": "390 px breit: Markenbereich ausgeblendet, Kopfzeile mit Logo und Claim."
+        }
+      ]
+    },
+    {
+      "title": "Antwort senden fragt nach der Wissensanreicherung",
+      "status": "Funktioniert",
+      "status_kind": "ok",
+      "before": "Die Expertenantwort ging ohne Rückfrage raus. Der Knopf „Wissensanreicherung anfordern“ hing an einem Status, den nur der alte Weg ohne Quellenauswahl schrieb — und der hätte „Beantwortet“ überschrieben. Nach dem Senden wirkte die Spalte erledigt, die Detailansicht lud die Anfrage nicht nach.",
+      "after": "Alle drei Sendewege (Knopf, Vollbild, ⌘/Strg+Enter) öffnen eine Rückfrage: „Senden und Anreicherung anfordern“, „Nur senden“, „Abbrechen“. Angereichert wird erst nach dem erfolgreichen Senden, weil der Task-Executor den Antworttext aus der Konversation liest; der Fachbereich der Anfrage ist vorgewählt. Die Spalte bleibt bei beantworteten Anfragen sichtbar, „schon angefordert“ kommt aus knowledge_requested_at, der Knopf heißt dann „Erneut anfordern“.",
+      "review": "Alle Pfade bestanden: Abbrechen behält den Entwurf, „Nur senden“ lässt die Spalte mit Hinweis stehen, die Anreicherung öffnet mit dem Fachbereich „Arbeitssicherheit“ vorgewählt, das Abzeichen zeigt Datum und Uhrzeit, bereits angeforderte Anfragen bekommen die verkürzte Rückfrage.",
+      "shots": [
+        {
+          "file": "b/01-b1-dialog-antwort-senden.png",
+          "caption": "Rückfrage vor dem Senden mit den drei Aktionen."
+        },
+        {
+          "file": "b/02-b1-nur-senden-beantwortet.png",
+          "caption": "Nach „Nur senden“: Status Beantwortet, die Anreicherungs-Spalte bleibt mit Hinweis und aktivem Knopf."
+        },
+        {
+          "file": "b/04-b2-anreicherung-dialog-preselect.png",
+          "caption": "„Senden und Anreicherung anfordern“: Auswahldialog öffnet mit dem Fachbereich der Anfrage vorgewählt."
+        },
+        {
+          "file": "b/05-b2-angefordert-badge.png",
+          "caption": "Abzeichen „Anreicherung angefordert · 12.09. 16:06“, Knopf „Erneut anfordern“."
+        },
+        {
+          "file": "b/06-b3-bereits-angefordert-dialog.png",
+          "caption": "Bereits angefordert: die Rückfrage bietet nur noch „Senden“."
+        }
+      ]
+    },
+    {
+      "title": "Unterartikel wird geschrieben, nicht abgeschrieben",
+      "status": "Funktioniert",
+      "status_kind": "ok",
+      "before": "Der Unterseiten-Pfad der Wissensanreicherung hat nie ein Sprachmodell aufgerufen. Er setzte den Anfragetext in ein Schema („Problem / Analyse / Lösung“) — ohne Expertenantwort blieb die Frage wörtlich als Seiteninhalt stehen (Toasterbeschaffung auf Stage: 403 Zeichen). Der Anfragetext wurde dabei ohne Maskierung als HTML eingesetzt.",
+      "after": "Die Function wiki-education-propose-article-update kennt den Modus subarticle: eigenständiger Artikel mit „Kurzantwort“, „Hintergrund und Vorgehen“, „Abgrenzung zum Basisartikel“, aus Frage, KI-Analyse und Expertenantwort, den Basisartikel nur als Kontext. Vorschau mit „Bearbeiten“ und „Neu erzeugen“, Titel vorbelegt, „Seite erstellen“ erst mit Entwurf. Ohne Expertenantwort kommt ein klarer Hinweis statt einer leeren Seite. Die Rohfassung gibt es nur noch hinter einem Schalter, maskiert.",
+      "review": "Erzeugung in rund 9 Sekunden, Struktur wie vorgesehen, Titel „Erforderlicher Schlüssel für CNC-Reparatur“ vorgeschlagen, Bearbeiten-Textarea funktioniert, die angelegte Seite hängt unter dem Basisartikel und enthält den generierten Text. Der Hinweis ohne Expertenantwort erscheint, „Seite erstellen“ bleibt gesperrt.",
+      "shots": [
+        {
+          "file": "b/07-b4-convert-initial.png",
+          "caption": "Wissensanreicherung: Basisartikel aus der Anfrage vorbelegt, Modus Unterartikel, „Seite erstellen“ noch gesperrt."
+        },
+        {
+          "file": "b/08-b4-vorschau.png",
+          "caption": "KI-Entwurf mit Kurzantwort, Hintergrund und Abgrenzung; Titel „Vorgeschlagen von NOVA“."
+        },
+        {
+          "file": "b/09-b4-bearbeiten-textarea.png",
+          "caption": "„Bearbeiten“ macht den Entwurf vor dem Anlegen korrigierbar."
+        },
+        {
+          "file": "b/10-b4-erstellte-seite.png",
+          "caption": "Die angelegte Unterseite unter „Grundlagen der CNC-Bedienung“ mit dem generierten Text."
+        },
+        {
+          "file": "b/11-b5-gate-ohne-expertenantwort.png",
+          "caption": "Ohne Expertenantwort: Hinweis statt leerer Seite, Rohfassung nur per Schalter."
+        }
+      ]
+    },
+    {
+      "title": "Schulung aktualisieren: Unterseiten einbeziehen, nur echte Änderungen zeigen",
+      "status": "Funktioniert · Nachbesserungen ausgeliefert",
+      "status_kind": "ok",
+      "before": "Die Veraltung kannte den Seitenbaum, die Aktualisierung nicht: sie las nur die flachen Quell-IDs, eine neue Unterseite kam nie beim Modell an. Das Prompt verlangte eine komplette Neufassung, der Dialog zeigte zwei volle Texte nebeneinander ohne Hervorhebung. Bilder gingen beim Übernehmen verloren, jeder Abschnitt kostete Credits.",
+      "after": "Neue Serverfunktion edu_page_subtree liefert den ganzen Teilbaum. Jeder Abschnitt merkt sich einen Quellabdruck (source_fingerprint): unverändert heißt kein Modellaufruf und keine Credits. Minimal-Edit-Prompt mit expliziter Liste NEU / GEÄNDERT, serverseitiger Textvergleich, im Dialog ein Wort-Diff (grün neu, rot entfällt), umschaltbar auf Nebeneinander, Hinweis auf unveränderte Abschnitte, Bilder bleiben erhalten. Heute schon veraltete Schulungen bekamen bewusst keinen Abdruck vorbelegt und gehen beim ersten Mal vollständig ans Modell.",
+      "review": "Dialog, Wort-Diff, Nebeneinander, Übernehmen je Abschnitt und der Hinweis „1 Abschnitt ist unverändert“ beim zweiten Lauf bestanden (55 s bzw. 44 s Laufzeit). Gefunden: die Liste „Was hat sich in den Quellen geändert?“ bleibt beim ersten Abgleich leer, weil es keinen Vergleichsstand gibt; „Verwerfen“ eines Abschnitts hält dessen Quellstand nicht fest; vorbestehend pollt der Editor fehlende Infografiken alle 8 Sekunden ohne Ende.",
+      "shots": [
+        {
+          "file": "b/12-b6-veraltet-banner.png",
+          "caption": "Veraltete Schulung mit Hinweisbanner und „Inhalte aktualisieren“."
+        },
+        {
+          "file": "b/13-b6-diff-dialog.png",
+          "caption": "„Vorgeschlagene Aktualisierungen“: nur geänderte Abschnitte, je Abschnitt Übernehmen / Verwerfen / Bearbeiten."
+        },
+        {
+          "file": "b/14-b6-inline-diff-gruen.png",
+          "caption": "Wort-Diff: Ergänzungen grün hervorgehoben statt zwei voller Texte."
+        },
+        {
+          "file": "b/15-b6-nebeneinander.png",
+          "caption": "Umschaltung „Nebeneinander“: Bisher gegen Neu (Vorschlag)."
+        },
+        {
+          "file": "b/16-b6-zweiter-lauf-unveraendert.png",
+          "caption": "Zweiter Lauf nach einem Übernehmen: „1 Abschnitt ist unverändert und wird nicht angezeigt.“"
+        }
+      ]
+    },
+    {
+      "title": "Globale FAQ: Betreiber pflegt, alle Organisationen lesen",
+      "status": "Funktioniert · Nachbesserungen ausgeliefert",
+      "status_kind": "ok",
+      "before": "Die Hilfe lag fest im Quelltext (PAGE_HELP). Jede Änderung brauchte einen neuen Build; Matthias konnte seinen Kunden keine Antwort „in die FAQ stellen“.",
+      "after": "Tabelle global_faq_entries mit Zeilenrechten: jede angemeldete Person liest veröffentlichte Einträge, schreiben dürfen nur globale superadmin/admin — dieselbe Vereinigung wie der Konsolenzugang, neue Fähigkeit platform.faq.manage. Matthias pflegt unter /admin/faq (Markdown mit Vorschau, Kategorien, Reihenfolge, Veröffentlichen, Seitenzuordnung). Kunden lesen unter /hilfe (Suche über Frage und Antwort, Kategorien, Support-Kontakt), im Profilmenü, in der Seitenleiste und in den bestehenden Hilfe-Dialogen als „Häufige Fragen zu dieser Seite“. Fünf Startfragen sind eingespielt.",
+      "review": "Anlegen, Veröffentlichen, Bearbeiten, Löschen und die Anzeige auf /hilfe und im Kontext-Dialog bestanden. Die Suche findet Wörter aus Antworten. Zeilenrechte mit einem echten Nicht-Admin-Konto gegengeprüft: fünf veröffentlichte Einträge sichtbar, kein Entwurf, Schreibversuch wirkungslos. Gefunden: Entwürfe erscheinen für Plattform-Admins mit Abzeichen „Entwurf“ auch in der „Ansicht als Mitarbeiter“.",
+      "shots": [
+        {
+          "file": "a/09-admin-faq-tabelle.png",
+          "caption": "Konsole /admin/faq: Kategorie, Frage, Zielgruppe, Veröffentlicht-Schalter, Reihenfolge."
+        },
+        {
+          "file": "a/10-faq-dialog-neu-vorschau.png",
+          "caption": "Neue Frage: Markdown links, gerenderte Vorschau rechts, Seitenzuordnung und Zielgruppe."
+        },
+        {
+          "file": "a/05-hilfe-page.png",
+          "caption": "/hilfe für alle Rollen: Suche, Kategorien, Fragen als Akkordeon, Support-Kontakt."
+        },
+        {
+          "file": "a/06-hilfe-suche.png",
+          "caption": "Suche nach „Abrechnungszeitraum“ trifft über den Antworttext."
+        },
+        {
+          "file": "a/08-pagehelp-kontext-faq.png",
+          "caption": "Kontext-Hilfe auf „Schulungsinhalte“: unter dem festen Text die passende FAQ mit Link „Alle Fragen ansehen“."
+        },
+        {
+          "file": "a/22-console-nav-faq-hilfe.png",
+          "caption": "Konsolen-Navigation mit dem neuen Eintrag „FAQ & Hilfe“."
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "sev": "info",
+      "sev_label": "Behoben",
+      "text": "Konsole → Tarife & Abrechnung: „Testversion bis“ speichert jetzt bei Eingabe, Enter und Verlassen des Felds, mit Bestätigung. Das Datum wird in Ortszeit gespeichert und gelesen, der Sperrtext nennt den eingetragenen Tag. (prod-20260912-1503)"
+    },
+    {
+      "sev": "info",
+      "sev_label": "Behoben",
+      "text": "/hilfe und Kontext-Hilfe zeigen Entwürfe nur noch mit der Fähigkeit platform.faq.manage — die „Ansicht als Mitarbeiter“ streift sie ab. Echte Mitarbeiter sahen Entwürfe nie; das Zeilenrecht ist mit einem Nicht-Admin-Konto gegengeprüft. (prod-20260912-1503)"
+    },
+    {
+      "sev": "info",
+      "sev_label": "Behoben",
+      "text": "Schulung aktualisieren: beim ersten Abgleich ohne Vergleichsstand listet der Dialog alle Quellen der Prüfung und benennt das; „Verwerfen“ hält den Quellstand des Abschnitts fest; fehlende Infografiken werden nach rund zwei Minuten nicht mehr nachgefragt. (prod-20260912-1503)"
+    },
+    {
+      "sev": "info",
+      "sev_label": "Aus Kommentar",
+      "text": "Rückfrage „Antwort senden“: der dritte Knopf war rechts abgeschnitten. Dialog breiter, Hauptaktion in eigener Zeile, Nebenaktionen darunter. Wortwahl „im zuständigen Knowledge Space“ statt „Bereich“, wie im Wissensmodul. (PR #7, in Auslieferung)"
+    },
+    {
+      "sev": "info",
+      "sev_label": "Aus Kommentar",
+      "text": "Kontext-Hilfe: der ganze Dialog rollte mit, der Titel verschwand beim Lesen der FAQ. Jetzt bleibt der Kopf stehen, nur der Text rollt. (PR #7)"
+    },
+    {
+      "sev": "info",
+      "sev_label": "Aus Kommentar",
+      "text": "FAQ-Konsole: kein Markdown-Quelltext mehr. Die Antwort wird im Editor der Expertenantworten geschrieben (Fett, Listen, Links per Leiste); gespeichert wird weiter Markdown, /hilfe rendert unverändert. Niemand muss Syntax lernen. (PR #7)"
+    },
+    {
+      "sev": "info",
+      "sev_label": "Aus Kommentar",
+      "text": "Unterartikel „Bearbeiten“: statt rohem HTML im Textfeld der TipTap-Editor der Wiki-Seiten. (PR #7)"
+    },
+    {
+      "sev": "info",
+      "sev_label": "Antwort",
+      "text": "Sperrseite ohne „Tarif wählen“: der Screenshot zeigt die Mitarbeitersicht. Organisations-Admins sehen dort „Tarif wählen“ und landen im bestehenden Stripe-Checkout; Mitglieder ohne Verwaltungsrecht bekommen den Hinweis, sich an ihre Verwaltung zu wenden, plus das Kontaktformular."
+    },
+    {
+      "sev": "info",
+      "sev_label": "Antwort",
+      "text": "Tarife & Abrechnung in der Konsole ist nur für Superadmins: die Tabelle setzt Tarif, Kontingent und Testende je Organisation und zeigt Verbrauch und Umsatz der Periode. Wer was tut oder welchen Onboarding-Schritt eine Organisation erreicht hat, steht dort nicht — dafür gibt es heute nur die Analytics-Seiten; ein Vertriebs-Cockpit wäre ein eigenes Vorhaben."
+    },
+    {
+      "sev": "info",
+      "sev_label": "Antwort",
+      "text": "„Menü unten abgeschnitten“ auf /hilfe: ein Artefakt des ganzseitigen Screenshots — die Seitenleiste ist fixiert und wurde nur in Fensterhöhe aufgenommen. In der App ist sie vollständig."
+    },
+    {
+      "sev": "niedrig",
+      "sev_label": "Kosmetik",
+      "text": "Offen gelassen: /register scrollt bei 1440×900 leicht; Lücke im Mobil-Layout von /auth; Abrechnungstabelle läuft bei 1440 px seitlich über."
+    }
+  ],
+  "todo": {
+    "title": "Matthias' Konten und die Frist 06.10.2026",
+    "text": "Matthias' Hauptkonto ist globaler Superadmin und sieht in abgelaufenen Organisationen nur das Banner, nie die Sperre. Seine Persona-Konten (m.pappenscheller+it, +hr, +leitunghr …) sind einfache Mitglieder der Test AG — deshalb wurde die Test AG heute auf Prod von Testversion auf Enterprise gesetzt (kein Enddatum, 100.000 Credits, Notiz „Intern (NOUSYS)“); rückgängig jederzeit in der Konsole. Offen bleiben 13 Organisationen auf Testversion mit Ende 06.10., darunter Gföllner, Levante, Ortner, AI Pioneers und die e2e-Demo-Organisation: Matthias setzt dort in der Konsole Tarif oder „Testversion bis“. Nebenbefund: das Testversions-Kontingent im Tarifkatalog steht auf 1.000 statt 5.000 Credits."
+  },
+  "footer": "Stand 12.09.2026, 17:10 · Review auf stage.nova-ai.at mit dem Testkonto e2e@novaknows.test (für die Konsolenprüfung vorübergehend Plattform-Admin, danach entzogen) · Prod app.nova-ai.at läuft 2490af2 (prod-20260912-1503); PR #7 folgt nach grünem Stage-Lauf."
+}
