@@ -54,10 +54,21 @@ For each of the 10, one line: what it is (per transcript), cluster, score/quadra
 InboxMate as intake, an OS-consolidation angle, industry-hallucination risk). **Do not** rework
 concepts, edit canvases, or touch diagrams here.
 
+## Postfach-Signal (one check, evidence only)
+Scan the transcript and ALL processes (not only the top 10) for the shared-inbox pattern:
+- one address (office@/info@/service@/rechnung@) read by several people or teams,
+- mail sorted, forwarded or answered by hand; "wer ist zuständig?" delays,
+- misdirected mail (wrong person, wrong department, wrong company),
+- invoices, orders or requests that arrive by mail and are typed or re-filed manually.
+If found: list it as **Postfach-Signal** in the context brief, with the exact transcript quote(s) and
+the process name(s). Do **not** add InboxMate to any concept, canvas or score here — the human decides
+whether it is a lead (then CRM tagging per `agenthub/docs/gtm/neverlost-crm-tagging.md`). If there is
+no evidence, write "Postfach-Signal: keins" — never infer one from the industry alone.
+
 ## Output (the hand-off)
 1. The **top-10 worklist** (exact process names + IDs) — this is what gets split across terminals.
 2. A short **context brief**: industry (exact), real systems/ERP, transcript priorities, cross-cutting
-   notes, and any elevate/swap flags for the human.
+   notes, the **Postfach-Signal** (quotes or "keins"), and any elevate/swap flags for the human.
 3. Tell the user: next, open one terminal per process and run **`processflow-run <process name>`**
    (works the process to guardrail-completion + self-critique + fix). Overview does not build.
 
