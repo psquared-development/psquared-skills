@@ -187,20 +187,24 @@ All in `/Users/martinpammesberger/Documents/psquared/claude-overlord-folder/.env
 | `NOTIFICATIONS_SERVICE_BEARER_TOKEN` | Notification service (admin) |
 | `ACKEE_TOKEN` | Ackee analytics |
 
-## Pricing Tiers (credits model, since 2026-06)
+## Pricing Tiers (credits model, since 2026-09)
 
 **Note:** If prices change, this table must be updated. The `/price-change` skill handles pricing updates across all touchpoints — make sure this file is included in the update list.
 
-Model: **pay per Postfach (mailbox) + AI credits** (chat reply 1, email draft 2, tool call/scrape/PDF 1; setup & rule-based sorting free). Manual invoicing — no Stripe checkout.
+Model: **pay per Postfach (mailbox) + AI credits + one-time setup**. All prices net (zzgl. USt.). Manual invoicing, bank transfer. Stripe is NOT used for InboxMate billing (do not create Stripe prices). 14-day Pro trial, no credit card; at trial end the account is downgraded to Free (data kept).
 
-| Tier | Price | Postfächer | Credits/mo | Notes |
-|---|---|---|---|---|
-| Free | €0 | 0 (chatbot only) | 50 | widget funnel |
-| Starter | €49/mo (monthly only) | 1 (extra €19) | 500 | full email automation from here |
-| Pro | €129/mo · €107 yearly | 3 (extra €15) | 2,500 | API+MCP, marketplace; demo discount → €86 first year |
-| Business | ab €349/mo, custom | 15+ | 10,000+ | custom integrations (first incl.), white-label, SLA; demo offer €199 first year |
+| Tier | Price | Postfächer | Credits/mo | Users | Agents | Notes |
+|---|---|---|---|---|---|---|
+| Free | €0 | 0 (chatbot only) | 50 | 1 | 1 | widget funnel |
+| Pro | €129/mo · €107/mo yearly | 1 (extra €49/mo) | 2,500 | 5 | 5 | entry paid plan; API+MCP, auto-send, triage, advanced analytics |
+| Business | €389/mo · €349/mo yearly | 5 (extra €39/mo) | 15,000 | 10 | unlimited | + remove branding / white-label, SLA tickets, time tracking, advanced export |
+| Enterprise | individuell / auf Anfrage (never show a price) | more than 5 | individual | — | — | custom integrations, SLA, hosting choice (SaaS or Exoscale), framework contract, white-label |
 
-Top-ups: €9/€8 per 1,000 (Starter/Pro), instant grant, invoiced afterwards. All paid plans 14-day free trial, no credit card.
+- **Starter is removed from all displays.** The code tier key `im_starter` stays in agenthub (schemas, Shopify) — hide only.
+- **Setup (Einrichtung), Pro and Business:** Standard €890 one-time (1 Postfach, up to 10 rules, Microsoft 365 / IMAP, test run, 2 adjustments; each extra mailbox + €290). Individuell: fixed price after first call (webhooks, integrations, complex rules). Enterprise: individual. Display + AGB only, not in code.
+- **Top-ups:** €40 per 1,000 credits, €175 per 5,000 (`shared/constants/credits.ts`), instant grant, invoiced afterwards.
+- **Credit costs** (`agenthub/server/utils/creditLedger.ts`): categorize (one run) 2, chat reply 1, email draft 1, email send 1, webhook 0.5, PDF/OCR 1, scrape 5, tool call 0, test chat 0. Grace buffer 20% (×1.2).
+- **Grandfathered:** Doppler Holding €100/mo for 3 mailboxes. Do not mention publicly.
 
 ## Knowledge System
 
