@@ -1,0 +1,18 @@
+{
+  "tool": "generate-image",
+  "version": "0.1.0",
+  "createdAt": "2026-09-06T12:00:00.000Z",
+  "cwd": "/Users/example/project",
+  "prompt": "minimal flat vector icon of a paper plane, single lime green shape on white, no text",
+  "request": {
+    "url": "https://cloud.leonardo.ai/api/rest/v2/generations",
+    "body": { "model": "phoenix-v1.0", "public": false, "parameters": { "prompt": "…", "width": 512, "height": 512, "quantity": 1, "mode": "QUALITY", "style_ids": ["cadc8cd6-7838-4c99-b645-df76be8ba8d8"] } }
+  },
+  "decision": { "source": "heuristic", "matchedRule": "logo-icon", "reasons": ["Regel \"logo-icon\" (Treffer: \"--intent icon\", \"icon\", \"vector\", \"minimal\")"], "fallbacksApplied": [] },
+  "cost": { "estimated": { "amount": 8, "unit": "CREDITS", "source": "observed (3 frühere Läufe)" }, "actual": { "amount": 8, "unit": "CREDITS", "source": "apiCreditCost" } },
+  "balance": { "before": { "amount": 1240, "unit": "CREDITS" }, "after": { "amount": 1232, "unit": "CREDITS" }, "delta": -8 },
+  "generationId": "00000000-0000-0000-0000-000000000000",
+  "status": "COMPLETE",
+  "images": [{ "id": "…", "url": "https://cdn.leonardo.ai/…/image.jpg", "nsfw": false, "path": "/Users/example/project/generated-images/minimal-flat-vector-icon-of-a-paper-plane-phoenix-v1.0-01.jpg", "contentType": "image/jpeg", "bytes": 123456, "sha256": "…" }],
+  "timing": { "submittedAt": "2026-09-06T12:00:00.000Z", "completedAt": "2026-09-06T12:00:14.000Z", "polls": 3, "waitMs": 14000, "getEndpoint": "v1" }
+}
