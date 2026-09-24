@@ -1,0 +1,9 @@
+node_modules/
+.cache/
+*.log
+generated-images/
+*.png
+*.jpg
+*.jpeg
+*.webp
+!examples/**

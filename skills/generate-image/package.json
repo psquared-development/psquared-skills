@@ -1,0 +1,16 @@
+{
+  "name": "generate-image",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Leonardo AI image generation for psquared skills: automatic model choice, cost and balance reporting, provenance sidecar",
+  "type": "module",
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "start": "node generate.mjs",
+    "test": "node --test test/*.test.mjs",
+    "balance": "node generate.mjs --balance",
+    "models": "node generate.mjs --list-models"
+  }
+}
