@@ -195,10 +195,10 @@ Model: **pay per Postfach (mailbox) + AI credits + one-time setup**. All prices 
 
 | Tier | Price | Postfächer | Credits/mo | Users | Agents | Notes |
 |---|---|---|---|---|---|---|
-| Free | €0 | 0 (chatbot only) | 50 | 1 | 1 | widget funnel |
+| Free | €0 | 0 | 50 | 1 | 1 | where accounts land after the trial; not marketed (website shows no chatbot since 2026-09-24) |
 | Pro | €129/mo · €107/mo yearly | 1 (extra €49/mo) | 2,500 | 5 | 5 | entry paid plan; API+MCP, auto-send, triage, advanced analytics |
-| Business | €389/mo · €349/mo yearly | 5 (extra €39/mo) | 15,000 | 10 | unlimited | + remove branding / white-label, SLA tickets, time tracking, advanced export |
-| Enterprise | individuell / auf Anfrage (never show a price) | more than 5 | individual | — | — | custom integrations, SLA, hosting choice (SaaS or Exoscale), framework contract, white-label |
+| Business | €389/mo · €349/mo yearly | 5 (extra €39/mo) | 15,000 | 10 | unlimited | SLA tickets, time tracking, advanced export, priority support |
+| Enterprise | individuell / auf Anfrage (never show a price) | more than 5 | individual | — | — | custom integrations built by psquared, SLA, named contact, training. SaaS only — never offer Exoscale/self-hosting or a framework contract. |
 
 - **Starter is removed from all displays.** The code tier key `im_starter` stays in agenthub (schemas, Shopify) — hide only.
 - **Setup (Einrichtung), Pro and Business:** Standard €890 one-time (1 Postfach, up to 10 rules, Microsoft 365 / IMAP, test run, 2 adjustments; each extra mailbox + €290). Individuell: fixed price after first call (webhooks, integrations, complex rules). Enterprise: individual. Display + AGB only, not in code.
