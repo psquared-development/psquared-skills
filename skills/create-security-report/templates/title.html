@@ -1,0 +1,40 @@
+<div class="title-top">
+  <div class="brand">
+    <span class="brand-mark">p²</span>
+    <span>psquared</span>
+  </div>
+  <div class="meta">
+    {{#if doc.referenceNumber}}<div>Report-Nr. {{doc.referenceNumber}}</div>{{/if}}
+    {{#if doc.date}}<div>{{doc.date}}</div>{{/if}}
+    {{#if doc.version}}<div>Version {{doc.version}}</div>{{/if}}
+    <div class="confidential">Confidential</div>
+  </div>
+</div>
+
+<div class="title-center">
+  <div class="title-eyebrow">{{doc.eyebrow}}</div>
+  <h1 class="title-headline">{{doc.headline}}</h1>
+  <p class="title-sub">{{doc.subtitle}}</p>
+  <div class="title-stats">
+    {{#each stats}}
+    <div class="stat stat--{{key}}"><div class="stat-num">{{count}}</div><div class="stat-label">{{label}}</div></div>
+    {{/each}}
+  </div>
+</div>
+
+<div class="title-bottom">
+  <div>
+    <h4>Customer</h4>
+    <div class="contact-line"><strong>{{customer.name}}</strong></div>
+    {{#if customer.system}}<div class="contact-line">{{customer.system}}</div>{{/if}}
+    {{#if customer.scope}}<div class="contact-line">{{customer.scope}}</div>{{/if}}
+  </div>
+  <div>
+    <h4>Prepared by</h4>
+    <div class="contact-line"><strong>{{provider.name}}</strong></div>
+    {{#if provider.contactPerson}}<div class="contact-line">{{provider.contactPerson}}</div>{{/if}}
+    {{#if provider.address}}<div class="contact-line">{{{provider.address}}}</div>{{/if}}
+    {{#if provider.email}}<div class="contact-line">{{provider.email}}</div>{{/if}}
+    {{#if provider.website}}<div class="contact-line"><a href="https://{{provider.website}}">{{provider.website}}</a></div>{{/if}}
+  </div>
+</div>

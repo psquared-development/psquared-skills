@@ -1,0 +1,14 @@
+{
+  "name": "create-security-report",
+  "version": "1.0.0",
+  "private": true,
+  "description": "psquared security audit report PDF generator (Playwright)",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "playwright": "1.48.2"
+  }
+}

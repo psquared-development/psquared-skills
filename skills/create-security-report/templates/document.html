@@ -1,0 +1,64 @@
+<div class="doc-header">
+  <div class="brand">
+    <span class="brand-mark">p²</span>
+    <span>psquared</span>
+  </div>
+  <div class="doc-label">{{doc.eyebrow}}</div>
+</div>
+
+{{#each introSections}}
+<div class="avv-section">
+  <h2>{{title}}</h2>
+  {{{html}}}
+</div>
+{{/each}}
+
+<div class="avv-section">
+  <h2>Findings overview</h2>
+  <p>Severity uses the scale critical, high, medium, low. A finding with the status <strong>Not yet verified</strong> has a confirmed source path, but its runtime result was not observed. Its severity is the expected value if the finding is confirmed (marked <em>exp.</em>), and it is sorted in that position.</p>
+  <table class="findings-table">
+    <colgroup><col style="width:13mm"/><col style="width:27mm"/><col style="width:34mm"/><col/><col style="width:30mm"/></colgroup>
+    <thead><tr><th>ID</th><th>Severity</th><th>Status</th><th>Finding</th><th>Area</th></tr></thead>
+    <tbody>
+      {{#each findings}}
+      <tr>
+        <td class="nowrap"><strong>{{id}}</strong></td>
+        <td><span class="sev sev--{{severity}}">{{severityLabel}}</span></td>
+        <td><span class="status status--{{statusKey}}">{{statusLabel}}</span></td>
+        <td>{{title}}</td>
+        <td class="small">{{area}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+<div class="avv-section">
+  <h2>Findings in detail</h2>
+</div>
+{{#each findings}}
+<div class="finding">
+  <div class="finding-head">
+    <span class="finding-id">{{id}}</span>
+    <span class="sev sev--{{severity}}">{{severityLabel}}</span>
+    <span class="status status--{{statusKey}}">{{statusLabel}}</span>
+  </div>
+  <h3>{{title}}</h3>
+  <div class="finding-meta"><strong>Location:</strong> <code>{{location}}</code></div>
+  <p>{{summary}}</p>
+  <div class="finding-fix"><strong>Recommended fix.</strong> {{fix}}</div>
+  {{#if verifyItems}}
+  <div class="finding-verify">
+    <strong>Not yet verified. Still open:</strong>
+    <ul>{{#each verifyItems}}<li>{{this}}</li>{{/each}}</ul>
+  </div>
+  {{/if}}
+</div>
+{{/each}}
+
+{{#each outroSections}}
+<div class="avv-section">
+  <h2>{{title}}</h2>
+  {{{html}}}
+</div>
+{{/each}}

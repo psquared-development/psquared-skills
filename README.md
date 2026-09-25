@@ -103,6 +103,7 @@ Maintenance (run anytime):
 |-------|-------------|
 | [price-change](./skills/price-change/SKILL.md) | Change pricing across all touchpoints (website, app, docs, Stripe) |
 | [create-offer](./skills/create-offer/SKILL.md) | Generate a branded multi-page client offer PDF (title + project description + screenshots + Angebot + AGB) from a JSON config. Two-pass Playwright render with pagination + pdf-lib merge. |
+| [create-security-report](./skills/create-security-report/SKILL.md) | Generate a branded Security Audit report PDF for a customer from a security-audit run (`findings.json` + `report.json`): severity counts, findings table, one card per finding with fix and open verification points, fix order. Same render engine as create-avv. |
 | [browser-review-report](./skills/browser-review-report/SKILL.md) | Independent browser review of a shipped change set: parallel reviewer agents click through stage via the chrome-devtools MCP in isolated contexts, then a self-contained proof page (Vorher / Jetzt / Review + screenshots per change, findings, operator to-do) is published as an Artifact. |
 
 ### ProcessFlow Review (neverlost)

@@ -1,0 +1,54 @@
+{
+  "language": "en",
+  "idPrefix": "SEC",
+  "doc": {
+    "title": "Security Audit [Customer]",
+    "eyebrow": "Security Audit · [Product]",
+    "headline": "Security Audit",
+    "subtitle": "Source review and controlled validation of the [Product] platform: findings, severity and recommended fixes.",
+    "system": "the [Product] platform",
+    "referenceNumber": "YYYY-MMDD-SA01",
+    "date": "25 September 2026",
+    "version": "1.0"
+  },
+  "customer": {
+    "name": "[Customer]",
+    "system": "[Product / repository]",
+    "scope": "Commit [sha] · branch [branch]"
+  },
+  "provider": {
+    "name": "psquared GmbH",
+    "contactPerson": "Martin Pammesberger, Geschäftsführer",
+    "address": "Dametzstraße 2-4<br/>4020 Linz, Österreich",
+    "email": "office@psquared.dev",
+    "website": "psquared.dev"
+  },
+  "summaryNote": "[Optional: one sentence about the main pattern across findings.]",
+  "scope": [
+    "<strong>Code base:</strong> repository <code>[org/repo]</code>, branch <code>[branch]</code>, commit <code>[sha]</code>.",
+    "<strong>Method:</strong> structured source review by area, followed by independent review of each finding and a second record check.",
+    "<strong>Live checks:</strong> only on [environment], with dedicated test accounts and test data. All test data was removed."
+  ],
+  "expectedSeverity": {
+    "<fingerprint of a needs_validation record>": "high"
+  },
+  "fixOverrides": {
+    "<fingerprint>": "Short, concrete fix in one to three sentences."
+  },
+  "fixOrder": [
+    {
+      "title": "Fix the confirmed findings first",
+      "fingerprints": ["<fingerprint>", "<fingerprint>"],
+      "text": "What to change, in one or two sentences."
+    },
+    {
+      "title": "Fix the remaining medium and low findings in normal sprint work",
+      "rest": true,
+      "text": "Short reason why these can wait."
+    }
+  ],
+  "limits": [
+    "Areas that were identified but not reviewed in depth: [list].",
+    "A review cannot prove that no other defects exist. We recommend a second review after the fixes, with regression tests for each finding."
+  ]
+}

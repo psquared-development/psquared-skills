@@ -1,0 +1,191 @@
+/* =============================================================================
+   psquared AVV PDF — shared styles (mirrors create-offer brand + print rules)
+   ============================================================================= */
+
+@page { size: A4; }
+@page :first {
+  /* Title page stays edge-to-edge in BOTH passes — without this it inherits
+     pass 2's body margin and overflows, knocking pagination off by one. */
+  margin: 0;
+}
+
+:root {
+  --primary: #6b46c1;
+  --primary-light: #9f7aea;
+  --primary-dark: #553c9a;
+  --secondary: #1a202c;
+  --accent: #8b5cf6;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --bg-soft: #f8fafc;
+  --page-padding: 22mm;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+               'Helvetica Neue', Arial, sans-serif;
+  color: var(--secondary);
+  font-size: 10.5pt;
+  line-height: 1.55;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.page { width: 100%; position: relative; page-break-after: always; break-after: page; }
+.page:last-child { page-break-after: auto; break-after: auto; }
+.page--title { padding: 22mm; min-height: 297mm; }
+
+h1, h2, h3, h4 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--secondary);
+  margin: 0 0 0.5em 0;
+  line-height: 1.2;
+  font-weight: 700;
+}
+h1 { font-size: 28pt; }
+h2 { font-size: 16pt; color: var(--primary-dark); margin-top: 1.2em; }
+h3 { font-size: 12pt; color: var(--primary-dark); margin-top: 1em; }
+h4 { font-size: 11pt; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+p { margin: 0 0 0.7em 0; }
+ul { margin: 0 0 0.7em 0; padding-left: 1.2em; }
+ul li { margin-bottom: 0.25em; }
+strong { color: var(--secondary); }
+
+/* ---------- Brand mark ---------- */
+.brand {
+  display: inline-flex; align-items: center; gap: 0.4em;
+  font-weight: 700; font-size: 16pt; color: var(--primary); letter-spacing: -0.02em;
+}
+.brand-mark {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13pt; font-weight: 800; font-family: 'Inter', sans-serif;
+}
+
+/* ---------- Title page ---------- */
+.page--title {
+  background: linear-gradient(160deg, #ffffff 0%, #f5f1ff 60%, #ece3ff 100%);
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.title-top { display: flex; justify-content: space-between; align-items: center; }
+.title-top .meta { font-size: 9.5pt; color: var(--muted); text-align: right; }
+.title-center { padding: 0 0 20mm 0; }
+.title-eyebrow {
+  text-transform: uppercase; letter-spacing: 0.18em; color: var(--primary);
+  font-size: 9.5pt; font-weight: 600; margin-bottom: 14mm;
+}
+.title-headline {
+  font-size: 30pt; line-height: 1.1; font-weight: 800;
+  /* Solid brand color — the gradient + background-clip:text trick renders as a
+     solid purple box in PDF viewers (Preview/Quick Look), so don't use it. */
+  color: var(--primary-dark);
+  margin: 0 0 8mm 0;
+}
+.title-sub { font-size: 13pt; color: var(--muted); max-width: 150mm; }
+.title-bottom {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8mm;
+  padding-top: 8mm; border-top: 2px solid var(--primary); font-size: 10pt;
+}
+.title-bottom h4 { margin-top: 0; }
+.title-bottom .contact-line { color: var(--secondary); }
+.title-bottom .contact-line a { color: var(--primary); text-decoration: none; }
+
+/* ---------- Document body ---------- */
+.doc-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-bottom: 1px solid var(--border); padding-bottom: 4mm; margin-bottom: 7mm;
+}
+.doc-header .doc-label {
+  color: var(--muted); font-size: 9.5pt; text-transform: uppercase; letter-spacing: 0.12em;
+}
+.preamble {
+  background: var(--bg-soft); border-left: 4px solid var(--primary);
+  padding: 4mm 5mm; border-radius: 0 4px 4px 0; margin: 0 0 7mm 0;
+  break-inside: avoid; page-break-inside: avoid; font-size: 10pt;
+}
+.preamble p:last-child { margin-bottom: 0; }
+
+.avv-section { margin-bottom: 6mm; font-size: 10.5pt; }
+.avv-section h2 {
+  font-size: 13pt; color: var(--primary-dark); margin-bottom: 2mm;
+  break-after: avoid-page; page-break-after: avoid;
+}
+.avv-section h3 {
+  font-size: 11pt; break-after: avoid-page; page-break-after: avoid;
+}
+.avv-section p:first-of-type { break-before: avoid-page; page-break-before: avoid; }
+
+/* ---------- Annex tables (sub-processors) ---------- */
+.annex { margin-top: 8mm; }
+.annex table {
+  width: 100%; border-collapse: collapse; margin: 4mm 0; font-size: 9pt;
+  break-inside: auto;
+}
+.annex th {
+  text-align: left; background: var(--primary); color: #fff;
+  padding: 2.5mm 3mm; font-weight: 600; font-size: 8.5pt;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.annex td { padding: 2mm 3mm; vertical-align: top; border-bottom: 1px solid var(--border); }
+.annex tr { break-inside: avoid; page-break-inside: avoid; }
+
+/* ---------- Signature block ---------- */
+.signature-block {
+  margin-top: 12mm; display: grid; grid-template-columns: 1fr 1fr; gap: 12mm;
+  break-inside: avoid; page-break-inside: avoid;
+}
+.signature-block .sig {
+  border-top: 1px solid var(--secondary); padding-top: 2mm;
+  font-size: 9.5pt; color: var(--muted);
+}
+.signature-block .sig .role { color: var(--secondary); font-weight: 600; }
+/* Reserve two full lines for the party name (line-height 1.55 → 2 lines ≈
+   3.1em) so a one-line and a two-line name keep the following signature lines
+   at the same height across both columns. */
+.signature-block .sig .party { margin-top: 2mm; min-height: 3.2em; }
+.signature-block .sig .line { margin-top: 9mm; border-top: 1px solid var(--border); padding-top: 1.5mm; }
+
+/* ---------- Security audit additions ---------- */
+.confidential { margin-top: 2mm; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; font-size: 8.5pt; }
+.title-stats { display: flex; gap: 5mm; margin-top: 12mm; }
+.stat { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 3mm 4mm; min-width: 30mm; }
+.stat-num { font-size: 20pt; font-weight: 800; line-height: 1; }
+.stat-label { font-size: 8.5pt; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 1.5mm; }
+.stat--critical .stat-num { color: #b91c1c; }
+.stat--high .stat-num { color: #c2410c; }
+.stat--medium .stat-num { color: #a16207; }
+.stat--low .stat-num { color: #475569; }
+.stat--confirmed .stat-num { color: var(--primary-dark); }
+
+.findings-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 8.5pt; margin: 3mm 0; }
+.findings-table th { text-align: left; background: var(--primary); color: #fff; padding: 2mm 2.5mm; font-weight: 600; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.05em; }
+.findings-table td { padding: 1.8mm 2.5mm; vertical-align: top; border-bottom: 1px solid var(--border); }
+.findings-table tr { break-inside: avoid; page-break-inside: avoid; }
+.findings-table thead { display: table-header-group; }
+.nowrap { white-space: nowrap; }
+.small { font-size: 8pt; color: var(--muted); }
+
+.sev, .status { display: inline-block; border-radius: 3px; padding: 0.3mm 1.8mm; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+.sev--critical { background: #fee2e2; color: #b91c1c; }
+.sev--high { background: #ffedd5; color: #c2410c; }
+.sev--medium { background: #fef9c3; color: #a16207; }
+.sev--low { background: #f1f5f9; color: #475569; }
+.status--confirmed { background: var(--primary); color: #fff; }
+.status--open { background: #fff; color: var(--primary-dark); border: 1px solid var(--primary-light); }
+
+.finding { border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 0 6px 6px 0; padding: 4mm 5mm; margin: 0 0 5mm 0; break-inside: avoid; page-break-inside: avoid; font-size: 9.5pt; }
+.finding-head { display: flex; gap: 2mm; align-items: center; margin-bottom: 2mm; }
+.finding-id { font-weight: 800; color: var(--primary-dark); margin-right: 1mm; }
+.finding h3 { margin: 0 0 2mm 0; font-size: 11pt; color: var(--secondary); }
+.finding-meta { font-size: 8.5pt; color: var(--muted); margin-bottom: 2mm; word-break: break-all; }
+.finding code, .avv-section code { font-family: 'SF Mono', Menlo, monospace; font-size: 8pt; background: var(--bg-soft); padding: 0 1mm; border-radius: 2px; }
+.finding-fix { background: #f0fdf4; border-left: 3px solid #16a34a; padding: 2mm 3mm; margin-top: 2mm; }
+.finding-verify { background: #f5f1ff; border-left: 3px solid var(--primary-light); padding: 2mm 3mm; margin-top: 2mm; }
+.finding-verify ul { margin: 1mm 0 0 0; }
+.priority-list li { margin-bottom: 1.5mm; }
