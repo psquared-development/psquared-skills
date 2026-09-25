@@ -121,6 +121,29 @@ Per finding: title; model used; property violated; repro; root cause with
 
 Then: bugs found, unreproduced suspects, and the next best target.
 
+## Production is never the laboratory
+
+This technique reads code and reasons about it. It has no reason to touch a
+running system, and the cost of being wrong there is not a red test — it is a
+customer's data.
+
+- **Never write to a production database.** Not an UPDATE, not a DELETE, not a
+  migration, not "just fixing this one row". Modelling produces findings and
+  patches; applying them to live data is a separate, human decision.
+- **Do not query production either** unless the person explicitly asks for it
+  in that moment. A read is safer than a write, not safe: a bad `GROUP BY` or
+  a NULL-joined column produces confident, wrong evidence, and it is easy to
+  report a fabricated incident from a real table.
+- **Verify a counterexample against code and tests**, not against live rows.
+  Where production data genuinely is the only evidence, say so, ask first, and
+  write the query to be read by the person before it runs.
+- **A schema change proposed by a model is a proposal.** Adding a constraint
+  can turn a rare silent anomaly into a hard insert failure on a path that
+  worked yesterday. Trace what happens to the losing write before recommending
+  it, and say what breaks.
+- Land fixes the way the repository normally lands them. If merging deploys to
+  staging and production is promoted by hand, leave production alone.
+
 ## House rules
 
 - **The reader may not know Lean or TLA+.** You write the specs and explain
