@@ -50,7 +50,7 @@ When unsure, drop the claim or ask the user.
 2. **Copy the template** to a work folder in the scratchpad: `reel.html`, `render.cjs`,
    `Newsreader-Italic.ttf`, the spot images the scenes use.
 3. **Music (ElevenLabs, paid plan):**
-   `ELEVENLABS_API_KEY=… /usr/bin/python3 scripts/elevenlabs_music.py cand 2 87 30`.
+   `/usr/bin/python3 scripts/elevenlabs_music.py cand 2 87 30` (key `ELEVENLABS_API_KEY` from `psquared-skills/.env`).
    Measure each candidate: `python3 scripts/analyse_music.py cand1.mp3 84 90`.
    Facts learned: the API ignores section timing and length (returns ~31 s), but the tempo is exact.
    Composition-plan sections must be >= 3000 ms and were followed less than a timestamp prompt.
