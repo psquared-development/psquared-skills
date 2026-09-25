@@ -1,0 +1,268 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:"News";src:url("Newsreader-Italic.ttf");font-style:italic;font-weight:400 800}
+:root{--g:#10b981;--gd:#047857;--gl:#d1fae5;--ink:#0b1410;--paper:#f6f7f3;--mute:#6b7280}
+*{margin:0;box-sizing:border-box}
+html,body{overflow:hidden;background:var(--paper)}
+body{font-family:"SF Pro Display",-apple-system,"Helvetica Neue",Arial,sans-serif;color:var(--ink)}
+#stage{position:absolute;inset:0;overflow:hidden}
+.scene{position:absolute;inset:0;opacity:0}
+.hud{position:absolute;inset:0;pointer-events:none;font:600 15px/1 "SF Mono",Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;z-index:50}
+.hud span{position:absolute}
+.corner{position:absolute;width:26px;height:26px;border-color:currentColor;border-style:solid;opacity:.55}
+.big{font-weight:900;letter-spacing:-.045em;line-height:.9}
+.serif{font-family:"News",Georgia,serif;font-style:italic;font-weight:500;letter-spacing:-.01em}
+.env{position:absolute;width:120px;height:86px}
+.tile{position:absolute;border-radius:28px;overflow:hidden}
+</style></head>
+<body>
+<div id="stage">
+  <canvas id="grid" style="position:absolute;inset:0"></canvas>
+  <div id="s0" class="scene"></div>
+  <div id="s1" class="scene"><div id="echo1" class="big" style="position:absolute;left:0;right:0;top:50%;text-align:center;font-size:var(--kf);color:transparent;-webkit-text-stroke:3px currentColor;opacity:.25"></div><div id="echo2" class="big" style="position:absolute;left:0;right:0;top:50%;text-align:center;font-size:var(--kf);color:transparent;-webkit-text-stroke:2px currentColor;opacity:.12"></div><div id="word" class="big" style="position:absolute;left:0;right:0;top:50%;text-align:center;font-size:var(--kf);transform:translateY(-50%)"></div></div>
+  <div id="s2" class="scene"><svg id="machine"></svg></div>
+  <div id="s3" class="scene" style="background:var(--ink)"><div id="bb" class="serif" style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-size:var(--bbf);line-height:1.02;color:#fff"></div></div>
+  <div id="s4" class="scene" style="background:var(--ink)"></div>
+  <div id="s5" class="scene"></div>
+  <div id="s6" class="scene"></div>
+  <div id="sL" class="scene"></div>
+  <div id="sE" class="scene" style="background:var(--ink)"></div>
+  <div id="sQ" class="scene"></div>
+  <div id="flash" style="position:absolute;inset:0;background:#fff;opacity:0;z-index:40"></div>
+  <div class="hud" id="hud">
+    <span id="tc" style="display:none"></span>
+    <span id="chap" style="display:none"></span>
+    <div id="bar" style="position:absolute;bottom:56px;height:2px;background:currentColor;opacity:.18"></div>
+    <div id="barfill" style="position:absolute;bottom:56px;height:2px;background:var(--g)"></div>
+  </div>
+</div>
+<script>
+const V=new URLSearchParams(location.search).get('v')==='1';
+const W=V?1080:1920,H=V?1920:1080,BEAT=60/128,T0=0.02,SLOW=(60/87)/(60/128),DUR=30/SLOW;
+const beat=k=>T0+k*BEAT;
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,p)=>a+(b-a)*p;
+const prog=(t,a,b)=>clamp((t-a)/(b-a));
+const eOut=p=>1-Math.pow(1-p,3), eIn=p=>p*p*p, eIO=p=>p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+const eBack=p=>{const c=1.9;return 1+(c+1)*Math.pow(p-1,3)+c*Math.pow(p-1,2)};
+const eElastic=p=>p===0||p===1?p:Math.pow(2,-10*p)*Math.sin((p*10-.75)*2*Math.PI/3)+1;
+function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+const $=id=>document.getElementById(id);
+document.documentElement.style.width=document.body.style.width=W+'px';document.documentElement.style.height=document.body.style.height=H+'px';
+$('grid').width=W;$('grid').height=H;$('machine').setAttribute('width',W);$('machine').setAttribute('height',H);$('machine').setAttribute('viewBox',`0 0 ${W} ${H}`);
+const BARX=V?140:330; $('bar').style.left=BARX+'px';$('bar').style.right=BARX+'px';$('barfill').style.left=BARX+'px';$('bar').style.bottom=$('barfill').style.bottom=(V?90:56)+'px';
+
+// envelope svg
+function envSVG(fill,stroke,flap){return `<svg viewBox="0 0 120 86" width="100%" height="100%"><rect x="3" y="3" width="114" height="80" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="5"/><path d="M8 10 L60 50 L112 10" fill="none" stroke="${flap}" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></svg>`}
+
+// ---------- dot grid ----------
+const gctx=$('grid').getContext('2d');
+function drawGrid(t,color,alpha,shift){gctx.clearRect(0,0,W,H);gctx.fillStyle=color;gctx.globalAlpha=alpha;const s=48;const off=(shift%s+s)%s;for(let y=off-s;y<H+s;y+=s)for(let x=off-s;x<W+s;x+=s){gctx.beginPath();gctx.arc(x,y,1.6,0,6.283);gctx.fill()}gctx.globalAlpha=1}
+
+// ---------- scene 0: inbox chaos ----------
+const s0=$('s0'); const N0=120; const envs0=[];
+for(let i=0;i<N0;i++){const d=document.createElement('div');d.className='env';const green=rnd(i*3+11)<0.2;d.innerHTML=envSVG(green?'#10b981':'#fff',green?'#047857':'#0b1410',green?'#fff':'#0b1410');s0.appendChild(d);envs0.push(d)}
+const cnt=document.createElement('div');cnt.style.cssText=`position:absolute;left:${V?90:120}px;top:${V?220:150}px;font-weight:800;font-size:44px;letter-spacing:-.01em`;s0.appendChild(cnt);
+const cntBig=document.createElement('div');cntBig.className='big';cntBig.style.cssText=`position:absolute;left:${V?82:112}px;top:${V?275:205}px;font-size:${V?250:230}px;font-variant-numeric:tabular-nums`;s0.appendChild(cntBig);
+function scene0(t){
+  const tEnd=beat(4);
+  envs0.forEach((d,i)=>{
+    const start=0.04+i*0.0125;const p=prog(t,start,start+0.5);
+    const COLS=V?10:15; const col=i%COLS, row=Math.floor(i/COLS);
+    const tx=(V?40:560)+col*(V?100:84)+(rnd(i)*34-17), ty=(V?1700:900)-row*(V?56:50)-(rnd(i+7)*14);
+    const fromY=-140-rnd(i+3)*300;
+    let y=lerp(fromY,ty,eIn(Math.min(1,p*1.05)));
+    if(p>=.95){const q=prog(t,start+.52,start+.8);y=ty-Math.sin(q*Math.PI)*22*(1-q)}
+    const rot=lerp(rnd(i+5)*120-60,(rnd(i+9)*16-8),eOut(p));
+    // suck-out at drop
+    const q2=eIn(prog(t,tEnd-0.28,tEnd));
+    const x=lerp(tx,W/2-60,q2), y2=lerp(y,H/2-43,q2), sc=lerp(1,.2,q2);
+    d.style.transform=`translate(${x}px,${y2}px) rotate(${rot*(1-q2)}deg) scale(${sc*0.82})`;d.style.opacity=p>0?1-q2*0.9:0;
+  });
+  const n=Math.round(lerp(3,1248,eIn(prog(t,0.1,tEnd-0.35))));
+  cnt.textContent='Posteingang';cntBig.textContent=n.toLocaleString('de-AT');
+  const k=eIn(prog(t,tEnd-0.28,tEnd));cnt.style.opacity=cntBig.style.opacity=1-k;
+  cntBig.style.color=n>900?'#b91c1c':'#0b1410';
+}
+
+// ---------- scene 1: kinetic words ----------
+const words=[['JEDE','ink'],['MAIL','green'],['HAT','ink'],['IHREN','ink'],['PLATZ.','green']];
+document.documentElement.style.setProperty('--kf',(V?250:330)+'px');
+function scene1(t){
+  const b=(t-beat(4))/BEAT; const i=Math.min(words.length-1,Math.floor(b*words.length/4));
+  const local=(b*words.length/4)-i;
+  const w=$('word'); const [txt,c]=words[i];
+  w.textContent=txt; w.style.color=c==='green'?'#10b981':'#0b1410';
+  const sc=lerp(1.35,1,eOut(clamp(local*3)));const sk=lerp(-14,0,eOut(clamp(local*3)));
+  w.style.transform=`translateY(-50%) scale(${sc}) skewX(${sk}deg)`;w.style.letterSpacing=`${lerp(-.12,-.045,eOut(clamp(local*2)))}em`;
+  $('s1').style.background=i%2?'#0b1410':'var(--paper)'; if(i%2&&c!=='green') w.style.color='#fff';
+  const ec=i%2?'#6ee7b7':'#10b981'; const lp=eOut(clamp(local*2.2));
+  [['echo1',1.28,-120],['echo2',1.6,-240]].forEach(([id,k,dy])=>{const e=$(id);e.textContent=txt;e.style.color='transparent';e.style.webkitTextStroke=(id==='echo1'?'3px ':'2px ')+ec;e.style.transform=`translateY(calc(-50% + ${dy*(1-lp)}px)) scale(${lerp(k,1.02,lp)})`;e.style.opacity=(id==='echo1'?.35:.18)*(1-lp*0.6)});
+}
+
+// ---------- scene 2: sorting machine ----------
+const LY=V?[640,830,1020,1210,1400]:[300,450,600,750,900];
+const lanes=[{l:'Rechnung',d:'Buchhaltung'},{l:'Anfrage',d:'Vertrieb'},{l:'Termin',d:'Kalender'},{l:'Support',d:'Team Service'},{l:'Newsletter',d:'Archiv'}].map((o,i)=>({...o,y:LY[i]}));
+const NX=V?280:860,NY=V?1020:600,PILLR=V?1040:1860;
+let mach=`<defs><filter id="sh"><feDropShadow dx="0" dy="10" stdDeviation="14" flood-opacity=".18"/></filter></defs>
+<path id="inTrack" d="M-40 ${NY} H${NX-140}" stroke="#0b1410" stroke-width="3" stroke-dasharray="2 14" stroke-linecap="round" fill="none" opacity=".35"/>`;
+lanes.forEach((ln,i)=>{mach+=`<path id="lane${i}" d="M${NX+140} ${NY} C ${NX+300} ${NY}, ${NX+260} ${ln.y}, ${NX+470} ${ln.y} H 1560" stroke="#0b1410" stroke-width="3" fill="none" opacity=".25" stroke-dasharray="1400" stroke-dashoffset="1400"/>
+<g id="dest${i}" opacity="0"><rect x="1580" y="${ln.y-40}" width="270" height="80" rx="40" fill="#fff" stroke="#0b1410" stroke-width="3"/><circle cx="1622" cy="${ln.y}" r="12" fill="#10b981"/><text x="1648" y="${ln.y+11}" font-size="31" font-weight="700" fill="#0b1410">${ln.d}</text></g>`});
+mach+=`<g id="packets"></g><g id="node" filter="url(#sh)"><rect x="${NX-140}" y="${NY-95}" width="280" height="190" rx="40" fill="#0b1410"/><text x="${NX}" y="${NY-22}" text-anchor="middle" font-size="24" letter-spacing="5" font-weight="700" fill="#6ee7b7">REGEL</text><text id="nodeTxt" x="${NX}" y="${NY+36}" text-anchor="middle" font-size="46" font-weight="800" fill="#fff">…</text></g><text id="mtitle" x="${V?90:120}" y="${V?300:190}" font-size="${V?96:84}" font-weight="900" letter-spacing="-3" fill="#0b1410">${V?'<tspan x="90">Nach Regeln,</tspan><tspan x="90" dy="1.05em">die Sie sehen.</tspan>':'Nach Regeln, die Sie sehen.'}</text>`;
+$('machine').innerHTML=mach;
+lanes.forEach((ln,i)=>{const g=$('dest'+i);const tx=g.querySelector('text');const w=Math.ceil(tx.getComputedTextLength())+92;const r=g.querySelector('rect');const x=PILLR-w;r.setAttribute('x',x);r.setAttribute('width',w);g.querySelector('circle').setAttribute('cx',x+42);tx.setAttribute('x',x+68);});
+const laneEnd=Math.min(...lanes.map((ln,i)=>+$('dest'+i).querySelector('rect').getAttribute('x')))-20;
+lanes.forEach((ln,i)=>{const c1=V?NX+230:NX+300,c2=V?NX+170:NX+260,c3=V?NX+300:NX+470;$('lane'+i).setAttribute('d',`M${NX+140} ${NY} C ${c1} ${NY}, ${c2} ${ln.y}, ${c3} ${ln.y} H ${laneEnd}`)});
+const pk=$('packets'); const NP=14; const packets=[];
+for(let i=0;i<NP;i++){const g=document.createElementNS('http://www.w3.org/2000/svg','g');g.innerHTML=`<rect x="-46" y="-32" width="92" height="64" rx="10" fill="#fff" stroke="#0b1410" stroke-width="4"/><path d="M-40 -24 L0 6 L40 -24" fill="none" stroke="#0b1410" stroke-width="4" stroke-linejoin="round"/><g class="tag" opacity="0"><rect x="-70" y="-78" width="140" height="38" rx="19" fill="#10b981"/><text x="0" y="-52" text-anchor="middle" font-size="22" font-weight="800" fill="#fff">${lanes[i%5].l}</text></g>`;pk.appendChild(g);packets.push(g)}
+function lanePoint(i,p){const path=$('lane'+i);const L=path.getTotalLength();return path.getPointAtLength(L*p)}
+function scene2(t){
+  const t0=beat(8);
+  lanes.forEach((ln,i)=>{const p=eOut(prog(t,t0+i*0.1,t0+0.7+i*0.1));$('lane'+i).setAttribute('stroke-dashoffset',1400*(1-p));$('dest'+i).setAttribute('opacity',eOut(prog(t,t0+0.4+i*0.1,t0+0.7+i*0.1)))});
+  const titleP=eOut(prog(t,t0,t0+0.5));$('mtitle').setAttribute('opacity',titleP);$('mtitle').setAttribute('transform',`translate(0 ${30*(1-titleP)})`);
+  let active='';
+  packets.forEach((g,i)=>{
+    const st=t0+0.35+i*BEAT*0.5; const lane=i%5;
+    const a=prog(t,st,st+0.45); const b=prog(t,st+0.45,st+1.25);
+    let x,y,rot=0,sc=1;
+    if(t<st){g.setAttribute('opacity',0);return}
+    g.setAttribute('opacity',1-prog(t,st+1.2,st+1.35));
+    if(a<1){x=lerp(-80,NX,eIO(a));y=NY+Math.sin(a*Math.PI)*-10}
+    else{const pt=lanePoint(lane,eIO(b));x=pt.x;y=pt.y;rot=0}
+    if(a>0.85&&b<0.25) active=lanes[lane].l;
+    const inNode=a>0.75&&b<0.15; sc=inNode?0.001:1;
+    g.setAttribute('transform',`translate(${x} ${y}) scale(${sc})`);
+    g.querySelector('.tag').setAttribute('opacity',b>0.05?1:0);
+  });
+  $('nodeTxt').textContent=active||'…';
+  const pulse=Math.exp(-((t-t0)%BEAT)*9);$('node').setAttribute('transform',`translate(${NX} ${NY}) scale(${1+pulse*0.06}) translate(${-NX} ${-NY})`);
+}
+
+// ---------- scene 3: break ----------
+document.documentElement.style.setProperty('--bbf',(V?180:190)+'px');
+function scene3(t){const p=eOut(prog(t,beat(15)-0.02,beat(15)+0.2));const el=$('bb');el.innerHTML=V?'Keine<br>Blackbox.':'Keine Blackbox.';el.style.opacity=p;el.style.letterSpacing=`${lerp(.2,-.01,p)}em`}
+
+// ---------- scene 4: action tiles ----------
+const acts=[
+ {n:'Recherche',i:'<circle cx="0" cy="-10" r="62" fill="none" stroke="#fff" stroke-width="14"/><path d="M44 34 L96 86" stroke="#10b981" stroke-width="18" stroke-linecap="round"/>'},
+ {n:'Antwortentwurf',i:'<rect x="-100" y="-80" width="200" height="150" rx="18" fill="none" stroke="#fff" stroke-width="12"/><path d="M-66 -34 H66 M-66 4 H40 M-66 40 H10" stroke="#10b981" stroke-width="12" stroke-linecap="round"/>'},
+ {n:'Weiterleitung',i:'<path d="M-100 0 H70" stroke="#fff" stroke-width="16" stroke-linecap="round"/><path d="M30 -46 L84 0 L30 46" fill="none" stroke="#10b981" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>'},
+ {n:'Ticket',i:'<text x="0" y="36" text-anchor="middle" font-size="112" font-weight="900" fill="#fff">#4211</text>'},
+ {n:'Webhook',i:'<text x="0" y="40" text-anchor="middle" font-size="130" font-weight="700" fill="#10b981" font-family="SF Mono,Menlo,monospace">{ }</text>'},
+];
+const s4=$('s4'); const tiles=[];
+const L4=V?[{x:70,y:230,w:940,h:420},{x:70,y:680,w:940,h:420},{x:70,y:1130,w:455,h:330},{x:555,y:1130,w:455,h:330},{x:70,y:1490,w:940,h:300}]:[{x:120,y:170,w:820,h:400},{x:980,y:170,w:820,h:400},{x:120,y:610,w:540,h:330},{x:690,y:610,w:540,h:330},{x:1260,y:610,w:540,h:330}];
+acts.forEach((a,i)=>{const d=document.createElement('div');d.className='tile';const L=L4[i];d.style.cssText+=`left:${L.x}px;top:${L.y}px;width:${L.w}px;height:${L.h}px;background:${i===1?'#10b981':'#16221c'}`;
+ d.innerHTML=`<svg width="${L.w}" height="${L.h}" style="position:absolute;inset:0"><g class="ico" transform="translate(${L.w/2} ${L.h/2-24})">${i===1?a.i.replace(/#10b981/g,'#0b1410'):a.i}</g></svg><div style="position:absolute;left:34px;bottom:28px;font-weight:800;font-size:${L.w>600?52:40}px;color:#fff;letter-spacing:-.02em">${a.n}</div><div style="position:absolute;right:30px;top:26px;font:600 16px Menlo,monospace;letter-spacing:.14em;color:rgba(255,255,255,.55)">0${i+1}</div>`;s4.appendChild(d);tiles.push(d)});
+function scene4(t){
+  tiles.forEach((d,i)=>{const st=beat(16+i);const p=prog(t,st,st+0.32);const e=eBack(p);d.style.opacity=p>0?1:0;d.style.transform=`scale(${lerp(.6,1,e)}) translateY(${lerp(80,0,eOut(p))}px)`;
+   const ico=d.querySelector('.ico');const L=L4[i];const bob=Math.sin((t-st)*6)*6;
+   let extra='';if(i===0)extra=` rotate(${Math.sin((t-st)*3)*14})`;if(i===2)extra=` translate(${Math.sin((t-st)*5)*16} 0)`;
+   ico.setAttribute('transform',`translate(${L.w/2} ${L.h/2-24+bob})${extra} scale(${lerp(.4,1,eBack(prog(t,st+.05,st+.4)))})`)});
+  const push=eIO(prog(t,beat(21),beat(24)));s4.style.transform=`scale(${1+push*0.06})`;
+}
+
+// ---------- scene 5: approve ----------
+const s5=$('s5');
+s5.innerHTML=`<div id="card" style="position:absolute;left:${V?100:560}px;top:${V?600:250}px;width:${V?880:800}px;height:520px;background:#fff;border-radius:34px;box-shadow:0 40px 80px rgba(11,20,16,.18);padding:56px 60px">
+<div style="font:600 18px Menlo,monospace;letter-spacing:.14em;color:#6b7280;text-transform:uppercase">Antwortentwurf · Anfrage</div>
+<div style="margin-top:26px;font-weight:800;font-size:44px;letter-spacing:-.02em">Re: Angebot für 3 Standorte</div>
+<div id="typed" style="margin-top:26px;font-size:30px;line-height:1.45;color:#374151;height:170px"></div>
+<div id="btn" style="position:absolute;left:60px;bottom:52px;height:84px;padding:0 44px;border-radius:42px;background:#10b981;color:#fff;font-weight:800;font-size:34px;display:flex;align-items:center;gap:16px">Freigeben</div>
+<div id="ok" style="position:absolute;right:56px;bottom:40px;width:108px;height:108px;border-radius:54px;background:#0b1410;display:flex;align-items:center;justify-content:center;opacity:0"><svg width="60" height="60" viewBox="0 0 60 60"><path id="okp" d="M12 31 L25 44 L49 18" fill="none" stroke="#6ee7b7" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="60" stroke-dashoffset="60"/></svg></div></div>
+<svg id="cursor" width="44" height="54" viewBox="0 0 44 54" style="position:absolute;left:0;top:0"><path d="M4 3 L4 44 L15 34 L23 51 L31 47 L23 31 L38 31 Z" fill="#0b1410" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>
+<div id="zero" style="position:absolute;left:0;right:0;top:${V?1250:820}px;text-align:center;font-weight:800;font-size:46px;letter-spacing:-.01em;opacity:0">Posteingang <span style="color:#10b981">0</span></div>`;
+const reply='Guten Tag Frau Berger, danke für Ihre Anfrage. Gerne schicken wir Ihnen bis Freitag ein Angebot für alle drei Standorte.';
+function scene5(t){
+  const t0=beat(32); const cp=eOut(prog(t,t0,t0+0.35)); $('card').style.transform=`translateY(${lerp(120,0,cp)}px) rotate(${lerp(-3,0,cp)}deg)`;$('card').style.opacity=cp;
+  const n=Math.floor(reply.length*prog(t,t0+0.15,t0+1.0));$('typed').textContent=reply.slice(0,n)+(n<reply.length?'▍':'');
+  const click=t0+1.35; const cm=eIO(prog(t,t0+0.8,click));
+  const cx=V?lerp(900,300,cm):lerp(1500,760,cm),cy=V?lerp(1700,1085,cm):lerp(980,735,cm); $('cursor').style.transform=`translate(${cx}px,${cy}px) scale(${t>click&&t<click+0.12?0.85:1})`;
+  const bp=t>click?Math.exp(-(t-click)*8):0; $('btn').style.transform=`scale(${1-bp*0.08})`;
+  const okp=eOut(prog(t,click+0.05,click+0.4)); $('ok').style.opacity=okp; $('ok').style.transform=`scale(${eBack(okp)})`; $('okp').setAttribute('stroke-dashoffset',60*(1-eOut(prog(t,click+0.15,click+0.45))));
+  $('zero').style.opacity=eOut(prog(t,click+0.25,click+0.5));
+}
+
+// ---------- scene 6: logo ----------
+const s6=$('s6');
+s6.innerHTML=`<div id="lk" style="position:absolute;left:0;right:0;top:${V?640:300}px;display:flex;align-items:center;justify-content:center;gap:${V?24:34}px">
+<svg id="mark" width="${V?120:150}" height="${V?120:150}" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="#10b981"/><path d="M26 90V56a16 16 0 0 1 32 0v34M58 56a16 16 0 0 1 32 0v22a8 8 0 0 1-16 0V58" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div id="wm" class="big" style="font-size:${V?140:170}px;letter-spacing:-.05em">InboxMate</div></div>
+<div id="tag1" style="position:absolute;left:0;right:0;top:${V?860:545}px;text-align:center;font-weight:800;font-size:${V?64:74}px;letter-spacing:-.03em;line-height:1.1">${V?'E-Mail-KI, die nicht<br>nur sortiert.':'E-Mail-KI, die nicht nur sortiert.'}</div>
+<div id="tag2" class="serif" style="position:absolute;left:0;right:0;top:${V?1030:650}px;text-align:center;font-size:104px;color:#10b981">Sie erledigt.</div>
+<div id="url" style="position:absolute;left:0;right:0;top:${V?1260:880}px;text-align:center;font:600 26px Menlo,monospace;letter-spacing:.2em;color:#6b7280">INBOXMATE.AT</div>`;
+function scene6(t){
+  const t0=beat(36);
+  const m=eElastic(prog(t,t0,t0+0.9)); $('mark').style.transform=`scale(${m}) rotate(${lerp(-90,0,eOut(prog(t,t0,t0+0.5)))}deg)`;
+  const w=eOut(prog(t,t0+0.12,t0+0.5)); $('wm').style.opacity=w; $('wm').style.transform=`translateX(${lerp(-60,0,w)}px)`; $('wm').style.clipPath=`inset(0 ${100-w*100}% 0 0)`;
+  const a=eOut(prog(t,beat(37),beat(37)+0.35)); $('tag1').style.opacity=a; $('tag1').style.transform=`translateY(${lerp(40,0,a)}px)`;
+  const b=eOut(prog(t,beat(38),beat(38)+0.4)); $('tag2').style.opacity=b; $('tag2').style.transform=`translateY(${lerp(40,0,b)}px)`; $('tag2').style.letterSpacing=`${lerp(.12,-.01,b)}em`;
+  $('url').style.opacity=eOut(prog(t,beat(38)+0.3,beat(38)+0.7));
+}
+
+
+// ---------- scene L: learns from corrections ----------
+const sL=$('sL');
+sL.innerHTML=`<div id="lt" style="position:absolute;left:${V?90:120}px;top:${V?220:130}px;font-weight:900;font-size:${V?96:84}px;letter-spacing:-.03em;line-height:1.05">Lernt aus jeder${V?'<br>':' '}<span class="serif" style="color:#10b981;font-size:${V?110:96}px">Korrektur.</span></div>
+<svg id="lline" width="${W}" height="${H}" style="position:absolute;inset:0"><g fill="none" stroke="#10b981" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">${V?'<path class="larr" d="M300 882 V946 M282 928 L300 948 L318 928" stroke-dasharray="140" stroke-dashoffset="140"/><path class="larr" d="M300 1302 V1366 M282 1348 L300 1368 L318 1348" stroke-dasharray="140" stroke-dashoffset="140"/>':'<path class="larr" d="M702 570 H778 M760 552 L780 570 L760 588" stroke-dasharray="140" stroke-dashoffset="140"/><path class="larr" d="M1242 570 H1318 M1300 552 L1320 570 L1300 588" stroke-dasharray="140" stroke-dashoffset="140"/>'}</g></svg>`+
+[['spot-korrigieren-480.webp','Korrigieren'],['spot-merken-480.webp','Merken'],['spot-automatisch-480.webp','Automatisch']].map((x,i)=>V?`<div class="lc" style="position:absolute;left:120px;top:${540+i*420}px;display:flex;align-items:center;gap:40px"><img src="${x[0]}" style="width:340px;height:340px;object-fit:contain"><div><div style="font:600 20px Menlo,monospace;letter-spacing:.16em;color:#6b7280">0${i+1}</div><div style="margin-top:10px;font-weight:800;font-size:64px;letter-spacing:-.02em">${x[1]}</div></div></div>`:`<div class="lc" style="position:absolute;left:${230+i*540}px;top:360px;width:480px;text-align:center"><img src="${x[0]}" style="width:420px;height:420px;object-fit:contain"><div style="margin-top:6px;font-weight:800;font-size:46px;letter-spacing:-.02em">${x[1]}</div><div style="font:600 18px Menlo,monospace;letter-spacing:.16em;color:#6b7280;margin-top:10px">0${i+1}</div></div>`).join('');
+function sceneL(t){
+  const t0=beat(24); const hp=eOut(prog(t,t0,t0+0.4)); $('lt').style.opacity=hp; $('lt').style.transform=`translateY(${lerp(40,0,hp)}px)`;
+  document.querySelectorAll('#sL .lc').forEach((c,i)=>{const p=prog(t,beat(24+i)+0.05,beat(24+i)+0.45);c.style.opacity=p>0?1:0;c.style.transform=`translateY(${lerp(90,0,eOut(p))}px) scale(${lerp(.7,1,eBack(p))})`});
+  document.querySelectorAll('#sL .larr').forEach((a,i)=>a.setAttribute('stroke-dashoffset',140*(1-eOut(prog(t,beat(25+i)-0.05,beat(25+i)+0.35)))));
+}
+// ---------- scene E: EU / data protection ----------
+const sE=$('sE');
+const star=(cx,cy,r)=>{let d='';for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5;const rr=k%2?r*0.42:r;d+=(k?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1)}return d+'Z'};
+const ECX=V?540:600,ECY=V?560:540;
+sE.innerHTML=`<svg width="${W}" height="${H}" style="position:absolute;inset:0"><g id="ring">${Array.from({length:12},(_,i)=>{const a=i/12*2*Math.PI-Math.PI/2;return `<path class="st" d="${star(ECX+230*Math.cos(a),ECY+230*Math.sin(a),30)}" fill="#10b981"/>`}).join('')}</g>
+<text id="eufr" x="${ECX}" y="${ECY+20}" text-anchor="middle" font-size="64" font-weight="900" fill="#fff" letter-spacing="-2">EU</text></svg>
+<div id="eh" style="position:absolute;left:${V?90:1000}px;top:${V?950:330}px;color:#fff;font-weight:900;font-size:92px;letter-spacing:-.035em;line-height:1">Daten in<br><span class="serif" style="color:#6ee7b7;font-size:106px">Frankfurt.</span></div>
+<div id="el" style="position:absolute;left:${V?94:1004}px;top:${V?1240:620}px;color:#d1d5db;font-weight:700;font-size:40px;line-height:1.75">${['Standard: EU-KI-Modelle','Für DSGVO-konformen Einsatz gebaut','Auftragsverarbeitungsvertrag (AVV)'].map(x=>`<div class="eli"><span style="display:inline-block;width:14px;height:14px;border-radius:7px;background:#10b981;margin-right:20px;vertical-align:middle"></span>${x}</div>`).join('')}</div>`;
+function sceneE(t){
+  const t0=beat(28);
+  document.querySelectorAll('#sE .st').forEach((p,i)=>{const q=eBack(prog(t,t0+i*0.04,t0+i*0.04+0.35));p.setAttribute('transform',`translate(${p.getBBox().x+p.getBBox().width/2} ${p.getBBox().y+p.getBBox().height/2}) scale(${Math.max(0,q)}) translate(${-(p.getBBox().x+p.getBBox().width/2)} ${-(p.getBBox().y+p.getBBox().height/2)})`)});
+  $('ring').setAttribute('transform',`rotate(${(t-t0)*14} ${ECX} ${ECY})`);
+  $('eufr').setAttribute('opacity',eOut(prog(t,t0+0.3,t0+0.6)));
+  const h=eOut(prog(t,t0+0.1,t0+0.5)); $('eh').style.opacity=h; $('eh').style.transform=`translateX(${lerp(60,0,h)}px)`;
+  document.querySelectorAll('#sE .eli').forEach((e,i)=>{const p=eOut(prog(t,beat(29+i),beat(29+i)+0.35));e.style.opacity=p;e.style.transform=`translateX(${lerp(50,0,p)}px)`});
+}
+// ---------- scene Q: QR code ----------
+const QR=[[1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1], [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1], [0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0], [1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1], [1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1], [0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1], [1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0], [1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1], [0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0], [1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0], [0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0], [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0], [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1], [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0], [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0], [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0]]; const QN=QR.length; const QS=18, QX=0, QY=0;
+const sQ=$('sQ');
+let qrs=''; const mods=[];
+for(let y=0;y<QN;y++)for(let x=0;x<QN;x++){if(!QR[y][x])continue; const c=QN/2-0.5; if(Math.abs(x-c)<=3.5&&Math.abs(y-c)<=3.5)continue; mods.push([x,y]); qrs+=`<rect class="qm" x="${x*QS}" y="${y*QS}" width="${QS}" height="${QS}" rx="3" fill="#0b1410" data-d="${(Math.hypot(x-c,y-c)/(QN*0.72)).toFixed(3)}"/>`}
+const QW=QN*QS;
+sQ.innerHTML=`<div id="qcard" style="position:absolute;left:${V?(W-QW-96)/2:1050}px;top:${V?860:540-QW/2-48}px;width:${QW+96}px;height:${QW+96}px;background:#fff;border-radius:40px;box-shadow:0 40px 90px rgba(11,20,16,.16)">
+<svg width="${QW}" height="${QW}" viewBox="0 0 ${QW} ${QW}" style="position:absolute;left:48px;top:48px">${qrs}
+<g id="qlogo" transform="translate(${QW/2} ${QW/2})"><rect x="-${3.4*QS}" y="-${3.4*QS}" width="${6.8*QS}" height="${6.8*QS}" rx="${1.6*QS}" fill="#fff"/><g transform="scale(${5.6*QS/120}) translate(-60 -60)"><rect width="120" height="120" rx="28" fill="#10b981"/><path d="M26 90V56a16 16 0 0 1 32 0v34M58 56a16 16 0 0 1 32 0v22a8 8 0 0 1-16 0V58" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></g></g></svg></div>
+<div id="qtxt" style="position:absolute;left:${V?90:160}px;top:${V?250:330}px">
+ <div style="font:600 20px Menlo,monospace;letter-spacing:.2em;color:#6b7280">30 MINUTEN · UNVERBINDLICH</div>
+ <div style="margin-top:22px;font-weight:900;font-size:120px;letter-spacing:-.045em;line-height:.95">Termin<br><span class="serif" style="color:#10b981;font-size:136px;font-weight:500">buchen.</span></div>
+ <div style="margin-top:44px;font:600 30px Menlo,monospace;letter-spacing:.2em;color:#0b1410">INBOXMATE.AT</div></div>`;
+function sceneQ(t){
+  const t0=beat(40);
+  const c=eOut(prog(t,t0,t0+0.4)); $('qcard').style.opacity=c; $('qcard').style.transform=`translateY(${lerp(60,0,c)}px) rotate(${lerp(4,0,c)}deg)`;
+  document.querySelectorAll('#sQ .qm').forEach(r=>{const d=+r.dataset.d; const p=eOut(prog(t,t0+0.15+d*0.9,t0+0.35+d*0.9)); r.setAttribute('opacity',p)});
+  const l=eElastic(prog(t,t0+0.1,t0+0.9)); $('qlogo').setAttribute('transform',`translate(${QW/2} ${QW/2}) scale(${l})`);
+  const x=eOut(prog(t,t0+0.2,t0+0.6)); $('qtxt').style.opacity=x; $('qtxt').style.transform=`translateX(${lerp(-60,0,x)}px)`;
+  const out=prog(t,DUR-0.25,DUR); sQ.style.opacity=1-eIn(out);
+}
+// ---------- master ----------
+const scenes=[['s0',0,beat(4),scene0,''],['s1',beat(4),beat(8),scene1,''],['s2',beat(8),beat(15),scene2,''],['s3',beat(15),beat(16),scene3,''],['s4',beat(16),beat(24),scene4,''],['sL',beat(24),beat(28),sceneL,''],['sE',beat(28),beat(32),sceneE,''],['s5',beat(32),beat(36),scene5,''],['s6',beat(36),beat(40),scene6,''],['sQ',beat(40),DUR+1,sceneQ,'']];
+function render(tReal){
+  const t=tReal/SLOW;
+  let dark=false,chap='';
+  for(const [id,a,b,fn,name] of scenes){const el=$(id);const on=t>=a&&t<b;el.style.opacity=on?(id==='sQ'?el.style.opacity||1:1):0;if(on){if(id==='sQ')el.style.opacity=1;fn(t);chap=name;if(id==='s3'||id==='s4'||id==='sE')dark=true;if(id==='s1'){const i=Math.floor(((t-beat(4))/BEAT)*5/4);if(i%2)dark=true}}}
+  // flash on cuts
+  let f=0;for(const c of [beat(4),beat(8),beat(16),beat(24),beat(28),beat(32),beat(36),beat(40)]){if(t>=c)f=Math.max(f,Math.exp(-(t-c)*14)*0.55)}
+  $('flash').style.opacity=f;
+  drawGrid(t,dark?'#ffffff':'#0b1410',dark?0.10:0.12,t*20);
+  const hud=$('hud');hud.style.color=dark?'#e5e7eb':'#0b1410';
+  const fr=Math.floor(t*60)%60,s=Math.floor(t);$('tc').textContent=`TC 00:00:${String(s).padStart(2,'0')}:${String(fr).padStart(2,'0')}`;$('chap').textContent=chap;
+  $('barfill').style.width=`${(W-2*BARX)*clamp(t/DUR)}px`;
+  hud.style.opacity=t>DUR-0.6?1-prog(t,DUR-0.6,DUR-0.2):1;
+}
+window.render=render;render(0);
+</script></body></html>
