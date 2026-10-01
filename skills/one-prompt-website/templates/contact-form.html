@@ -1,0 +1,54 @@
+<!-- Contact form wired to https://psquared.dev/api/contact (see SKILL.md 'Form submission').
+     Copy the form + script, restyle freely, keep: field names name/email/message, honeypot 'company',
+     JSON POST, mailto fallback on error. Replace fixmyagent.com / texts. -->
+<form id="intake-form" novalidate>
+          <fieldset class="field chips" style="margin-bottom:28px">
+            <legend style="font:500 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px;color:#5a534a">It's a</legend>
+            <label><input type="radio" name="kind" value="AI agent / chatbot" checked><span>AI agent or chatbot</span></label>
+            <label><input type="radio" name="kind" value="Vibe-coded app"><span>Vibe-coded app</span></label>
+            <label><input type="radio" name="kind" value="Automation flow"><span>Automation flow</span></label>
+            <label><input type="radio" name="kind" value="Not sure"><span>Not sure</span></label>
+          </fieldset>
+          <div class="row2">
+            <label class="field"><span>Name</span><input name="name" autocomplete="name" required></label>
+            <label class="field"><span>Work email</span><input name="email" type="email" autocomplete="email" required></label>
+          </div>
+          <label class="field"><span>Link</span><input name="link" type="url" inputmode="url" placeholder="https://"></label>
+          <label class="field"><span>What goes wrong</span><textarea name="message" required placeholder="It tells customers we ship to Switzerland. We don't."></textarea></label>
+          <label class="hp" aria-hidden="true">Company<input name="company" tabindex="-1" autocomplete="off"></label>
+          <div class="form-foot">
+            <span class="mono">We reply from office@psquared.dev · <a href="/privacy.html">Privacy</a></span>
+            <button class="btn" type="submit">Send for diagnosis</button>
+          </div>
+          <p class="status" id="form-status" role="status" aria-live="polite"></p>
+        </form>
+
+<script>
+(function(){
+  var form=document.getElementById('intake-form'), status=document.getElementById('form-status');
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var d=new FormData(form);
+    if(d.get('company')) return;
+    var name=(d.get('name')||'').trim(), email=(d.get('email')||'').trim(), msg=(d.get('message')||'').trim();
+    status.className='status err';
+    if(!name||!email||!msg){status.textContent='Please fill in name, email and what goes wrong.';return;}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){status.textContent='Please check the email address.';return;}
+    var btn=form.querySelector('button[type=submit]'); btn.disabled=true; btn.textContent='Sending…';
+    status.className='status'; status.textContent='';
+    fetch('https://psquared.dev/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      name:name,email:email,
+      subject:'fix-my-agent — '+d.get('kind'),
+      message:'Type: '+d.get('kind')+'\nLink: '+(d.get('link')||'—')+'\n\n'+msg,
+      source:'fixmyagent.com'
+    })}).then(function(r){
+      if(!r.ok) throw new Error(r.status);
+      form.parentNode.innerHTML='<div class="done"><p class="label" style="color:#b3470b">Ticket received</p><h3>We are on it.</h3><p>You get the written diagnosis at '+email.replace(/[<>&"]/g,'')+' within 2 working days.</p></div>';
+    }).catch(function(){
+      btn.disabled=false; btn.textContent='Send for diagnosis';
+      status.className='status err';
+      status.innerHTML='That did not go through. Email us at <a href="mailto:office@psquared.dev?subject=fix-my-agent">office@psquared.dev</a>.';
+    });
+  });
+})();
+</script>

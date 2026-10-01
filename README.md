@@ -90,6 +90,12 @@ Maintenance (run anytime):
 | [check-demo-analytics](./skills/check-demo-analytics/SKILL.md) | Full funnel analytics (Ackee + CRM + emails) |
 | [refurbish-demos](./skills/refurbish-demos/SKILL.md) | Upgrade knowledge for existing demos |
 
+### Websites
+
+| Skill | Description |
+|-------|-------------|
+| [one-prompt-website](./skills/one-prompt-website/SKILL.md) | Domain + concept → live one-pager: design, Leonardo images + Kling hero video, contact form via psquared.dev/api/contact, nginx, DNS, Dokploy domain/HTTPS, push, live checks. Asks update vs. rebuild when a page exists. Reference: fixmyagent.com |
+
 ### SEO
 
 | Skill | Description |

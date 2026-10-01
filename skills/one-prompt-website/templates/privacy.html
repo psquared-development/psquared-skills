@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy — {{SITE_NAME}}</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14120f;--line:#2e2a24;--paper:#ece6da;--muted:#9a9184;--signal:#f26b1d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--paper);font:400 17px/1.65 "Archivo",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:760px;margin:0 auto;padding:40px 16px 96px}
+.back{font:400 13px/1 "JetBrains Mono",monospace;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--paper)}
+h1{font-weight:800;font-stretch:72%;text-transform:uppercase;font-size:clamp(44px,8vw,72px);line-height:.95;margin:48px 0 40px}
+h2{font:500 12px/1 "JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--signal);margin:40px 0 12px}
+p,li{color:#d6cfc2}
+ul{padding-left:20px}
+a{color:var(--paper)}
+footer{border-top:1px solid var(--line);margin-top:64px;padding-top:24px;font:400 13px/1 "JetBrains Mono",monospace}
+footer a{color:var(--muted);text-decoration:none;margin-right:20px}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="/">← {{SITE_SLUG}}</a>
+<h1>Privacy</h1>
+<p>Last updated: {{DATE_LONG}}</p>
+<h2>Controller</h2>
+<p>psquared GmbH, Dametzstraße 2-4, 4020 Linz, Austria, FN 647249m. Email: <a href="mailto:office@psquared.dev">office@psquared.dev</a></p>
+<h2>What we collect</h2>
+<ul>
+<li><strong>Diagnosis form:</strong> name, email address, the link and the description you enter.</li>
+<li><strong>Material you send us:</strong> for example prompts, chat logs or repository access, only when you choose to send it.</li>
+<li><strong>Server logs:</strong> IP address, browser type and time of access, for security and operation.</li>
+</ul>
+<p>This site uses no analytics, no tracking cookies and no advertising tools. Fonts load from Google Fonts.</p>
+<h2>Why we process it</h2>
+<ul>
+<li>To answer your request and prepare the diagnosis and a quote (Art. 6 (1) (b) GDPR, steps before a contract).</li>
+<li>To run and protect this website (Art. 6 (1) (f) GDPR, legitimate interest).</li>
+</ul>
+<h2>Who receives it</h2>
+<p>The form sends your data to our server at psquared.dev. We deliver it as an email through Amazon Web Services (SES, EU region) to our team mailbox. We do not sell or share your data for marketing.</p>
+<h2>How long we keep it</h2>
+<p>We keep requests that do not lead to a contract for up to 12 months, then we delete them. Material for a diagnosis is deleted when you ask us to. Where a contract follows, statutory retention periods apply.</p>
+<h2>Your rights</h2>
+<p>You have the right to access, correction, deletion, restriction, data portability and objection. Write to <a href="mailto:office@psquared.dev">office@psquared.dev</a>. You can also complain to the Austrian Data Protection Authority (Datenschutzbehörde), Barichgasse 40-42, 1030 Vienna, <a href="https://www.dsb.gv.at">dsb.gv.at</a>.</p>
+<footer><a href="https://psquared.dev" style="color:var(--paper)">p<sup style="color:var(--signal)">²</sup> psquared</a><a href="/imprint.html">Imprint</a><a href="/privacy.html">Privacy</a></footer>
+</main>
+</body>
+</html>
