@@ -226,6 +226,12 @@ bash $SKILL/scripts/screenshot.sh $SITE <scratchpad>/shots 8931
     }
 ```
 
+Redirects inside a server block must use an absolute `https://<domain>/...` target. TLS ends
+at Traefik, so a relative `return 301 /;` sends visitors to `http://` first (seen on ki-linz.at).
+When a rebuild replaces an older site, map its old URLs with 301s (ki-linz.at sends
+`/wissen/<slug>` to `https://psquared.dev/de/ai-insights/<slug>`, same slugs) and verify one
+real old URL end to end.
+
 **Dockerfile** — next to the other static sites:
 `COPY apps/<slug>/ /usr/share/nginx/html/<slug>/`
 
@@ -293,5 +299,6 @@ Open:     real form test by the user · <anything skipped>
 | Form → 403 live | domain not in `NUXT_ALLOWED_DOMAINS` or not redeployed | `dokploy.py allow`, push or `dokploy.py deploy` |
 | HTTPS error after go-live | domain added in Dokploy before DNS pointed here | wait a few minutes; Traefik retries; re-check DNS |
 | Live page still old | deploy still running | poll ~2 min; `dokploy.py show` for status |
+| Redirect goes to `http://` first | relative `return 301 /...` | absolute `https://<domain>/...` |
 | `generations-motion-svd` 404 | endpoint retired | `scripts/hero_video.mjs` (Kling 3.0) |
 | Python SSL errors | Homebrew python | use `/usr/bin/python3` |
