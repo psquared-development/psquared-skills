@@ -309,7 +309,7 @@ Open:     real form test by the user · <anything skipped>
 | Form → 403 live | domain not in `NUXT_ALLOWED_DOMAINS` or not redeployed | `dokploy.py allow`, push or `dokploy.py deploy` |
 | HTTPS error after go-live | domain added in Dokploy before DNS pointed here | wait a few minutes; Traefik retries; re-check DNS |
 | Live page still old | deploy still running | poll ~2 min; `dokploy.py show` for status |
-| Live check loops (307) or shows the old host after a DNS move | this Mac caches the old A record (`dscacheutil -q host -a name <domain>`) | verify pinned to the server IP (patch `socket.getaddrinfo` → `157.90.27.32`); the user can flush with `! sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder` |
+| Live check loops (307) or shows the old host after a DNS move | this Mac caches the old A record (`dscacheutil -q host -a name <domain>`) | verify pinned to the server IP (patch `socket.getaddrinfo` → `157.90.27.32`); the user flushes in a **normal Terminal window** (the `!` prefix has no TTY, so sudo fails): `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder`, plus `brave://net-internals/#dns` / `chrome://net-internals/#dns` → Clear host cache |
 | Redirect goes to `http://` first | relative `return 301 /...` | absolute `https://<domain>/...` |
 | `generations-motion-svd` 404 | endpoint retired | `scripts/hero_video.mjs` (Kling 3.0) |
 | Python SSL errors | Homebrew python | use `/usr/bin/python3` |
