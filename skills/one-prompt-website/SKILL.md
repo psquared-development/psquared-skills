@@ -110,6 +110,11 @@ Images (run in parallel, `&` + `wait`, each with `--json --out <file>`):
 | `hero.jpg` | 16:9 | full-bleed hero, empty dark area on the left third for text |
 | 2–3 × section | 4:3 | one per service / form side |
 
+Models (state 2026-10-06): `lucid-realism` now accepts **only `--mode FAST`** (ULTRA/QUALITY →
+HTTP 400) and FAST gives ~1184×888 / 1368×768. That is fine for 4:3 section images. For the
+**hero** use `--model flux-pro-2.0 --size 1920x1080` (≈56 credits, sharp at 1920 px). Kling
+accepts a FLUX image id as start frame.
+
 Prompt pattern: `Photorealistic ... editorial still life, warm lamp light, dark charcoal
 background, shallow depth of field, film grain. No people, no text, no logos.` — always forbid
 text: generated text comes out garbled. Flags: `--intent photo --mode ULTRA --quantity 1`.
@@ -168,6 +173,11 @@ CSS traps hit in the reference build — prevent them up front:
 - **Every** multi-column grid needs a `@media (max-width:860px){grid-template-columns:1fr}`.
   The form section was missed once and overflowed on phones.
 - `fieldset` has `min-width:min-content` → set `min-width:0` on chip/radio fieldsets.
+- The hero is `display:flex`, so its `.wrap` shrinks to its content and centres → set
+  `.hero > .wrap{width:100%}` or the headline is not aligned with the logo.
+- Marker highlights (`linear-gradient` on the lower half) are invisible on dark sections when the
+  text colour is dark. On dark backgrounds use a full block: `background:<marker>; color:<ink>;
+  box-decoration-break:clone`.
 - `body{overflow-x:clip}` as a last guard, not as the fix.
 - Visible focus styles (`:focus-visible` outline in the accent colour).
 
