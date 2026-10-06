@@ -36,7 +36,9 @@ When the URL matches a known psquared site, use the local source files for the f
 |--------|----------------------------------------------|-----------|
 | `psquared.dev` / `www.psquared.dev` | `apps/psquared/` | Nuxt 3 |
 | `inboxmate.psquared.dev` | `apps/inboxmate/` | Static HTML |
-| `ki-linz.at` / `www.ki-linz.at` | `apps/ki-linz/` | Astro 5 |
+| `ki-linz.at` / `www.ki-linz.at` | `apps/ki-linz/` | Static HTML |
+| `fixmyagent.com` | `apps/fix-my-agent/` | Static HTML |
+| `ki-jobs.dev` | `apps/ki-jobs/` | Static HTML |
 | `agenthub.psquared.dev` | `apps/agenthub/` | Static HTML |
 
 The monorepo lives at `/Users/martinpammesberger/Documents/psquared/psquared-websites/`.
@@ -306,7 +308,7 @@ If the URL matches a site in the Site Registry, locate the source files and appl
 
 > Read the existing `nuxt.config.js` and relevant page files **before** making any edits. Follow existing patterns.
 
-#### Astro 5 (`apps/ki-linz/`)
+#### Astro 5 (none at the moment; ki-linz.at is static HTML since 2026-10)
 
 | Fix target | Where to edit |
 |------------|--------------|
@@ -316,7 +318,7 @@ If the URL matches a site in the Site Registry, locate the source files and appl
 | Sitemap config | `astro.config.mjs` → `@astrojs/sitemap` integration |
 | robots.txt | `public/robots.txt` |
 
-#### Static HTML (`apps/inboxmate/`, `apps/agenthub/`)
+#### Static HTML (`apps/inboxmate/`, `apps/agenthub/`, `apps/ki-linz/`, `apps/fix-my-agent/`, `apps/ki-jobs/`)
 
 | Fix target | Where to edit |
 |------------|--------------|
