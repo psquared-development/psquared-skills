@@ -252,6 +252,8 @@ real old URL end to end.
   (`81.19.154.98`). Tell the user to **edit or delete those existing A records**, not add new
   ones next to them — two A records make half the requests hit the parking page.
 - No NS records at all → domain is not registered/delegated; stop and tell the user.
+- **Subdomains of psquared.dev** (e.g. `ecke24.psquared.dev`) need no DNS entry: psquared.dev is at
+  Namecheap with a wildcard `*` A record → server IP. Just add the Dokploy domain.
 - Verify: `dig +short <domain> A @ns1.world4you.at` and `@1.1.1.1`.
 
 **Dokploy** (API key in the keychain; the script never prints secrets):
@@ -310,6 +312,7 @@ Open:     real form test by the user · <anything skipped>
 | HTTPS error after go-live | domain added in Dokploy before DNS pointed here | wait a few minutes; Traefik retries; re-check DNS |
 | Live page still old | deploy still running | poll ~2 min; `dokploy.py show` for status |
 | Live check loops (307) or shows the old host after a DNS move | this Mac caches the old A record (`dscacheutil -q host -a name <domain>`) | verify pinned to the server IP (patch `socket.getaddrinfo` → `157.90.27.32`); the user flushes in a **normal Terminal window** (the `!` prefix has no TTY, so sudo fails): `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder`, plus `brave://net-internals/#dns` / `chrome://net-internals/#dns` → Clear host cache |
+| Site serves `TRAEFIK DEFAULT CERT` (browser: certificate invalid) minutes after `add-domain` | Traefik's first ACME attempt failed and it does not retry while the config is unchanged; a redeploy does not help | delete the domain in Dokploy and create it again (`domain.delete` + `domain.create`); the certificate came 15 s later on ecke24.psquared.dev |
 | Redirect goes to `http://` first | relative `return 301 /...` | absolute `https://<domain>/...` |
 | `generations-motion-svd` 404 | endpoint retired | `scripts/hero_video.mjs` (Kling 3.0) |
 | Python SSL errors | Homebrew python | use `/usr/bin/python3` |
