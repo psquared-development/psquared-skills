@@ -87,6 +87,13 @@ Anything created via API with a **workspace key is owned by the key's service ac
 4. **Share** agents/workflows with users; archive leftovers (no delete endpoint for agents).
 5. Integration triggers/actions must be **enabled for the workspace** (Workspace settings → Integrations).
 
+## Step 4b — Test end to end yourself (browser)
+If the chrome-devtools MCP is available, start a debug Chrome with its own profile
+(`"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222 --user-data-dir=$HOME/.chrome-claude-profile`,
+run in background), let the user log in once, then: upload a test file in the agent chat, click **Trigger** on the
+workflow card, and read the run via `GET /workflows/v1/runs`. Copy test files under the working directory first
+(the MCP can only upload from there). Use the tRPC action catalogue (references/api.md) to get action ids + connection ids.
+
 ## Step 5 — Report
 
 State what was created (IDs, links), what was tested and how, what is untested, and the numbered UI

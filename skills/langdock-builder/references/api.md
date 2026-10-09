@@ -71,15 +71,48 @@ Docs: https://docs.langdock.com (append `.md` to a page URL for raw markdown).
 - Langdock MCP server (`https://api.langdock.com/mcp`, Agent API scope): tools `find_agent`, `ask_agent`,
   `ask_custom_agent` only — no create/update.
 
+## Full action catalogue (all built-in integrations, with input fields and YOUR connections)
+Not in the public API, but the web app's tRPC endpoint works from a logged-in browser tab (chrome-devtools
+`evaluate_script` on app.langdock.com):
+```js
+const u = '/api/trpc/workflows.getAvailableActionsGrouped?input=' + encodeURIComponent(JSON.stringify({json:null,meta:{values:['undefined'],v:1}}));
+const d = (await (await fetch(u)).json()).result.data.json;   // d.allActions[]: id, version, name, integrationName, inputFields[], connections[], preselectedConnection
+```
+`connections[]` per action lists the user's connection ids → use them as `config.connectionId` in workflow action nodes.
+Each Microsoft integration (SharePoint, Excel, OneDrive, Outlook Email, Outlook Calendar) is a **separate OAuth
+connection** — a SharePoint connection id on an Excel node fails with "The selected connection for this action is
+not available". Connect missing ones at app.langdock.com/integrations → Connect (SSO goes through if the browser is
+logged in to M365).
+
+## Microsoft action behaviour (verified in runs 2026-10-09)
+- SharePoint **Get folder** (`ef1690ac…`, `folderPath`) only **resolves existing** folders → 403 "Could not resolve the
+  folder URL" for missing ones. URL must include the library: `…/sites/<Site>/Freigegebene%20Dokumente/<Folder>`.
+  Output: `{name, driveId, folderId}`.
+- SharePoint **Create folder** (`8f60f15e…`: `driveId`, `parentFolderId`, `folderPath` nested like `A/2026/09`) creates
+  all missing levels; output `{id, name, path, webUrl, driveId, createdFolders[...alreadyExisted]}`.
+- SharePoint **Upload file** (`c12cb77e…`): `file` = `{{code.output._files[0]._metadata.name}}`; output `{id, name, size, webUrl}`.
+- Excel **Get table rows** (`8a48d69e…`, **actionVersion 2**): `itemId` may be the SharePoint file URL, `tableId` the table
+  name; output `{rows: [{<column>: value, _rowIndex}]}`.
+- Excel **Add table row** (`5b36a75b…`): `rowValues` is ONE comma-separated string → strip commas from values.
+  Works on SharePoint-hosted workbooks. The workbook needs a real Excel *table* (create with openpyxl, see
+  langdock-belege `tools/make_journal.py`); a renamed sheet is not enough.
+- Agent → form-workflow calls: Langdock shows a **Trigger/Deny** card; FILE fields are only filled from attachments in
+  the **latest** user message (retries without re-attaching → no file). The FILE value may arrive JSON-encoded as a string.
+- Run inspection: `GET /workflows/v1/runs?workflowId=` → `runs[].executions[]` with per-node `input`, `output`,
+  `inputError`, `outputError` (parse with `json.loads(..., strict=False)` – raw control chars).
+
 ## Action IDs seen in the psquared workspace (verify per workspace)
 | ID | Integration / action | Fields |
 |---|---|---|
-| `ef1690ac-2fe7-4606-8ad6-c355a7af7751` | SharePoint – folder by path/URL → `driveId`, `folderId` (whether it creates missing folders: **unverified**) | `folderPath` |
+| `ef1690ac-2fe7-4606-8ad6-c355a7af7751` | SharePoint – Get folder (existing only) → `driveId`, `folderId` | `folderPath` |
+| `8f60f15e-02dd-4cb9-b83b-4156bc9c7783` | SharePoint – Create folder (nested) | `driveId, parentFolderId, folderPath` |
+| `8a48d69e-20c3-40e1-858d-b0c383ab426a` | Excel – Get table rows (**v2**) | `driveId, itemId, tableId, skip, limit` |
 | `c12cb77e-0308-48e7-a8f1-0aa7465a6753` | SharePoint – upload file → `webUrl`, `id` | `driveId, folderId, file, fileName` |
 | `8fd7963e-c346-4b15-8e65-5b62b5ab78fa` | SharePoint – get/download file | `itemId, parent` |
 | `3f0c0485-2862-48c5-9605-f5e62e38c01e` | OneDrive – upload file | `file, fileName, folderId` |
 | `397ef1fb-4eea-4128-816b-aaf2c48256e1` | OneDrive – search files (used as agent tool) | |
-| `5b36a75b…`, `c2546579…`, `71fc19d1…`, `86a08d09…` | Excel tools used by an agent node (get item by name / get sheet / get tables / add table row — exact mapping unverified) | |
+| `5b36a75b-c03d-4d6a-8429-a72aaa9cef7a` | Excel – Add table row | `driveId, itemId, tableId, rowValues` |
+| `c2546579…` / `71fc19d1…` / `86a08d09…` | Excel – Search files / Get sheet by item id / Get tables | |
 | `4d2b8b97-4b89-47a7-bbc9-901a1bd73966` | Outlook – create draft | `toRecipients, subject, body, isHtml, files, cc/bcc` |
 | `f857f3b4-1ec9-4ba9-a013-bc4d3f3b4a13` | Outlook – send mail | same minus files |
 | `e8d7ebc6-4904-42d6-a664-dd9487b059d5` | Calendar – add event | |
