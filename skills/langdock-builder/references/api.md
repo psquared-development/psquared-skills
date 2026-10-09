@@ -37,6 +37,11 @@ Docs: https://docs.langdock.com (append `.md` to a page URL for raw markdown).
 - No capability flag for code execution/file creation (`dataAnalyst` deprecated/ignored). Agents had a bash/Python
   sandbox anyway (`/mnt/data` = chat files; files copied to `/mnt/data` are delivered to the user; Pillow + DejaVu fonts present).
 - Actions attached via API have `connectionId: null`; OAuth connections must be selected in the UI.
+- `PATCH /agent/v1/update` with `"actions": [...]` **replaces** the agent's tools, including workflows the user
+  attached in the UI → omit `actions` unless the deploy owns them. Attached workflows are not visible in `GET /agent/v1/get`;
+  check by asking the agent via chat completions to list its tools.
+- A workflow must be **published** before it can be attached to an agent; the folder/URL fields a user edits in the UI
+  are overwritten by the next deploy → keep such values in the client config.
 
 ## Workflows
 | Call | Notes |
