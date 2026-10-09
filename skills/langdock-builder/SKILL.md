@@ -25,7 +25,8 @@ Copy its structure for new client deliverables.
 |---|---|
 | `references/api.md` | Endpoints, scopes, request bodies, **all known quirks** |
 | `references/workflow-schema.md` | Node/edge JSON for every node type (copied from real workflows) |
-| `references/design-rules.md` | Agent vs. workflow, mobile, OAuth, files/PDF, multi-client, cost |
+| `references/design-rules.md` | Agent vs. workflow, mobile, OAuth, files/PDF, document design, multi-client, domain notes |
+| `references/sharepoint.md` | SharePoint REST + Excel table handling from the browser (inspect, download, upload, recycle, locks) |
 | `scripts/ld.sh` | `ld GET /path` / `ld POST /path @body.json` — curl wrapper, key from keychain |
 | `scripts/harvest-ids.sh` | Lists every integration action/trigger ID + connection + field names used in the workspace's workflows |
 
@@ -66,13 +67,20 @@ Anything created via API with a **workspace key is owned by the key's service ac
   We then `PATCH /agent/v1/update` + `POST /agent/v1/publish`. No sharing field exists in the Agent API.
 - **Workflow:** `POST /workflows/v1/create` with `"shareWith": {"userIds": [...], "role": "editor"}` —
   **only on create** (update rejects it). Get user IDs from `owner.id` in `GET /workflows/v1/list`.
+  Caveat: the service account stays **owner**. Attaching such a workflow to an agent triggers the warning
+  "1 attached resource isn't available to everyone this agent is shared with"; **Grant access** fails
+  ("Couldn't share access") because the user is only editor. Works for the user himself, but for production
+  prefer a UI-created workflow shell owned by the client user (same pattern as the agent).
 
 ## Step 3 — Build
 
 - Keep the definition as **code** (templates + per-client JSON + `deploy.py`), never hand-edit in the UI
   what deploy owns — the next `update` replaces the whole graph.
 - Agent: instructions in German/Du-Form for end users, `creativity` 0.1 for extraction tasks, conversation
-  starters, actions only if the agent itself must call integrations.
+  starters (`conversationStarters` – only ones the agent can actually answer), actions only if the agent itself
+  must call integrations. Name the **end customer** explicitly in the prompt (firm, address, UID) as owner of all
+  documents and employer of all users; the implementer (psquared) must not appear anywhere.
+- `deploy.py` must **not** send `actions: []` on update — it wipes workflows/tools attached in the UI.
 - Workflow: build nodes per `references/workflow-schema.md`; stable node IDs (uuid5) so re-deploys are idempotent.
 - Test code-node Python **locally** before deploying (wrap the code in a function, feed a fake trigger dict).
 - Test agents via `POST /agent/v1/chat/completions` with an uploaded attachment (`/attachment/v1/upload`).
@@ -88,11 +96,25 @@ Anything created via API with a **workspace key is owned by the key's service ac
 5. Integration triggers/actions must be **enabled for the workspace** (Workspace settings → Integrations).
 
 ## Step 4b — Test end to end yourself (browser)
-If the chrome-devtools MCP is available, start a debug Chrome with its own profile
-(`"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222 --user-data-dir=$HOME/.chrome-claude-profile`,
-run in background), let the user log in once, then: upload a test file in the agent chat, click **Trigger** on the
-workflow card, and read the run via `GET /workflows/v1/runs`. Copy test files under the working directory first
-(the MCP can only upload from there). Use the tRPC action catalogue (references/api.md) to get action ids + connection ids.
+If the chrome-devtools MCP is available, start a debug Chrome with its own profile — run the binary with
+`run_in_background` (`open -na …` exits immediately and the port disappears):
+`"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222 --user-data-dir=$HOME/.chrome-claude-profile --no-first-run <url>`.
+The user logs in once (Langdock + M365 SSO); never type passwords yourself. Then:
+1. New chat with the agent → `+` → **Add files** menuitem → `upload_file` (file must be inside the working
+   directory — copy test data to `<repo>/testdata/`, gitignored; same for `take_snapshot(filePath=…)`).
+2. Focus the editor via `evaluate_script` (`form [contenteditable=true]`), `type_text` with `submitKey: "Enter"`.
+   Give all answers in the first message so the agent calls the workflow directly.
+3. Poll for the **Trigger** button in an `evaluate_script` loop and click it (the run never starts without it).
+4. Read the run: `GET /workflows/v1/runs?workflowId=` → per-node status/errors (see references/api.md).
+5. Verify outputs at the source (download the PDF / workbook from SharePoint, see references/sharepoint.md) —
+   don't trust "COMPLETED" alone.
+To debug a user's failed attempt, open their chat (`/chat/<id>`) and read `main.innerText` — e.g. a stale
+Trigger card that was never clicked, or a FILE field left empty on a retry.
+
+## Step 4c — Fix data directly (SharePoint/Excel)
+Test entries, empty workbooks, locked files: see `references/sharepoint.md` (REST from a logged-in SharePoint tab:
+list, download, overwrite, recycle; Excel tables via openpyxl). Never touch rows/files you didn't create — check
+first what is there (users test in parallel).
 
 ## Step 5 — Report
 

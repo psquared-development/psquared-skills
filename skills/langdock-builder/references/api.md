@@ -98,6 +98,10 @@ logged in to M365).
   langdock-belege `tools/make_journal.py`); a renamed sheet is not enough.
 - Agent → form-workflow calls: Langdock shows a **Trigger/Deny** card; FILE fields are only filled from attachments in
   the **latest** user message (retries without re-attaching → no file). The FILE value may arrive JSON-encoded as a string.
+- Runs started from an agent chat showed `workflowVersion.version: "0"` (the draft) although a version was
+  published — deploy changes to the draft are live for chat calls immediately; still publish for other triggers.
+- Missing connection for an integration: app.langdock.com/integrations → card → **Connect** (M365 SSO goes through
+  in a logged-in browser), then read the new id from the tRPC catalogue `connections[]`.
 - Run inspection: `GET /workflows/v1/runs?workflowId=` → `runs[].executions[]` with per-node `input`, `output`,
   `inputError`, `outputError` (parse with `json.loads(..., strict=False)` – raw control chars).
 

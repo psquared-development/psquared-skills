@@ -68,6 +68,12 @@ Field modes: `manual` (value/template), `auto` (AI fills it — avoid for determ
 - JavaScript: upstream nodes as objects (`invoiceReview.output.x`), `return {...}`; files via
   `return {files: [{fileName, mimeType, base64|text}]}`.
 - A node not executed on this path → `NameError` in Python; guard with try/except when branches merge.
+- The code is wrapped in a function by the runtime (`_user_code()`): `global` does not reach your top-level
+  variables — use return values / closures. Raised exceptions show up as the node's `outputError` traceback.
+- Assets can be embedded: base64 strings for a logo PNG and two subset TTF fonts (~195 KB code) are accepted
+  by the API and run fine; render the final code from templates in `deploy.py`.
+- Trigger values may arrive differently depending on the caller: FILE as list of `{path,_metadata}` **or** as a
+  JSON-encoded string of that list (agent calls); NUMBER as float with noise (`46.20000076`) → round.
 - Limits: 5 MiB combined input, 25 MB output.
 
 ## condition
