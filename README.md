@@ -107,6 +107,7 @@ Maintenance (run anytime):
 
 | Skill | Description |
 |-------|-------------|
+| [jira-ticket](./skills/jira-ticket/SKILL.md) | Create or update a ticket on the PP board. The ticket stays very short (goal, blocker, open); the session detail goes into one dated comment. Searches for an existing ticket first. |
 | [price-change](./skills/price-change/SKILL.md) | Change pricing across all touchpoints (website, app, docs, Stripe) |
 | [create-offer](./skills/create-offer/SKILL.md) | Generate a branded multi-page client offer PDF (title + project description + screenshots + Angebot + AGB) from a JSON config. Two-pass Playwright render with pagination + pdf-lib merge. |
 | [create-security-report](./skills/create-security-report/SKILL.md) | Generate a branded Security Audit report PDF for a customer from a security-audit run (`findings.json` + `report.json`): severity counts, findings table, one card per finding with fix and open verification points, fix order. Same render engine as create-avv. |
