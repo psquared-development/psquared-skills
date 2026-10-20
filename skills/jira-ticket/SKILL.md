@@ -16,7 +16,8 @@ A ticket is for a person who scans the board. They must understand it in 20 seco
 ## Board facts
 
 - Site `beardedviber.atlassian.net`, cloudId `a0faf4fa-e61e-410e-a7f7-d40148b38198`, project **PP**.
-- Types: `Task`, `Bug` (broken behavior). No epics are used.
+- Types: `Task`, `Bug` (broken behavior).
+- Epics: every ticket sits under one PP epic (set it as the parent): InboxMate, Neverlost (all neverlost customers, incl. Doppler, Sallriegler), allmedia, NovaKnows, Direct customers, Treitinger, Organization & finance, Infra & tools, Websites & sales, Apps & Games, Side Quests. Find the open ones with `project = PP AND issuetype = Epic AND statusCategory != Done`; ask when none fits.
 - Statuses: To Do, In Progress, Blocked, To Review, Done, Won't Do.
 - People: Martin Pammesberger, Manuel Pils. Get the current user with `atlassianUserInfo`.
 - Summary style on the board: lowercase is fine, a short project prefix before a colon (`dop-os:`, `treitinger portal:`, `resilienz:`, `inboxmate:`).
