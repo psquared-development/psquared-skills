@@ -32,6 +32,14 @@ When an agent calls the workflow, the form fields are the tool schema; FILE fiel
 ```
 Other kinds: `manual`, `webhook` (files as base64 JSON, ≤25 MB, `{{trigger.output.body…}}`), `scheduled`, `meeting_end`.
 
+## trigger — scheduled (verified 2026-10-22)
+```json
+{"type": "trigger", "data": {"slug": "zeitplan", "kind": "scheduled", "name": "Zeitplan", "cron": "0 * * * *"}}
+```
+5-field cron; the workflow timezone (`timezone` on create) applies — a `timezone` inside the node is dropped.
+"Test run" in the editor runs it immediately. There is **no SharePoint/OneDrive "new file" trigger** —
+poll on a schedule and dedupe against your own state (e.g. an Excel register keyed by `id@lastModifiedDateTime`).
+
 ## agent
 ```json
 {"type": "agent", "data": {"slug": "belegAnalyse", "mode": "create", "name": "…",
@@ -43,7 +51,11 @@ Other kinds: `manual`, `webhook` (files as base64 JSON, ≤25 MB, `{{trigger.out
   "tools": [{"id": "<uuid>", "type": "action", "actionId": "<uuid>", "requiresConfirmation": false, "connectionId": "<uuid or null>"}],
   "maxSteps": 5}}
 ```
-Output schema types: string, number, boolean, select (with options), array. Vision on images works
+Output schema types: string, number, boolean, select (with options), array.
+**`modelId` is required to run** ("Model ID is required in order to run the agent node") — workspace model UUIDs
+via tRPC `models.getModelsForSelector?input={"json":{"onlyActive":true}}` (logged-in tab). They differ per workspace.
+Files: put the file object in the prompt (`{{holen.output.result}}` = `{path, _metadata{attachmentId}}`); the
+agent reads it via its `read` tool (PDF text, scans/images visually, DOCX). Output: `output.structured.<field>`. Vision on images works
 (file reference in the prompt). `modelId` in workflows is a **workspace model UUID** (not the `/agent/v1/models`
 string id); `null` = default — the UI fills it when the user opens the node.
 
@@ -99,7 +111,12 @@ Output: `{{pruefung.output.invoice_type}}`. No FILE fields. Shows up in the Lang
   "maxIterations": 200, "concurrency": false, "collectOutputs": true}}
 {"type": "loop_end", "data": {"slug": "belegLoopEnd", "name": "…", "loopEndSlug": "belegLoop"}}
 ```
-Current item: `{{belegLoop.output.currentItem}}`. Edge loop → first inner node uses `output-success`.
+Current item: `{{belegLoop.output.currentItem}}` (also `.currentIndex`, `.total`; nested fields work:
+`{{dokLoop.output.currentItem.parent}}` passes an object). Edge loop → first inner node uses `output-success`.
+Chain: loop → inner nodes → loop_end → next node (each node one edge). Loops can follow each other.
+**loop_end output** (collectOutputs): `{"total": n, "iterations": [{"item": <item>, "index": i,
+"executions": [{"nodeId": "<inner node id>", "output": {...}}, ...]}]}` — walk it generically in code.
+Inner nodes: "continue" error handling lets one bad item not stop the batch; check `output.error` downstream.
 
 ## workflow_output
 ```json

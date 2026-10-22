@@ -123,3 +123,16 @@ logged in to M365).
 | `6f433e48…`, `00f0e1a0…` | Teams – list chats / send chat message | |
 | `66c32696-ca45-411e-a7fc-9eddbf577913` | Google Drive – create folder (nested path) | `folderPath` |
 | `0f25bde8-7c7a-4c9e-8cd4-f37c7f3f4ede` | Google Drive – upload file | `file, folderId` |
+
+
+## Moving workflows between workspaces without API (verified 2026-10-22)
+- Editor ⋯ (More workflow actions) → **Export workflow (.json)** → file `<name>.json`, format
+  `{"schema":"ldwf","version":1,"name",meta,graph:{nodes,edges}}`. Connection ids are stripped; model UUIDs and all
+  literal values (URLs in code nodes) stay.
+- Target workspace: create an empty workflow → ⋯ → **Import workflow (.json)** → tick "I understand…" →
+  **Replace and save** (replaces the current canvas). Then pick connections on every action node and the model on
+  agent nodes. No API key needed in the client workspace.
+- Neutralise the export first (placeholders in the config code node, `modelId: null`) — see
+  `~/dev/langdock-liegenschaften/tools/make_client_export.py`.
+- UI export via chrome-devtools lands in `~/Downloads`; the import file chooser can be fed with CDP
+  `DOM.setFileInputFiles` on the `input[type=file]` that appears after clicking the menu item.

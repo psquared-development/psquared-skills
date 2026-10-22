@@ -16,8 +16,11 @@ Builds Langdock **agents** (chat, also on mobile) and **workflows** (determinist
 through the Langdock REST API. Langdock's own MCP server can only *chat* with agents (`find_agent`,
 `ask_agent`, `ask_custom_agent`) — it cannot create anything, so we use the REST API.
 
-Reference build: `~/dev/langdock-belege` (receipt agent + "Beleg verbuchen" workflow, templates + `deploy.py`).
-Copy its structure for new client deliverables.
+Reference builds:
+- `~/dev/langdock-belege`: receipt agent + "Beleg verbuchen" workflow, templates + `deploy.py`.
+- `~/dev/langdock-liegenschaften`: scheduled indexing workflow (SharePoint folders → per-document AI extraction →
+  Excel register) + agent that answers inventory questions with pandas on the register. Transfer via UI JSON import.
+Copy their structure for new client deliverables.
 
 ## Files in this skill
 
@@ -58,6 +61,11 @@ webhook / email / integration event), systems read/written, client or psquared w
 - **Before building, harvest existing work:** `scripts/harvest-ids.sh` — colleagues' workflows often
   already contain the action IDs (SharePoint, OneDrive, Excel, Outlook, Teams) and proven code patterns.
   Read similar workflows with `GET /workflows/v1/get?workflowId=…` and reuse their structure.
+
+**"Search everything / list all X" questions:** an agent or project with Folder Sync / knowledge bases only
+retrieves the top 50 chunks (~2,000 chars each) per query. It can't enumerate, count or filter a document
+collection. Classify each document once in a workflow into a spreadsheet, then let the agent query it with data
+analysis. Spreadsheets in synced folders are read whole, not embedded. Pattern: `~/dev/langdock-liegenschaften`.
 
 ## Step 2 — Ownership: create shells in the UI
 
@@ -123,7 +131,9 @@ steps the user must do. Record IDs in the client JSON and commit the repo.
 
 ## Multi-client reuse
 
-Langdock has no cross-workspace copy and templates can't be created via API. Product = repo:
+**Workflows: use the UI JSON export/import** (see references/api.md). The client needs no API key, which clients
+often refuse to issue. Agents still have no import, so paste the instructions from the repo.
+Langdock has no cross-workspace copy for agents, and templates can't be created via API. Product = repo:
 `templates/` (agent instruction with `{{PLACEHOLDERS}}`, workflow builder), `clients/<client>.json`
 (vars, keychain service, connection IDs, deployed IDs, share user IDs), `deploy.py <client> [agent|workflow|all]`
 (create on first run, update + publish afterwards). Per client ~15 min manual: shells + key sharing, OAuth
