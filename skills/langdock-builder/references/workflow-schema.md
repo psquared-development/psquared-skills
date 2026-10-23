@@ -86,7 +86,12 @@ Field modes: `manual` (value/template), `auto` (AI fills it — avoid for determ
   by the API and run fine; render the final code from templates in `deploy.py`.
 - Trigger values may arrive differently depending on the caller: FILE as list of `{path,_metadata}` **or** as a
   JSON-encoded string of that list (agent calls); NUMBER as float with noise (`46.20000076`) → round.
-- Limits: 5 MiB combined input, 25 MB output.
+- Limits: 5 MiB combined input, 25 MB output. **At most 20 files per code node are passed on as `_files`**: more are
+  dropped silently and a later upload fails with "not found among available files". Write files in batches of 20
+  (a code node inside a loop) and upload each batch.
+- Upload file (SharePoint, `c12cb77e…`): `file` = a template that resolves to a **list of file names** uploads them all in
+  one call; an existing file with the same name is **overwritten** (same item id). SharePoint rejects names with
+  `\ / : * ? " < > | # %`. A 400 on upload is usually such a character.
 
 ## condition
 ```json
